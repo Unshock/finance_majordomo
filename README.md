@@ -1,0 +1,1 @@
+#### Finance majordomo app that help you to watch your financial portfolio
