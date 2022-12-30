@@ -1,0 +1,17 @@
+__pycache__
+task_manager/__pycache__
+dist/
+*.pyc
+.venv/
+.coverage
+coverage.xml
+.pytest_cache/
+.idea
+*.log
+DRAFT/
+static/
+
+.env
+.python-version
+*.sqlite3
+*.bak
