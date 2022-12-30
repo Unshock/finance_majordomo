@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+    <div class="container wrapper flex-grow-1">
+        <h1 class="my-4">{{ page_title }}</h1>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>{% translate "Username" %}</th>
+                    <th>{% translate "Full name" %}</th>
+                    <th>{% translate "Creation date" %}</th>
+                    <th></th>
+                </tr>
+            </thead>
+            
+            <tbody method="get">
+                
+                {% for user in user_list %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.full_name }}</td>
+                    <td>{{ user.creation_date }}</td>
+                    <td>
+                      <a href="{{ user.get_update_url }}">{% translate "Update" %}</a>
+                      <br>
+                      <a href="{{ user.get_delete_url }}">{% translate "Delete" %}</a>
+                    </td>
+                </tr>
+                {% endfor %} 
+            </tbody>
+        </table>
+    </div>
+{% endblock content %}

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load bootstrap4 %}
+{% block content %}
+
+    <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col-lg-12 col-xl-11">
+            <div class="card text-black" style="border-radius: 25px;">
+                <div class="card-body p-md-5">
+                    <div class="row justify-content-center">
+                        <div class="col-md-12 col-lg-8 col-xl-6 order-2 order-lg-1">
+                  
+                            <p class="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">{{ page_title }}</p>
+
+                            <form method="post">
+                                {% csrf_token %}
+                                {% bootstrap_form_errors form %}
+                                {% bootstrap_form form %}
+                                <div class="d-flex justify-content-center mx-4 mb-3 mb-lg-4">
+                                    {% bootstrap_button button_text button_class="btn btn-primary btn-lg" %}
+                                </div>
+                            </form>
+                  
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+{% endblock content %}

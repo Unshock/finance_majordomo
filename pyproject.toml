@@ -8,6 +8,7 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = "^3.10"
 Django = "^4.1.4"
+django-bootstrap4 = "^22.3"
 
 [tool.poetry.dev-dependencies]
 

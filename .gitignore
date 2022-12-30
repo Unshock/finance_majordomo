@@ -10,6 +10,7 @@ coverage.xml
 *.log
 DRAFT/
 static/
+my_git_ssh_xd.txt
 
 .env
 .python-version

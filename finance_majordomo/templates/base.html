@@ -1,0 +1,78 @@
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+{% load bootstrap4 %}
+
+<!-- Current language: {{ LANGUAGE_CODE }} -->
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        {% bootstrap_css %}
+        {% bootstrap_javascript %}
+
+        <title>{% translate "Financial majordomo" %}</title>
+    </head>
+  {% block navbar %}
+    <body class="d-flex flex-column min-vh-100">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3 ">
+            <a class="navbar-brand" href="{% url 'home' %}">{% translate "Financial majordomo" %}</a>
+            <button class="navbar-toggler" data-toggle="collapse" data-target="navbarToggleExternalContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+      <div class="collapse navbar-collapse" id="navbarToggleExternalContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'users' %}">{% translate "Users" %}</a>
+            </li>
+            <!--
+            {% if request.user.is_authenticated %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'statuses' %}">{% translate "Statuses" %}</a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'labels' %}">{% translate "Labels" %}</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'tasks' %}">{% translate "Tasks" %}</a>
+            </li>
+            {% endif %}
+            -->
+        </ul>
+        <ul class="navbar-nav">
+            {% if request.user.is_authenticated %}
+            <span class="navbar-brand">
+                {{ request.user.username }}
+            </span>
+            <li class="nav-item">
+                <a class="btn btn-primary ml-3" href="{% url 'logout' %}">{% translate "Logout" %}</a>
+            </li>
+            {% else %}
+            <li class="nav-item">
+                <a class="btn btn-outline-secondary" href="{% url 'login' %}">{% translate "Login" %}</a>
+            </li>
+            <li class="nav-item">
+                <a class="btn btn-primary ml-3" href="{% url 'create_user' %}">{% translate "Sign up" %}</a>
+            </li>
+            {% endif %}
+        </ul>
+      </div>
+    </nav>
+    {% endblock navbar %}
+
+        <div class="container h-100">
+            {% bootstrap_messages %}
+            {% block content %}
+                <h1 class="my-4">{% translate "Hello!" %} {{ who }}!</h1>
+            {% endblock content %}
+            <footer>
+                <div class="container my-5 pt-4 border-top">
+                    <a target="_blank" href="https://t.me/Nedashkovskii">@Nedashkovsky</a>
+                </div>
+            </footer>
+        </div>
+    </body>
+</html>
