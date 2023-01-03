@@ -24,6 +24,7 @@ urlpatterns = [
     path('', views.index, name="home"),
 
     path("users/", include("finance_majordomo.users.urls")),
+    path("stocks/", include("finance_majordomo.stocks.urls")),
     path("login/", LoginUser.as_view(), name="login"),
     path("logout/", logout_user, name="logout")
 ]

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+    <div class="container wrapper flex-grow-1">
+        <h1 class="my-4">{{ page_title }}</h1>
+        <div class="d-flex justify-content-left my-4">
+            <a class="btn btn-primary btn-sm" href="{% url "add_stock" %}" role="button">{% translate "Add stock" %}</a>
+        </div>
+
+        <table class="table table-striped">
+           <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>{% translate "Ticker" %}</th>
+                    <th>{% translate "Name" %}</th>
+                    <th>{% translate "Creation date" %}</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody method="get">
+                {% for stock in stock_list %}
+                <tr>
+                    <td>{{ stock.id }}</td>
+                    <td>{{ stock.ticker }}</td>
+                    <td>{{ stock.name }}</td>
+                    <td>{{ stock.creation_date }}</td>
+                    <td>
+                      <a href="{{ stock.get_delete_url }}">{% translate "Delete" %}</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock content %}

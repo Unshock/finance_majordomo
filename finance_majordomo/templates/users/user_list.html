@@ -22,11 +22,17 @@
                     <td>{{ user.username }}</td>
                     <td>{{ user.full_name }}</td>
                     <td>{{ user.creation_date }}</td>
+
+
+                    {% comment %}
                     <td>
                       <a href="{{ user.get_update_url }}">{% translate "Update" %}</a>
                       <br>
                       <a href="{{ user.get_delete_url }}">{% translate "Delete" %}</a>
                     </td>
+                    {% endcomment %}
+
+
                 </tr>
                 {% endfor %} 
             </tbody>

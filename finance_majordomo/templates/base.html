@@ -27,20 +27,25 @@
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'users' %}">{% translate "Users" %}</a>
             </li>
-            <!--
+
+
+
             {% if request.user.is_authenticated %}
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'statuses' %}">{% translate "Statuses" %}</a>
+                <a class="nav-link" href="{% url 'stocks' %}">{% translate "Stocks" %}</a>
             </li>
-
+            {% endif %}
+            {% comment %}
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'labels' %}">{% translate "Labels" %}</a>
+                <a class="nav-link" href="{% url 'statuses' %}">{% translate "Statuses" %}</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'tasks' %}">{% translate "Tasks" %}</a>
             </li>
             {% endif %}
-            -->
+            {% endcomment %}
+
+
         </ul>
         <ul class="navbar-nav">
             {% if request.user.is_authenticated %}
