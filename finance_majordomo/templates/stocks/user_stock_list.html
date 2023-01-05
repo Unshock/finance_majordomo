@@ -15,7 +15,7 @@
                     <th>{% translate "Name" %}</th>
                     <th>{% translate "Creation date" %}</th>
                     <th></th>
-                    <th></th>
+                    <th>{% translate "Quantity" %}</th>
                 </tr>
             </thead>
 
@@ -29,11 +29,7 @@
                     <td>
                         <a href="{{ stock.get_delete_url }}">{% translate "Delete" %}</a>
                     </td>
-                    <td>
-                        <div class="d-flex justify-content-left">
-                            <a class="btn btn-primary btn-sm" href="{% url "add_stock_to_user" pk_user=request.user.id pk_stock=stock.id %}" role="button">{% translate "Add stock to my list" %}</a>
-                        </div>
-                    </td>
+                    <td>{{ stock.userstocks.quantity }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

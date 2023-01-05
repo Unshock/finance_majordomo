@@ -1,5 +1,7 @@
 from django.db import models
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
+
 
 class Stock(models.Model):
     creation_date = models.DateTimeField(
@@ -19,3 +21,5 @@ class Stock(models.Model):
         verbose_name = "Акция"
         verbose_name_plural = "Акции"
         ordering = ['creation_date', 'ticker', 'name']
+
+

@@ -12,6 +12,7 @@ from finance_majordomo.stocks.models import Stock
 from django.utils.translation import gettext_lazy as _
 
 from common.utils.stocks import validate_ticker
+from finance_majordomo.users.models import User
 
 
 class Stocks(LoginRequiredMixin, ListView):
@@ -24,6 +25,20 @@ class Stocks(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['page_title'] = _("Stock list")
         context['stock_list'] = Stock.objects.all()
+        return context
+
+
+class UsersStocks(LoginRequiredMixin, ListView):
+    login_url = 'login'
+    model = Stock
+    template_name = 'stocks/user_stock_list.html'
+    context_object_name = 'stock'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        print(self.request.user.id)
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = _("Stock list")
+        context['stock_list'] = Stock.objects.filter(usersstocks__user_id=self.request.user.id)
         return context
 
 
