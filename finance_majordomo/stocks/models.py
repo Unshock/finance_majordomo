@@ -10,6 +10,8 @@ class Stock(models.Model):
         max_length=10, verbose_name="Тикер акции", unique=True)
     name = models.CharField(
         max_length=100, verbose_name="Имя акции")
+    stock_data = models.JSONField(
+        verbose_name="Данные об акции")
 
     def __str__(self):
         return self.name

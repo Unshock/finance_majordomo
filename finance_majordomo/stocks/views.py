@@ -8,10 +8,11 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 
 from finance_majordomo.stocks.forms import StockForm
 from finance_majordomo.stocks.models import Stock
+from finance_majordomo.transactions.models import Transaction
 
 from django.utils.translation import gettext_lazy as _
 
-from common.utils.stocks import validate_ticker
+from common.utils.stocks import validate_ticker, get_stock_board_history, make_json_trade_info_dict
 from finance_majordomo.users.models import User
 
 
@@ -31,15 +32,35 @@ class Stocks(LoginRequiredMixin, ListView):
 class UsersStocks(LoginRequiredMixin, ListView):
     login_url = 'login'
     model = Stock
+    transaction = Transaction
     template_name = 'stocks/user_stock_list.html'
     context_object_name = 'stock'
 
     def get_context_data(self, *, object_list=None, **kwargs):
         print(self.request.user.id)
         context = super().get_context_data(**kwargs)
-        context['page_title'] = _("Stock list")
-        context['stock_list'] = Stock.objects.filter(usersstocks__user_id=self.request.user.id)
+        context['page_title'] = self.request.user.username + " " + _("stock list")
+        users_stocks = Stock.objects.filter(usersstocks__user_id=self.request.user.id)
+        users_stocks = [(obj, self.get_current_quantity(obj.id)) for obj in users_stocks]
+        print(users_stocks)
+        # print([el for el in users_stocks])
+        # self.get_current_quantity(1)
+        context['stock_list'] = users_stocks
         return context
+
+    def get_current_quantity(self, stock_id):
+        users_transacions = self.transaction.objects.filter(user=User.objects.get(id=self.request.user.id))
+        users_specific_asset_transacions = users_transacions.filter(ticker=Stock.objects.get(id=stock_id))
+        result = 0
+        for transaction in users_specific_asset_transacions:
+            if transaction.transaction_type == "BUY":
+                result += transaction.quantity
+            elif transaction.transaction_type == "SELL":
+                result -= transaction.quantity
+            else:
+                raise Exception('not buy nor sell')
+        return result
+
 
 
 class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
@@ -60,14 +81,21 @@ class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
         if form.is_valid():
             validated_ticker = validate_ticker(form.cleaned_data.get('ticker'))
-            obj = Stock()
-            obj.ticker = validated_ticker['ticker']
-            obj.name = validated_ticker['shortname']
-            obj.save()
+            if validated_ticker:
+
+                #Ищем инфу о ценах акции за весь период чтобы записать в JSONField
+                stock_board_history = get_stock_board_history(validated_ticker['ticker'])
+                json_stock_board_data = make_json_trade_info_dict(stock_board_history)
+
+                obj = Stock()
+                obj.ticker = validated_ticker['ticker']
+                obj.name = validated_ticker['shortname']
+                obj.stock_data = json_stock_board_data
+                obj.save()
             #return super().post(request, *args, **kwargs)
 
-            messages.success(request, self.success_message)
-            return redirect(self.success_url)
+                messages.success(request, self.success_message)
+                return redirect(self.success_url)
         return super().post(request, *args, **kwargs)
 
 

@@ -37,15 +37,23 @@
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'users_stocks' %}">{% translate "My Stocks" %}</a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'transactions' %}">{% translate "Transactions" %}</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'user_transactions' %}">{% translate "My Transactions" %}</a>
+            </li>
             {% endif %}
+
+
             {% comment %}
+            ЗАКОММЕНТИРОВАНО
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'statuses' %}">{% translate "Statuses" %}</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{% url 'tasks' %}">{% translate "Tasks" %}</a>
             </li>
-            {% endif %}
             {% endcomment %}
 
 

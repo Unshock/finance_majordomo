@@ -13,23 +13,23 @@
                     <th>ID</th>
                     <th>{% translate "Ticker" %}</th>
                     <th>{% translate "Name" %}</th>
-                    <th>{% translate "Creation date" %}</th>
-                    <th></th>
                     <th>{% translate "Quantity" %}</th>
+                    <th></th>
                 </tr>
             </thead>
 
             <tbody method="get">
                 {% for stock in stock_list %}
                 <tr>
-                    <td>{{ stock.id }}</td>
-                    <td>{{ stock.ticker }}</td>
-                    <td>{{ stock.name }}</td>
-                    <td>{{ stock.creation_date }}</td>
+                    <td>{{ stock.0.id }}</td>
+                    <td>{{ stock.0.ticker }}</td>
+                    <td>{{ stock.0.name }}</td>
+                    <td>{{ stock.1 }}</td>
                     <td>
-                        <a href="{{ stock.get_delete_url }}">{% translate "Delete" %}</a>
+                        <div class="d-flex justify-content-left">
+                            <a class="btn btn-primary btn-sm" href="{% url "add_transaction" %}" role="button">{% translate "Add stock transaction" %}</a>
+                        </div>
                     </td>
-                    <td>{{ stock.userstocks.quantity }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+    <div class="container wrapper flex-grow-1">
+        <h1 class="my-4">{{ page_title }}</h1>
+        <div class="d-flex justify-content-left my-4">
+            <a class="btn btn-primary btn-sm" href="{% url "add_transaction" %}" role="button">{% translate "Add transaction" %}</a>
+        </div>
+
+        <table class="table table-striped">
+           <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>{% translate "Asset type" %}</th>
+                    <th>{% translate "Transaction type" %}</th>
+                    <th>{% translate "Creation date" %}</th>
+                    <th>{% translate "User" %}</th>
+                    <th>{% translate "Ticker" %}</th>
+                    <th>{% translate "Date" %}</th>
+                    <th>{% translate "Price" %}</th>
+                    <th>{% translate "Fee" %}</th>
+                    <th>{% translate "Quantity" %}</th>
+                </tr>
+            </thead>
+
+            <tbody method="get">
+                {% for transaction in transaction_list %}
+                <tr>
+                    <td>{{ transaction.id }}</td>
+                    <td>{{ transaction.asset_type }}</td>
+                    <td>{{ transaction.transaction_type }}</td>
+                    <td>{{ transaction.creation_date }}</td>
+                    <td>{{ transaction.user }}</td>
+                    <td>{{ transaction.ticker }}</td>
+                    <td>{{ transaction.date }}</td>
+                    <td>{{ transaction.price }}</td>
+                    <td>{{ transaction.fee }}</td>
+                    <td>{{ transaction.quantity}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock content %}

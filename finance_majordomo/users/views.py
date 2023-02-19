@@ -74,7 +74,6 @@ class AddStockToUser(SuccessMessageMixin, LoginRequiredMixin, View):
     success_message = _("Stock has been successfully added to user's stock list")
 
     def get(self, request, *args, **kwargs):
-        print('rererererequest', request, kwargs)
         user = User.objects.get(id=kwargs['pk_user'])
         user.stocks.add(Stock.objects.get(id=kwargs['pk_stock']))
         user.save()
@@ -118,6 +117,9 @@ class AddStockToUser(SuccessMessageMixin, LoginRequiredMixin, View):
         context['page_title'] = _("Update users")
         context['button_text'] = _("Update")
         return context
+
+class AddTransaction(SuccessMessageMixin, LoginRequiredMixin, View):
+    pass
 
 
 
