@@ -1,3 +1,7 @@
+import json
+from decimal import Decimal
+
+import datetime
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
@@ -7,7 +11,7 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 
 from finance_majordomo.stocks.forms import StockForm
-from finance_majordomo.stocks.models import Stock
+from finance_majordomo.stocks.models import Stock, ProdCalendar
 from finance_majordomo.transactions.models import Transaction
 
 from django.utils.translation import gettext_lazy as _
@@ -40,16 +44,40 @@ class UsersStocks(LoginRequiredMixin, ListView):
         print(self.request.user.id)
         context = super().get_context_data(**kwargs)
         context['page_title'] = self.request.user.username + " " + _("stock list")
-        users_stocks = Stock.objects.filter(usersstocks__user_id=self.request.user.id)
-        users_stocks = [(obj, self.get_current_quantity(obj.id)) for obj in users_stocks]
-        print(users_stocks)
+
+        user_stock_data = self.get_user_stock_data()
+
+        #users_stocks = Stock.objects.filter(usersstocks__user_id=self.request.user.id)
+        #users_stocks = [(obj, self.get_current_quantity(self.request, obj.id), self.get_purchace_price(self.request, obj.id), self.get_current_price(obj.id)) for obj in users_stocks]
+        #print(users_stocks)
         # print([el for el in users_stocks])
         # self.get_current_quantity(1)
-        context['stock_list'] = users_stocks
+        context['stock_list'] = user_stock_data
         return context
 
-    def get_current_quantity(self, stock_id):
-        users_transacions = self.transaction.objects.filter(user=User.objects.get(id=self.request.user.id))
+    def get_user_stock_data(self):
+        request = self.request
+        user_stocks = Stock.objects.filter(usersstocks__user_id=request.user.id)
+
+        user_stock_data = []
+        for stock in user_stocks:
+            purchase_price = self.get_purchace_price(request, stock.id)
+            current_quantity = self.get_current_quantity(request, stock.id)
+            current_price = self.get_current_price(stock)
+            percent_result = self.get_percent_result(purchase_price, current_price)
+
+            user_stock_data.append({'stock': stock,
+                                    'purchase_price': purchase_price,
+                                    'current_quantity': current_quantity,
+                                    'current_price': current_price,
+                                    'percent_result': percent_result
+                                    })
+
+        return user_stock_data
+
+    @staticmethod
+    def get_current_quantity(request, stock_id):
+        users_transacions = Transaction.objects.filter(user=User.objects.get(id=request.user.id))
         users_specific_asset_transacions = users_transacions.filter(ticker=Stock.objects.get(id=stock_id))
         result = 0
         for transaction in users_specific_asset_transacions:
@@ -58,9 +86,95 @@ class UsersStocks(LoginRequiredMixin, ListView):
             elif transaction.transaction_type == "SELL":
                 result -= transaction.quantity
             else:
-                raise Exception('not buy nor sell')
+                raise Exception('not buy or sell found')
         return result
 
+    @staticmethod
+    def get_purchace_price(request, stock_id):
+        # С учетом метода FIFO
+        users_transacions = Transaction.objects.filter(user=User.objects.get(id=request.user.id))
+        users_specific_asset_transacions = sorted(users_transacions.filter(ticker=Stock.objects.get(id=stock_id)), key=lambda x: x.date)
+        result = 0
+        purchase_list = []
+        total_sold = 0
+        purchase_price = 0
+        for transaction in users_specific_asset_transacions:
+            if transaction.transaction_type == "BUY":
+                result += transaction.quantity
+                purchase_list.append({
+                    'quantity': transaction.quantity,
+                    'price': transaction.price
+                })
+            elif transaction.transaction_type == "SELL":
+                result -= transaction.quantity
+                total_sold += transaction.quantity
+            else:
+                raise Exception('not buy nor sell')
+
+        for elem in purchase_list:
+            print('total_sold', total_sold)
+            if elem['quantity'] >= total_sold:
+                elem['quantity'] -= total_sold
+                total_sold = 0
+
+            else:
+                sold = elem['quantity']
+                elem['quantity'] = 0
+                total_sold -= sold
+
+            purchase_price += elem['quantity'] * elem['price']
+
+            if total_sold < 0:
+                raise Exception('тотал меньше 0')
+
+
+        return purchase_price
+
+
+
+        #return result
+
+
+    def get_current_price(self, stock):
+        stock_data = Stock.objects.get(id=stock.id).stock_data
+        json_stock_data = json.loads(stock_data)
+
+        last_day = max(json_stock_data['TRADEINFO'].keys())
+        today = datetime.datetime.today().strftime('%Y-%m-%d')
+
+        if last_day < today:
+
+            today = datetime.datetime.strptime(today, '%Y-%m-%d')
+            last_day = datetime.datetime.strptime(last_day, '%Y-%m-%d')
+
+
+            try:
+                #print('daem stock', stock)
+                #драить код
+                AddStock.actualize_stock_data(stock, last_day)
+                stock_data = Stock.objects.get(id=stock.id).stock_data
+                json_stock_data = json.loads(stock_data)
+                last_day = max(json_stock_data['TRADEINFO'].keys())
+                #print('asd', stock_data)
+            except Exception:
+               raise Exception('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+        #print('last', last_day)
+
+        current_quantity = self.get_current_quantity(self.request, stock.id)
+
+        last_day_price = json_stock_data["TRADEINFO"][last_day]['CLOSE']
+        qurrent_price = current_quantity * last_day_price
+        #print(qurrent_price)
+        return qurrent_price
+        #ПРОВЕРИТЬ ЧТО ПОСЛЕДНЯЯ ДАТА АКТУАЛЬНА
+
+    @staticmethod
+    def get_percent_result(purchase_price, current_price):
+        #print(purchase_price, current_price, 'AAAAAAAAAAAAAAAAAAA')
+        if current_price > 0 and purchase_price > 0:
+            result = Decimal(current_price) / purchase_price
+            return f'- {"{:.2%}".format((1 - result))}' if result < 1 else f'+ {"{:.2%}".format((result - 1))}'
+        return None
 
 
 class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
@@ -90,13 +204,51 @@ class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
                 obj = Stock()
                 obj.ticker = validated_ticker['ticker']
                 obj.name = validated_ticker['shortname']
-                obj.stock_data = json_stock_board_data
+                obj.stock_data = json_stock_board_data #str
                 obj.save()
             #return super().post(request, *args, **kwargs)
+
 
                 messages.success(request, self.success_message)
                 return redirect(self.success_url)
         return super().post(request, *args, **kwargs)
+
+    @staticmethod
+    def actualize_stock_data(stock, start_date=None):
+
+        today = datetime.datetime.today().strftime('%Y-%m-%d')
+        today = datetime.datetime.strptime(today, '%Y-%m-%d')
+        last_day = datetime.datetime.strptime(start_date, '%Y-%m-%d')
+
+
+
+        json_current_stock_data = json.loads(stock.stock_data)
+
+        stock_board_history = get_stock_board_history(stock.ticker, start_date)
+        json_stock_board_data = json.loads(make_json_trade_info_dict(stock_board_history))
+
+        #print('======')
+        #print(json_stock_data['TRADEINFO'])
+        #print('#======#')
+        #print(json_stock_board_data, type(json_stock_board_data))
+        #print(json_stock_board_data['TRADEINFO'])
+        #print('##======##')
+
+        json_current_stock_data['TRADEINFO'].update(json_stock_board_data['TRADEINFO'])
+
+        #print('##########')
+        #print(json_stock_data)
+        #print('###########')
+        #print('1', json_stock_data.keys())
+        #print('2', json_stock_data['TRADEINFO'].keys())
+
+        stock_data = json.dumps(json_current_stock_data)
+        stock.stock_data = stock_data
+        stock.save()
+
+        return stock
+
+
 
 
     def form_valid(self, form):

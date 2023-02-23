@@ -21,13 +21,12 @@ def validate_ticker(ticker: str):
         #print(data)
         try:
             ticker_data = next(x for x in data['securities'] if x["SECID"] == ticker.upper())
+            ticker_data = {'ticker': ticker_data['SECID'],
+                          'shortname': ticker_data['SHORTNAME']}
+
         except StopIteration:
             ticker_data = None
-        print(ticker_data)
-        if not ticker_data:
-            return None
-        return {'ticker': ticker_data['SECID'],
-                'shortname': ticker_data['SHORTNAME']}
+        return ticker_data
 
 
 
@@ -50,19 +49,26 @@ def make_json_trade_info_dict(data: list):
     return json.dumps({"TRADEINFO": trade_info})
 
 
+def get_date_status(date):
+    url = f'https://isdayoff.ru/{date}'
+    return requests(url).text
+
 ticker = 'sber'
-date = '2022-06-09'
+date = '2023-02-17'
 #aaa = [{"BOARDID": "TQBR", "TRADEDATE": "2013-03-25", "CLOSE": 98.79, "VOLUME": 593680, "VALUE": 59340002.8}, {"BOARDID": "TQBR", "TRADEDATE": "2013-03-26", "CLOSE": 97.2, "VOLUME": 1283550, "VALUE": 126030358.8}, {"BOARDID": "TQBR", "TRADEDATE": "2013-03-27", "CLOSE": 96.75, "VOLUME": 1261950, "VALUE": 121835900.2}]
-# aaa = get_stock_board_history(ticker, date)
-#
-#
-#
-# dict =
-# #validate_ticker(ticker)
-# #a = get_stock_board_history(ticker)
+#aaa = get_stock_board_history(ticker, date)
+#print(aaa)
+
+
+
+#validate_ticker(ticker)
+#a = get_stock_board_history(ticker)
 # res = {'trade_info': dict}
 # jres = json.dumps(res)
 # print(res)
 # print(jres)
+
+#res = requests.get(url)
+#print(res.text)
 
 

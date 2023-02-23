@@ -25,3 +25,14 @@ class Stock(models.Model):
         ordering = ['creation_date', 'ticker', 'name']
 
 
+class ProdCalendar(models.Model):
+
+    date_status_choice = [
+        ('0', 'Working'),
+        ('1', 'Nonworking'),
+    ]
+
+    date = models.CharField(max_length=10, verbose_name='Дата')
+    date_status = models.CharField(max_length=10, choices=date_status_choice, verbose_name='Статус дня')
+
+

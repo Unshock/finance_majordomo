@@ -14,6 +14,9 @@
                     <th>{% translate "Ticker" %}</th>
                     <th>{% translate "Name" %}</th>
                     <th>{% translate "Quantity" %}</th>
+                    <th>{% translate "Purchase price" %}</th>
+                    <th>{% translate "Current price" %}</th>
+                    <th>{% translate "Result" %}</th>
                     <th></th>
                 </tr>
             </thead>
@@ -21,10 +24,13 @@
             <tbody method="get">
                 {% for stock in stock_list %}
                 <tr>
-                    <td>{{ stock.0.id }}</td>
-                    <td>{{ stock.0.ticker }}</td>
-                    <td>{{ stock.0.name }}</td>
-                    <td>{{ stock.1 }}</td>
+                    <td>{{ stock.stock.id }}</td>
+                    <td>{{ stock.stock.ticker }}</td>
+                    <td>{{ stock.stock.name }}</td>
+                    <td>{{ stock.current_quantity }}</td>
+                    <td>{{ stock.purchase_price }}</td>
+                    <td>{{ stock.current_price }}</td>
+                    <td>{{ stock.percent_result }}</td>
                     <td>
                         <div class="d-flex justify-content-left">
                             <a class="btn btn-primary btn-sm" href="{% url "add_transaction" %}" role="button">{% translate "Add stock transaction" %}</a>

@@ -4,6 +4,7 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 from finance_majordomo.stocks.models import Stock
 from finance_majordomo.transactions.models import Transaction
+from finance_majordomo.stocks.views import UsersStocks
 
 from common.utils.stocks import validate_ticker
 
@@ -66,6 +67,8 @@ class TransactionForm(ModelForm):
                    }
         )
     )
+
+
 
     class Meta:
         model = Transaction

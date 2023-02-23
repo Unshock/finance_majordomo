@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import ProtectedError
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 
@@ -15,6 +15,7 @@ from common.utils.stocks import validate_ticker, get_stock_board_history, make_j
 from finance_majordomo.transactions.forms import TransactionForm
 from finance_majordomo.users.models import User
 from finance_majordomo.transactions.models import Transaction
+from finance_majordomo.stocks.views import UsersStocks
 
 # Create your views here.
 class TransactionList(LoginRequiredMixin, ListView):
@@ -50,6 +51,9 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     success_url = reverse_lazy('transactions')
     success_message = _("Transaction has been successfully added!")
 
+    unsuccess_url = reverse_lazy('add_transaction')
+    unsuccess_message = _("Transaction has not been added!")
+
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         context['page_title'] = _("Add new transaction")
@@ -58,33 +62,60 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
     def post(self, request, *args, **kwargs):
         form = TransactionForm(request.POST)
-
+        #print('f', form.cleaned_data)
         if form.is_valid():
-            asset_type = form.cleaned_data.get('asset_type')
-            transaction_type = form.cleaned_data.get('transaction_type')
-            ticker = form.cleaned_data.get('ticker')
-            date = form.cleaned_data.get('date')
-            price = form.cleaned_data.get('price')
-            fee = form.cleaned_data.get('fee')
-            quantity = form.cleaned_data.get('quantity')
+            if self.validate_form(form):
+                asset_type = form.cleaned_data.get('asset_type')
+                transaction_type = form.cleaned_data.get('transaction_type')
+                ticker = form.cleaned_data.get('ticker')
+                date = form.cleaned_data.get('date')
+                price = form.cleaned_data.get('price')
+                fee = form.cleaned_data.get('fee')
+                quantity = form.cleaned_data.get('quantity')
 
-            user = User.objects.get(id=request.user.id)
+                user = User.objects.get(id=request.user.id)
 
-            obj = Transaction()
-            obj.asset_type = asset_type
-            obj.transaction_type = transaction_type
-            obj.user = user
-            obj.ticker = ticker
-            obj.date = date
-            obj.price = price
-            obj.fee = fee
-            obj.quantity = quantity
-            obj.save()
+                obj = Transaction()
+                obj.asset_type = asset_type
+                obj.transaction_type = transaction_type
+                obj.user = user
+                obj.ticker = ticker
+                obj.date = date
+                obj.price = price
+                obj.fee = fee
+                obj.quantity = quantity
+                obj.save()
 
-            messages.success(request, self.success_message)
-            return redirect(self.success_url)
-        return super().post(request, *args, **kwargs)
+                messages.success(request, self.success_message)
+                return redirect(self.success_url)
+            return render(request, self.template_name, {'form': form,
+                                                        'page_title': _("Add new transaction"),
+                                                        'button_text': _("Add")
+                                                        })
+            # else:
+            #     #form.errors()
+            #     messages.error(request, self.unsuccess_message)
+            #     return redirect(self.unsuccess_url)
+        #return super().post(request, *args, **kwargs)
+
+    def validate_form(self, form):
+        # form = TransactionForm(self.request.POST)
+
+        print("VALIDATION")
+        print('tika', form.cleaned_data.get('ticker'))
+        stock = Stock.objects.get(name=form.cleaned_data['ticker'])
+        print(stock)
+        total_stocks = UsersStocks.get_current_quantity(self.request, stock.id)
+        print(form.cleaned_data['quantity'], '999', total_stocks)
+
+        print(form.cleaned_data.get('transaction_type'), form.cleaned_data.get('quantity'))
+        if form.cleaned_data['transaction_type'] == 'SELL' and form.cleaned_data['quantity'] > total_stocks:
+            form.add_error('quantity', _('You don\'t have enough stocks'))
+            return False
+        return True
 
     def form_valid(self, form):
+        print("VALIDATION 2 ")
         form.instance.creator = self.request.user
+        print('validation 2 ok')
         return super().form_valid(form)
