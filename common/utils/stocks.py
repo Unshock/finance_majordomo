@@ -51,7 +51,7 @@ def make_json_trade_info_dict(data: list):
 
 def get_date_status(date):
     url = f'https://isdayoff.ru/{date}'
-    return requests(url).text
+    return requests.get(url).text
 
 ticker = 'sber'
 date = '2023-02-17'

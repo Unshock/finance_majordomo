@@ -35,4 +35,7 @@ class ProdCalendar(models.Model):
     date = models.CharField(max_length=10, verbose_name='Дата')
     date_status = models.CharField(max_length=10, choices=date_status_choice, verbose_name='Статус дня')
 
+    class Meta:
+        ordering = ['date', 'date_status']
+
 

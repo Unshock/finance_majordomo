@@ -9,6 +9,7 @@ from django.db.models import ProtectedError
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.core.exceptions import ObjectDoesNotExist
 
 from finance_majordomo.stocks.forms import StockForm
 from finance_majordomo.stocks.models import Stock, ProdCalendar
@@ -16,7 +17,7 @@ from finance_majordomo.transactions.models import Transaction
 
 from django.utils.translation import gettext_lazy as _
 
-from common.utils.stocks import validate_ticker, get_stock_board_history, make_json_trade_info_dict
+from common.utils.stocks import validate_ticker, get_stock_board_history, make_json_trade_info_dict, get_date_status
 from finance_majordomo.users.models import User
 
 
@@ -130,39 +131,44 @@ class UsersStocks(LoginRequiredMixin, ListView):
 
         return purchase_price
 
-
-
         #return result
 
-
     def get_current_price(self, stock):
-        stock_data = Stock.objects.get(id=stock.id).stock_data
-        json_stock_data = json.loads(stock_data)
 
-        last_day = max(json_stock_data['TRADEINFO'].keys())
-        today = datetime.datetime.today().strftime('%Y-%m-%d')
+        stock_obj = StockData(stock)
+        stock = stock_obj.actualize_stock_data()
+        last_day = datetime.datetime.strftime(stock_obj.get_data_last_date(), '%Y-%m-%d')
+        #stock_data = stock.stock_data
 
-        if last_day < today:
+        #stock_data = Stock.objects.get(id=stock.id).stock_data
+        stock_data_json = json.loads(stock.stock_data)
 
-            today = datetime.datetime.strptime(today, '%Y-%m-%d')
-            last_day = datetime.datetime.strptime(last_day, '%Y-%m-%d')
+        #last_day = max(json_stock_data['TRADEINFO'].keys())
+        #today = datetime.datetime.today().strftime('%Y-%m-%d')
 
-
-            try:
-                #print('daem stock', stock)
-                #драить код
-                AddStock.actualize_stock_data(stock, last_day)
-                stock_data = Stock.objects.get(id=stock.id).stock_data
-                json_stock_data = json.loads(stock_data)
-                last_day = max(json_stock_data['TRADEINFO'].keys())
-                #print('asd', stock_data)
-            except Exception:
-               raise Exception('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-        #print('last', last_day)
+        # if last_day < today:
+        #
+        #     actualizator = StockData(stock)
+        #
+        #     today = datetime.datetime.strptime(today, '%Y-%m-%d')
+        #     last_day = datetime.datetime.strptime(last_day, '%Y-%m-%d')
+        #
+        #
+        #     try:
+        #         #print('daem stock', stock)
+        #         #драить код
+        #         AddStock.actualize_stock_data(stock, last_day)
+        #         stock_data = Stock.objects.get(id=stock.id).stock_data
+        #         json_stock_data = json.loads(stock_data)
+        #         last_day = max(json_stock_data['TRADEINFO'].keys())
+        #         #print('asd', stock_data)
+        #     except Exception:
+        #        raise Exception('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+        # #print('last', last_day)
 
         current_quantity = self.get_current_quantity(self.request, stock.id)
 
-        last_day_price = json_stock_data["TRADEINFO"][last_day]['CLOSE']
+        last_day_price = stock_data_json["TRADEINFO"][last_day]['CLOSE']
         qurrent_price = current_quantity * last_day_price
         #print(qurrent_price)
         return qurrent_price
@@ -175,6 +181,96 @@ class UsersStocks(LoginRequiredMixin, ListView):
             result = Decimal(current_price) / purchase_price
             return f'- {"{:.2%}".format((1 - result))}' if result < 1 else f'+ {"{:.2%}".format((result - 1))}'
         return None
+
+class StockData(object):
+    MAX_GAP = 10
+    def __init__(self, stock=None):
+        self.stock = stock
+        self.today = datetime.datetime.today()
+        if self.stock:
+            self.stock_data = json.loads(stock.stock_data)
+
+    def get_data_last_date(self):
+        if self.stock_data:
+            last_day = datetime.datetime.strptime(
+                max(self.stock_data['TRADEINFO'].keys()),
+                '%Y-%m-%d')
+
+            return last_day
+    def actualize_stock_data(self):
+        if self.stock_data:
+            last_day = self.get_data_last_date()
+            actual_date_gap = (self.today - last_day).days
+
+            if actual_date_gap == 0:
+                return self.stock
+
+            elif actual_date_gap >= self.MAX_GAP:
+                stock = self.update_stock_data(datetime.datetime.strftime(last_day, '%Y-%m-%d'))
+                return stock
+
+            else:
+                #actual_last_date = self.today
+                for gap in range(actual_date_gap):
+                    print('gap', gap)
+                    date_str = datetime.datetime.strftime((self.today - datetime.timedelta(gap)), '%Y-%m-%d')
+
+                    try:
+                        prod_date = ProdCalendar.objects.get(date=date_str)
+                    except ProdCalendar.DoesNotExist:
+                        print("ZASHEL VNUTR")
+                        date_status = get_date_status(date_str)
+                        print('datestatus s site', date_status)
+                        prod_date = ProdCalendar()
+                        print(prod_date, 'PROOOOOOD DATE obj')
+                        prod_date.date = date_str
+                        prod_date.date_status = 'Working' if date_status == 0 else 'Nonworking'
+                        prod_date.save()
+
+                    if prod_date.date_status == 'Working':
+                        self.update_stock_data(datetime.datetime.strftime(last_day, '%Y-%m-%d'))
+                        return self.stock
+                return self.stock
+
+                    #print('try prod date', prod_date)
+                    # if prod_date:
+                    #     if prod_date.date_status == 'Working':
+                    #         stock = self.update_stock_data(datetime.datetime.strftime(last_day, '%Y-%m-%d'))
+                    #         return stock
+                    # else:
+                    #     date_status = get_date_status(date_str)
+                    #     print('datestatus s site', date_status)
+                    #     prod_date = ProdCalendar()
+                    #     prod_date.date = date_str
+                    #     prod_date.date_status = 'Working' if date_status == 0 else 'Nonworking'
+                    #     prod_date.save()
+                    #     if prod_date.date_status == 'Working':
+                    #         self.update_stock_data(datetime.datetime.strftime(last_day, '%Y-%m-%d'))
+                    #         return self.stock
+
+
+    def update_stock_data(self, start_date=None):
+        stock_board_history = get_stock_board_history(self.stock.ticker, start_date)
+        stock_board_data_json = json.loads(make_json_trade_info_dict(stock_board_history))
+
+        if self.stock_data:
+            current_stock_data_json = self.stock_data
+
+            current_stock_data_json['TRADEINFO'].update(stock_board_data_json['TRADEINFO'])
+
+            stock_data = json.dumps(current_stock_data_json)
+            self.stock.stock_data = stock_data
+            self.stock.save()
+
+            return self.stock
+
+        else:
+            stock_data = json.dumps(stock_board_data_json)
+            self.stock.stock_data = stock_data
+            self.stock.save()
+
+            return self.stock
+
 
 
 class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
@@ -204,6 +300,10 @@ class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
                 obj = Stock()
                 obj.ticker = validated_ticker['ticker']
                 obj.name = validated_ticker['shortname']
+
+                #obj.save()
+                #StockData(obj).update_stock_data()
+
                 obj.stock_data = json_stock_board_data #str
                 obj.save()
             #return super().post(request, *args, **kwargs)
