@@ -31,10 +31,16 @@ def validate_ticker(ticker: str):
 
 
 
-def get_stock_board_history(ticker: str, date:str=None):
-    print('ticker', ticker, 'data: ', date)
+def get_stock_board_history(ticker: str, start_date:str=None):
+    """
+    :param ticker: ticker for MOEX API
+    :param start_date: the earliest trading date from which information will be received to current date
+    :return: list of dicts with data for every day from start_day or first historic day if start_day is None
+    """
+    print('ticker', ticker, 'data: ', start_date)
     with requests.Session() as session:
-        data = apimoex.get_board_history(session, ticker.upper(), start=date)
+        data = apimoex.get_board_history(session, ticker.upper(), start=start_date)
+        print("ZAPROS POSHEL!!!!!!!!!!!")
         return data
 
 def make_json_trade_info_dict(data: list):
@@ -51,7 +57,13 @@ def make_json_trade_info_dict(data: list):
 
 def get_date_status(date):
     url = f'https://isdayoff.ru/{date}'
-    return requests.get(url).text
+    result = requests.get(url).text
+    if result == '0':
+        return 'Working'
+    if result == '1':
+        return 'Nonworking'
+    raise ConnectionError('Response is not valid')
+
 
 ticker = 'sber'
 date = '2023-02-17'

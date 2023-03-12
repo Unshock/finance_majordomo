@@ -70,7 +70,7 @@ class UsersStocks(LoginRequiredMixin, ListView):
             user_stock_data.append({'stock': stock,
                                     'purchase_price': purchase_price,
                                     'current_quantity': current_quantity,
-                                    'current_price': current_price,
+                                    'current_price': "{:.2f}".format(current_price),
                                     'percent_result': percent_result
                                     })
 
@@ -176,14 +176,14 @@ class UsersStocks(LoginRequiredMixin, ListView):
 
     @staticmethod
     def get_percent_result(purchase_price, current_price):
-        #print(purchase_price, current_price, 'AAAAAAAAAAAAAAAAAAA')
+
         if current_price > 0 and purchase_price > 0:
             result = Decimal(current_price) / purchase_price
             return f'- {"{:.2%}".format((1 - result))}' if result < 1 else f'+ {"{:.2%}".format((result - 1))}'
-        return None
+        raise ValueError('current_price and purchase_price must be > 0')
 
 class StockData(object):
-    MAX_GAP = 10
+    MAX_GAP = 10 #max holidays continuous sequence in russian prod calendar
     def __init__(self, stock=None):
         self.stock = stock
         self.today = datetime.datetime.today()
@@ -191,6 +191,9 @@ class StockData(object):
             self.stock_data = json.loads(stock.stock_data)
 
     def get_data_last_date(self):
+        """
+        :return: returns the last date for the stock that is written in the DB
+        """
         if self.stock_data:
             last_day = datetime.datetime.strptime(
                 max(self.stock_data['TRADEINFO'].keys()),
@@ -203,28 +206,45 @@ class StockData(object):
             actual_date_gap = (self.today - last_day).days
 
             if actual_date_gap == 0:
+                # the last day in stock data is TODAY - doesn't need to be updated
                 return self.stock
 
             elif actual_date_gap >= self.MAX_GAP:
+                """
+                The last day in stock data is different from today more than max holidays
+                continuous sequence in russian prod calendar -
+                must be updated anyway. Updating from the last date in DB.
+                """
                 stock = self.update_stock_data(datetime.datetime.strftime(last_day, '%Y-%m-%d'))
                 return stock
 
             else:
+                """
+                There is a possibility that all the days in the gap are holidays -
+                so need to find the last working day. Updating from the last date in DB.
+                """
                 #actual_last_date = self.today
-                for gap in range(actual_date_gap):
-                    print('gap', gap)
+                for gap in range(1, actual_date_gap):
+                    print('gap', gap, 'for', self.stock.ticker, 'last_day', last_day, 'actual date gap', actual_date_gap)
                     date_str = datetime.datetime.strftime((self.today - datetime.timedelta(gap)), '%Y-%m-%d')
+                    print('DATE', date_str)
 
                     try:
                         prod_date = ProdCalendar.objects.get(date=date_str)
+                        print('prod_date', prod_date, prod_date.date_status)
                     except ProdCalendar.DoesNotExist:
-                        print("ZASHEL VNUTR")
-                        date_status = get_date_status(date_str)
-                        print('datestatus s site', date_status)
+                        print("PRODCALENDAR DATE DOESNT EXIST")
+
+                        try:
+                            date_status = get_date_status(date_str)
+                        except ConnectionError:
+                            continue
+
+                        print('datestatus from site: ', date_str, ' is ', date_status)
+
                         prod_date = ProdCalendar()
-                        print(prod_date, 'PROOOOOOD DATE obj')
                         prod_date.date = date_str
-                        prod_date.date_status = 'Working' if date_status == 0 else 'Nonworking'
+                        prod_date.date_status = date_status
                         prod_date.save()
 
                     if prod_date.date_status == 'Working':
@@ -232,28 +252,19 @@ class StockData(object):
                         return self.stock
                 return self.stock
 
-                    #print('try prod date', prod_date)
-                    # if prod_date:
-                    #     if prod_date.date_status == 'Working':
-                    #         stock = self.update_stock_data(datetime.datetime.strftime(last_day, '%Y-%m-%d'))
-                    #         return stock
-                    # else:
-                    #     date_status = get_date_status(date_str)
-                    #     print('datestatus s site', date_status)
-                    #     prod_date = ProdCalendar()
-                    #     prod_date.date = date_str
-                    #     prod_date.date_status = 'Working' if date_status == 0 else 'Nonworking'
-                    #     prod_date.save()
-                    #     if prod_date.date_status == 'Working':
-                    #         self.update_stock_data(datetime.datetime.strftime(last_day, '%Y-%m-%d'))
-                    #         return self.stock
-
-
     def update_stock_data(self, start_date=None):
+        """
+        :param start_date: should be set if stock exist and has some stock data with last stock data date
+        :return: created or updates stock data using MOEX API from start_date
+        or from first historic date if start_date is None - returns updated stock object
+        """
         stock_board_history = get_stock_board_history(self.stock.ticker, start_date)
         stock_board_data_json = json.loads(make_json_trade_info_dict(stock_board_history))
 
         if self.stock_data:
+            """
+            if stock data already exist and should be updated
+            """
             current_stock_data_json = self.stock_data
 
             current_stock_data_json['TRADEINFO'].update(stock_board_data_json['TRADEINFO'])
@@ -265,6 +276,9 @@ class StockData(object):
             return self.stock
 
         else:
+            """
+            if stock data does not exist and should be created first time
+            """
             stock_data = json.dumps(stock_board_data_json)
             self.stock.stock_data = stock_data
             self.stock.save()
