@@ -13,13 +13,13 @@
                     <th>ID</th>
                     <th>{% translate "Asset type" %}</th>
                     <th>{% translate "Transaction type" %}</th>
-                    <th>{% translate "Creation date" %}</th>
                     <th>{% translate "User" %}</th>
                     <th>{% translate "Ticker" %}</th>
                     <th>{% translate "Date" %}</th>
                     <th>{% translate "Price" %}</th>
                     <th>{% translate "Fee" %}</th>
                     <th>{% translate "Quantity" %}</th>
+                    <th></th>
                 </tr>
             </thead>
 
@@ -29,13 +29,15 @@
                     <td>{{ transaction.id }}</td>
                     <td>{{ transaction.asset_type }}</td>
                     <td>{{ transaction.transaction_type }}</td>
-                    <td>{{ transaction.creation_date }}</td>
                     <td>{{ transaction.user }}</td>
                     <td>{{ transaction.ticker }}</td>
                     <td>{{ transaction.date }}</td>
                     <td>{{ transaction.price }}</td>
                     <td>{{ transaction.fee }}</td>
                     <td>{{ transaction.quantity}}</td>
+                    <td>
+                        <a href="{{ transaction.get_delete_url }}">{% translate "Delete" %}</a>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

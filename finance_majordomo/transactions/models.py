@@ -31,6 +31,8 @@ class Transaction(models.Model):
     fee = models.DecimalField(max_digits=8, decimal_places=2, null=True, default=0, verbose_name='Комиссия за сделку')
     quantity = models.IntegerField(verbose_name='Количество')
 
+    def get_delete_url(self):
+        return reverse("delete_transaction", kwargs={'pk': self.pk})
 
     def __str__(self):
         return f'{self.transaction_type} {self.ticker} for {self.price}'

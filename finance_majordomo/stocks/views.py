@@ -60,10 +60,16 @@ class UsersStocks(LoginRequiredMixin, ListView):
         request = self.request
         user_stocks = Stock.objects.filter(usersstocks__user_id=request.user.id)
 
+        #print(user_stocks)
+
         user_stock_data = []
         for stock in user_stocks:
-            purchase_price = self.get_purchace_price(request, stock.id)
             current_quantity = self.get_current_quantity(request, stock.id)
+
+            if current_quantity == 0:
+                continue
+
+            purchase_price = self.get_purchace_price(request, stock.id)
             current_price = self.get_current_price(stock)
             percent_result = self.get_percent_result(purchase_price, current_price)
 
@@ -77,14 +83,41 @@ class UsersStocks(LoginRequiredMixin, ListView):
         return user_stock_data
 
     @staticmethod
-    def get_current_quantity(request, stock_id):
-        users_transacions = Transaction.objects.filter(user=User.objects.get(id=request.user.id))
-        users_specific_asset_transacions = users_transacions.filter(ticker=Stock.objects.get(id=stock_id))
+    def get_current_quantity(request, stock_id, date=None):
+        users_transactions = Transaction.objects.filter(user=User.objects.get(id=request.user.id))
+        users_specific_asset_transactions = users_transactions.filter(ticker=Stock.objects.get(id=stock_id)).order_by('date')
+        #print(users_specific_asset_transactions, '1')
+
+        if date:
+            users_specific_asset_transactions = users_specific_asset_transactions.filter(date__lte=date)
+            #print(users_specific_asset_transactions, '2')
+        #print(users_specific_asset_transacions)
+        #a = users_specific_asset_transacions.order_by('date')
+        if date is None:
+            g = UsersStocks.get_current_quantity(request, stock_id, '2023-02-22')
+            if date is None:
+                print(stock_id, 'ALTER G', g)
+        #for el in a:
+        #    print(el.date)
+        #print(a)
+
         result = 0
-        for transaction in users_specific_asset_transacions:
+        date = None
+        previous_date = None
+
+        for transaction in users_specific_asset_transactions:
+            #print(date, prev_date)
+            if date != previous_date and result < 0:
+                raise ValueError('quantity cant be lower than 0')
+            #print(transaction, transaction.date)
+            previous_date = date
+            date = transaction.date
+
             if transaction.transaction_type == "BUY":
                 result += transaction.quantity
             elif transaction.transaction_type == "SELL":
+                if previous_date is None:
+                    raise ValueError('quantity cant be lower than 0')
                 result -= transaction.quantity
             else:
                 raise Exception('not buy or sell found')
@@ -113,7 +146,7 @@ class UsersStocks(LoginRequiredMixin, ListView):
                 raise Exception('not buy nor sell')
 
         for elem in purchase_list:
-            print('total_sold', total_sold)
+            #print('total_sold', total_sold)
             if elem['quantity'] >= total_sold:
                 elem['quantity'] -= total_sold
                 total_sold = 0
@@ -180,6 +213,7 @@ class UsersStocks(LoginRequiredMixin, ListView):
         if current_price > 0 and purchase_price > 0:
             result = Decimal(current_price) / purchase_price
             return f'- {"{:.2%}".format((1 - result))}' if result < 1 else f'+ {"{:.2%}".format((result - 1))}'
+        #return '0'
         raise ValueError('current_price and purchase_price must be > 0')
 
 class StockData(object):
@@ -225,22 +259,22 @@ class StockData(object):
                 """
                 #actual_last_date = self.today
                 for gap in range(1, actual_date_gap):
-                    print('gap', gap, 'for', self.stock.ticker, 'last_day', last_day, 'actual date gap', actual_date_gap)
+                    #print('gap', gap, 'for', self.stock.ticker, 'last_day', last_day, 'actual date gap', actual_date_gap)
                     date_str = datetime.datetime.strftime((self.today - datetime.timedelta(gap)), '%Y-%m-%d')
-                    print('DATE', date_str)
+                    #print('DATE', date_str)
 
                     try:
                         prod_date = ProdCalendar.objects.get(date=date_str)
-                        print('prod_date', prod_date, prod_date.date_status)
+                        #print('prod_date', prod_date, prod_date.date_status)
                     except ProdCalendar.DoesNotExist:
-                        print("PRODCALENDAR DATE DOESNT EXIST")
+                        #print("PRODCALENDAR DATE DOESNT EXIST")
 
                         try:
                             date_status = get_date_status(date_str)
                         except ConnectionError:
                             continue
 
-                        print('datestatus from site: ', date_str, ' is ', date_status)
+                        #print('datestatus from site: ', date_str, ' is ', date_status)
 
                         prod_date = ProdCalendar()
                         prod_date.date = date_str
