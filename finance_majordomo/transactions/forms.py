@@ -80,6 +80,12 @@ class TransactionForm(ModelForm):
             raise ValidationError(_("Quantity must be more than 0"))
         return quantity
 
+    def clean_fee(self):
+        fee = self.cleaned_data.get('fee')
+        if fee is not None and fee < 0:
+            raise ValidationError(_("Fee must be more or equal 0"))
+        return fee
+
     class Meta:
         model = Transaction
         fields = [
