@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -30,6 +31,7 @@ class Transaction(models.Model):
     price = models.DecimalField(max_digits=8, decimal_places=2, verbose_name='Цена сделки')
     fee = models.DecimalField(max_digits=8, decimal_places=2, null=True, default=0, verbose_name='Комиссия за сделку')
     quantity = models.IntegerField(verbose_name='Количество')
+
 
     def get_delete_url(self):
         return reverse("delete_transaction", kwargs={'pk': self.pk})

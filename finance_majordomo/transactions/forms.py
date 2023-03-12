@@ -68,7 +68,17 @@ class TransactionForm(ModelForm):
         )
     )
 
+    def clean_price(self):
+        price = self.cleaned_data.get('price')
+        if price <= 0:
+            raise ValidationError(_("Price must be more than 0"))
+        return price
 
+    def clean_quantity(self):
+        quantity = self.cleaned_data.get('quantity')
+        if quantity <= 0:
+            raise ValidationError(_("Quantity must be more than 0"))
+        return quantity
 
     class Meta:
         model = Transaction
