@@ -66,18 +66,18 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         return context
 
     def get(self, request, *args, **kwargs):
-        form = TransactionForm()
+        transaction_form = TransactionForm()
 
         asset_id = kwargs.get('asset_id')
         asset_type = kwargs.get('asset_type')
 
         if asset_id:
-           form.initial['ticker'] = asset_id
+           transaction_form.initial['ticker'] = asset_id
 
         if asset_type:
-           form.initial['asset_type'] = asset_type
+           transaction_form.initial['asset_type'] = asset_type
 
-        return render(request, self.template_name, {'form': form,
+        return render(request, self.template_name, {'form': transaction_form,
                                                     'page_title': _("Add new transaction"),
                                                     'button_text': _('Add')
                                                     })

@@ -48,13 +48,28 @@ class UsersStocks(LoginRequiredMixin, ListView):
 
         user_stock_data = self.get_user_stock_data()
 
+        total_price = {'total_purchase_price': self.get_total_purchase_price(user_stock_data),
+                       'total_current_price': self.get_total_current_price(user_stock_data),
+                       'total_percent_result': self.get_percent_result(Decimal(self.get_total_purchase_price(user_stock_data)),
+                                                       Decimal(self.get_total_current_price(user_stock_data)))}
+
+
         #users_stocks = Stock.objects.filter(usersstocks__user_id=self.request.user.id)
         #users_stocks = [(obj, self.get_current_quantity(self.request, obj.id), self.get_purchace_price(self.request, obj.id), self.get_current_price(obj.id)) for obj in users_stocks]
         #print(users_stocks)
         # print([el for el in users_stocks])
         # self.get_current_quantity(1)
         context['stock_list'] = user_stock_data
+        context['total_price'] = total_price
         return context
+
+    def get_total_purchase_price(self, stock_list):
+        total_purchase_price = sum([stock['purchase_price'] for stock in stock_list])
+        return "{:.2f}".format(total_purchase_price)
+
+    def get_total_current_price(self, stock_list):
+        total_current_price = sum([float(stock['current_price']) for stock in stock_list])
+        return "{:.2f}".format(total_current_price)
 
     def get_user_stock_data(self):
         request = self.request
@@ -211,7 +226,7 @@ class UsersStocks(LoginRequiredMixin, ListView):
     def get_percent_result(purchase_price, current_price):
 
         if current_price > 0 and purchase_price > 0:
-            result = Decimal(current_price) / purchase_price
+            result = Decimal(current_price) / Decimal(purchase_price)
             return f'- {"{:.2%}".format((1 - result))}' if result < 1 else f'+ {"{:.2%}".format((result - 1))}'
         #return '0'
         raise ValueError('current_price and purchase_price must be > 0')
