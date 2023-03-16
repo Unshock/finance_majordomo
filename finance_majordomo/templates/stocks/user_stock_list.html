@@ -33,7 +33,7 @@
                     <td>{{ stock.percent_result }}</td>
                     <td>
                         <div class="d-flex justify-content-left">
-                            <a class="btn btn-primary btn-sm" href="{% url "add_transaction" %}" role="button">{% translate "Add stock transaction" %}</a>
+                            <a class="btn btn-primary btn-sm" href="{% url "add_transaction" stock.stock.id %}" role="button">{% translate "Add stock transaction" %}</a>
                         </div>
                     </td>
                 </tr>

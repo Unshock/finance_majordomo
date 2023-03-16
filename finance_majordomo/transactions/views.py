@@ -54,12 +54,33 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     unsuccess_url = reverse_lazy('add_transaction')
     unsuccess_message = _("Transaction has not been added!")
 
+    # def __init__(self, asset_type=None, asset_id=None):
+    #     self.asset_type = asset_type
+    #     self.asset_id = asset_id
+
+
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         context['page_title'] = _("Add new transaction")
         context['button_text'] = _("Add")
         return context
 
+    def get(self, request, *args, **kwargs):
+        form = TransactionForm()
+
+        asset_id = kwargs.get('asset_id')
+        asset_type = kwargs.get('asset_type')
+
+        if asset_id:
+           form.initial['ticker'] = asset_id
+
+        if asset_type:
+           form.initial['asset_type'] = asset_type
+
+        return render(request, self.template_name, {'form': form,
+                                                    'page_title': _("Add new transaction"),
+                                                    'button_text': _('Add')
+                                                    })
     def post(self, request, *args, **kwargs):
         form = TransactionForm(request.POST)
         #print('f', form.cleaned_data)
