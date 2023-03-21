@@ -191,6 +191,7 @@ class UsersStocks(LoginRequiredMixin, ListView):
         #stock_data = Stock.objects.get(id=stock.id).stock_data
         stock_data_json = json.loads(stock.stock_data)
 
+        #закомментирован неактуальный код
         #last_day = max(json_stock_data['TRADEINFO'].keys())
         #today = datetime.datetime.today().strftime('%Y-%m-%d')
 
@@ -273,14 +274,14 @@ class StockData(object):
                 so need to find the last working day. Updating from the last date in DB.
                 """
                 #actual_last_date = self.today
-                for gap in range(1, actual_date_gap):
+                for gap in range(0, actual_date_gap):
                     #print('gap', gap, 'for', self.stock.ticker, 'last_day', last_day, 'actual date gap', actual_date_gap)
                     date_str = datetime.datetime.strftime((self.today - datetime.timedelta(gap)), '%Y-%m-%d')
-                    #print('DATE', date_str)
+                    print('DATE', date_str)
 
                     try:
                         prod_date = ProdCalendar.objects.get(date=date_str)
-                        #print('prod_date', prod_date, prod_date.date_status)
+                        print('prod_date', prod_date.date, prod_date.date_status)
                     except ProdCalendar.DoesNotExist:
                         #print("PRODCALENDAR DATE DOESNT EXIST")
 
@@ -315,7 +316,9 @@ class StockData(object):
             if stock data already exist and should be updated
             """
             current_stock_data_json = self.stock_data
-
+            print(start_date)
+            print('CURRENT', current_stock_data_json['TRADEINFO'][start_date])
+            print(start_date == datetime.datetime.today())
             current_stock_data_json['TRADEINFO'].update(stock_board_data_json['TRADEINFO'])
 
             stock_data = json.dumps(current_stock_data_json)
