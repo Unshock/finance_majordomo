@@ -61,18 +61,21 @@ def get_stock_current_price(ticker: str):
     current_time = datetime.datetime.now(offset)
     request_time = current_time - datetime.timedelta(minutes=TIME_GAP_MINUTES)
 
+    print(current_time, request_time)
+
     with requests.Session() as session:
         print(f'ZAPROS na poluchenie last_price of {ticker.upper()} poshel')
         data = apimoex.get_board_candles(session, ticker.upper(), start=request_time, interval=1)
 
         last_price = data[-1]['close']
+        actual_time = data[-1]['begin']
 
         if last_price:
             print('данные получены')
         else:
             print('ДАННЫЕ НЕ ПОЛУЧЕНЫ!!!!!!!!!')
 
-        return last_price
+        return last_price, actual_time
 
 
 def make_json_trade_info_dict(data: list):
@@ -86,7 +89,42 @@ def make_json_trade_info_dict(data: list):
 
     return json.dumps({"TRADEINFO": trade_info})
 
+def make_json_last_price_dict(last_price, actual_time):
+    today = datetime.datetime.strftime(datetime.datetime.today(), '%Y-%m-%d')
 
+    print(actual_time)
+
+    trade_info = {
+        today: {
+            'LAST': last_price,
+            'ACTUAL': actual_time,
+        }}
+
+    return json.dumps({"TRADEINFO": trade_info})
+
+
+# stock_board_history = get_stock_board_history('sber', '2023-03-18')
+# stock_board_data_json = json.loads(make_json_trade_info_dict(stock_board_history))
+#
+# last_price, actual = get_stock_current_price('sber')
+# data = json.loads(make_json_last_price_dict(last_price, actual))
+#
+# print(stock_board_data_json)
+# print(data)
+#
+# res = stock_board_data_json['TRADEINFO'].update(data['TRADEINFO'])
+#
+# print(stock_board_data_json)
+
+# g = {'TRADEINFO': {'2023-03-20': {'BOARDID': 'TQBR', 'CLOSE': 203.73, 'VOLUME': 156714250, 'VALUE': 31309861829}, '2023-03-21': {'BOARDID': 'TQBR', 'CLOSE': 203.32, 'VOLUME': 122583960, 'VALUE': 25112540900.7}, '2023-03-22': {'LAST': 203.88, 'ACTUAL': '2023-03-22 21:03:00'}}}
+# u = {'TRADEINFO': {'2023-03-20': {'BOARDID': 'z', 'CLOSE': 0.0, 'VOLUME': 0, 'VALUE': 0}, '2023-03-22': {'BOARDID': 'TQBR', 'CLOSE': 203.73, 'VOLUME': 156714250, 'VALUE': 31309861829}}}
+#
+# print(g)
+# print(u)
+#
+# g['TRADEINFO'].update(u['TRADEINFO'])
+
+print(g)
 def get_date_status(date):
     url = f'https://isdayoff.ru/{date}'
     result = requests.get(url).text
