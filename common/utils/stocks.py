@@ -54,28 +54,56 @@ def get_stock_board_history(ticker: str, start_date:str=None):
 
 def get_stock_current_price(ticker: str):
 
-    TIME_GAP_MINUTES = 20
+    TIME_GAP_MINUTES = 1000
 
     offset = datetime.timezone(datetime.timedelta(hours=3))
 
     current_time = datetime.datetime.now(offset)
     request_time = current_time - datetime.timedelta(minutes=TIME_GAP_MINUTES)
 
-    print(current_time, request_time)
+    #print(current_time, request_time)
 
     with requests.Session() as session:
         print(f'ZAPROS na poluchenie last_price of {ticker.upper()} poshel')
-        data = apimoex.get_board_candles(session, ticker.upper(), start=request_time, interval=1)
+        data = apimoex.get_board_candles(session, ticker.upper(), start=str(request_time), interval=1)
+        #data = apimoex.find_security_description(session, ticker.upper())
+        #print('data', '\n'.join(str(d) for d in data))
+        if data:
+            lastest_data = data[-1]
+            last_price = lastest_data.get('close')
+            actual_time = lastest_data.get('begin')
 
-        last_price = data[-1]['close']
-        actual_time = data[-1]['begin']
+            if last_price and actual_time:
+               return last_price, actual_time
+            else:
+               raise ValueError(f'Could not get data for {ticker} in {get_stock_current_price}')
 
-        if last_price:
-            print('данные получены')
-        else:
-            print('ДАННЫЕ НЕ ПОЛУЧЕНЫ!!!!!!!!!')
 
-        return last_price, actual_time
+        raise ValueError(f'Could not get data for {ticker} in {get_stock_current_price}')
+
+
+#print(get_stock_current_price('lsrg'))
+#print(get_stock_current_price('sber'))
+
+
+def is_admitted_for_sessions(ticker: str):
+    with requests.Session() as session:
+        print(f'ZAPROS na poluchenie admitted for sessions of {ticker.upper()} poshel')
+        #data = apimoex.get_board_candles(session, ticker.upper(), start=request_time, interval=1)
+        data = apimoex.find_security_description(session, ticker.upper())
+        #print('data', '\n'.join(str(d) for d in data))
+
+        admitted_for_morning = False
+        admitted_for_evening = False
+
+        for parameter in data:
+            if parameter['name'] == 'MORNINGSESSION' and parameter['value'] == '1':
+                admitted_for_morning = True
+            if parameter['name'] == 'EVENINGSESSION' and parameter['value'] == '1':
+                admitted_for_evening = True
+
+        return {'admitted_for_morning_session': admitted_for_morning,
+                'admitted_for_evening_session': admitted_for_evening}
 
 
 def make_json_trade_info_dict(data: list):
@@ -92,12 +120,12 @@ def make_json_trade_info_dict(data: list):
 def make_json_last_price_dict(last_price, actual_time):
     today = datetime.datetime.strftime(datetime.datetime.today(), '%Y-%m-%d')
 
-    print(actual_time)
+    #print(actual_time)
 
     trade_info = {
         today: {
             'LAST': last_price,
-            'ACTUAL': actual_time,
+            'UPDATE_TIME': actual_time,
         }}
 
     return json.dumps({"TRADEINFO": trade_info})
@@ -124,7 +152,6 @@ def make_json_last_price_dict(last_price, actual_time):
 #
 # g['TRADEINFO'].update(u['TRADEINFO'])
 
-print(g)
 def get_date_status(date):
     url = f'https://isdayoff.ru/{date}'
     result = requests.get(url).text

@@ -109,10 +109,10 @@ class UsersStocks(LoginRequiredMixin, ListView):
             #print(users_specific_asset_transactions, '2')
         #print(users_specific_asset_transacions)
         #a = users_specific_asset_transacions.order_by('date')
-        if date is None:
-            g = UsersStocks.get_current_quantity(request, stock_id, '2023-02-22')
-            if date is None:
-                print(stock_id, 'ALTER G', g)
+        #if date is None:
+        #    g = UsersStocks.get_current_quantity(request, stock_id, '2023-02-22')
+        #    if date is None:
+        #        print(stock_id, 'ALTER G', g)
         #for el in a:
         #    print(el.date)
         #print(a)
@@ -186,7 +186,9 @@ class UsersStocks(LoginRequiredMixin, ListView):
 
         stock_obj = StockData(stock)
         stock = stock_obj.actualize_stock_data()
-        last_day_str = datetime.datetime.strftime(stock_obj.get_data_last_date(), '%Y-%m-%d')[0]
+        last_date_dt, status, update_time = stock_obj.get_data_last_date()
+        #print('last_date_dt', last_date_dt)
+        last_day_str = datetime.datetime.strftime(last_date_dt, '%Y-%m-%d')
         #stock_data = stock.stock_data
 
         #stock_data = Stock.objects.get(id=stock.id).stock_data
@@ -218,7 +220,16 @@ class UsersStocks(LoginRequiredMixin, ListView):
 
         current_quantity = self.get_current_quantity(self.request, stock.id)
 
-        last_day_price = stock_data_json["TRADEINFO"][last_day_str].get('CLOSE') if not None else stock_data_json["TRADEINFO"][last_day_str].get('LAST')
+        #print(stock_data_json['TRADEINFO'])
+        #print('last_day_str', last_day_str)
+        #print(stock_data_json['TRADEINFO'].get(last_day_str))
+
+        last_day_price = stock_data_json["TRADEINFO"][last_day_str].get('CLOSE')
+
+        #print(last_day_price, 'LAST DAY PRICE')
+
+        if not last_day_price:
+            last_day_price = stock_data_json["TRADEINFO"][last_day_str].get('LAST')
 
         qurrent_price = current_quantity * last_day_price
         #print(qurrent_price)
@@ -253,14 +264,14 @@ class StockData(object):
 
             last_day_str = datetime.datetime.strftime(last_date_dt, '%Y-%m-%d')
             #print(self.stock_data)
-            print('LAST DAY:', last_date_dt)
+            #print('LAST DAY:', last_day_str)
             if self.stock_data['TRADEINFO'][last_day_str].get("CLOSE"):
                 status = 'CLOSED'
                 update_time = None
             elif self.stock_data['TRADEINFO'][last_day_str].get("LAST"):
                 status = 'LAST'
                 update_time = self.stock_data['TRADEINFO'][last_day_str].get("UPDATE_TIME")
-            print('STATUS:', status)
+            #print('STATUS:', status)
             return last_date_dt, status, update_time
     def actualize_stock_data(self):
         if self.stock_data:
@@ -278,7 +289,8 @@ class StockData(object):
                 continuous sequence in russian prod calendar -
                 must be updated anyway. Updating from the last date in DB.
                 """
-                stock = self.update_stock_data(last_date_str)
+                self.update_stock_data(last_date_str)
+                stock = self.update_last_day()
                 return stock
 
             else:
@@ -290,11 +302,11 @@ class StockData(object):
                 for gap in range(0, actual_date_gap):
                     #print('gap', gap, 'for', self.stock.ticker, 'last_day', last_day, 'actual date gap', actual_date_gap)
                     date_str = datetime.datetime.strftime((self.today - datetime.timedelta(gap)), '%Y-%m-%d')
-                    print('DATE', date_str)
+                    #print('DATE', date_str)
 
                     try:
                         prod_date = ProdCalendar.objects.get(date=date_str)
-                        print('prod_date', prod_date.date, prod_date.date_status)
+                        #print('prod_date', prod_date.date, prod_date.date_status)
                     except ProdCalendar.DoesNotExist:
                         #print("PRODCALENDAR DATE DOESNT EXIST")
 
@@ -311,8 +323,9 @@ class StockData(object):
                         prod_date.save()
 
                     if prod_date.date_status == 'Working':
-                        print('last_date', last_date_str)
+                        #print('last_date', last_date_str)
                         self.update_stock_data(last_date_str)
+                        self.update_last_day()
                         return self.stock
                 return self.stock
 
@@ -368,14 +381,16 @@ class StockData(object):
             #NE DODELANO
             last_day, _, update_time = self.get_data_last_date()
 
+            print(update_time)
             if update_time:
                 time_gap = self.get_time_gap(update_time)
+                print('time_gap', time_gap, self.stock)
                 if time_gap <= UPDATE_TIME_MINUTES:
                     return self.stock
 
             last_price, new_update_time = get_stock_current_price(self.stock.ticker)
             last_day_data = json.loads(make_json_last_price_dict(last_price, new_update_time))
-
+            print(self.stock, last_day_data)
             current_stock_data_json = self.stock_data
 
             current_stock_data_json['TRADEINFO'].update(last_day_data['TRADEINFO'])
