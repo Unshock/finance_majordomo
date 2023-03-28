@@ -28,6 +28,7 @@ def validate_ticker(ticker: str):
 
         except StopIteration:
             ticker_data = None
+        #print(ticker_data)
         return ticker_data
 
 
@@ -91,7 +92,7 @@ def is_admitted_for_sessions(ticker: str):
         print(f'ZAPROS na poluchenie admitted for sessions of {ticker.upper()} poshel')
         #data = apimoex.get_board_candles(session, ticker.upper(), start=request_time, interval=1)
         data = apimoex.find_security_description(session, ticker.upper())
-        #print('data', '\n'.join(str(d) for d in data))
+        print('data', '\n'.join(str(d) for d in data))
 
         admitted_for_morning = False
         admitted_for_evening = False
@@ -104,6 +105,22 @@ def is_admitted_for_sessions(ticker: str):
 
         return {'admitted_for_morning_session': admitted_for_morning,
                 'admitted_for_evening_session': admitted_for_evening}
+
+def get_stock_description(ticker: str):
+    with requests.Session() as session:
+        #print(f'ZAPROS na poluchenie stock description of {ticker.upper()} poshel')
+        #data = apimoex.get_board_candles(session, ticker.upper(), start=request_time, interval=1)
+        data = apimoex.find_security_description(session, ticker.upper())
+        #print('data', '\n'.join(str(d) for d in data))
+
+        result_data = {}
+        for elem in data:
+            result_data[elem['name']] = elem['value']
+        return result_data
+
+#is_admitted_for_sessions('posi')
+#a = get_stock_description('sber')
+#print(a)
 
 
 def make_json_trade_info_dict(data: list):

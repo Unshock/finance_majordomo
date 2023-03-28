@@ -18,7 +18,7 @@ from finance_majordomo.transactions.models import Transaction
 from django.utils.translation import gettext_lazy as _
 
 from common.utils.stocks import validate_ticker, get_stock_board_history, make_json_trade_info_dict, get_date_status, \
-    get_stock_current_price, make_json_last_price_dict
+    get_stock_current_price, make_json_last_price_dict, get_stock_description
 from finance_majordomo.users.models import User
 
 
@@ -372,6 +372,8 @@ class StockData(object):
         STANDARD_MOEX_LAG = 16
         UPDATE_TIME_MINUTES = 60 - STANDARD_MOEX_LAG
 
+        EVENING_CUT_OFF = datetime.datetime.strftime(self.today, '%Y-%m-%d 18:30:00')
+
         if self.stock_data:
             """
             if stock data already exist and should be updated
@@ -381,8 +383,12 @@ class StockData(object):
             #NE DODELANO
             last_day, _, update_time = self.get_data_last_date()
 
-            print(update_time)
             if update_time:
+
+                # IF STOCK IS NOT ON EVENING SESSION AND UPDATE TIME LATER THAN 18:30:00 TODAY => NO NEED TO UPDATE
+                if self.stock.eveningsession == '0' and update_time > EVENING_CUT_OFF:
+                    return self.stock
+
                 time_gap = self.get_time_gap(update_time)
                 print('time_gap', time_gap, self.stock)
                 if time_gap <= UPDATE_TIME_MINUTES:
@@ -440,16 +446,47 @@ class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         form = StockForm(request.POST)
 
         if form.is_valid():
-            validated_ticker = validate_ticker(form.cleaned_data.get('ticker'))
-            if validated_ticker:
+            #validated_ticker = validate_ticker(form.cleaned_data.get('ticker'))
+            stock_description = get_stock_description(form.cleaned_data.get('ticker'))
+            if stock_description:
+
+                ticker = stock_description.get('SECID')
+                name = stock_description.get('SHORTNAME')
+                isin = stock_description.get('ISIN')
+                currency = stock_description.get('FACEUNIT')
+                latname = stock_description.get('LATNAME')
+                isqualifiedinvestors = stock_description.get('ISQUALIFIEDINVESTORS')
+                issuedate = stock_description.get('ISSUEDATE')
+                morningsession = stock_description.get('MORNINGSESSION', '0')
+                eveningsession = stock_description.get('EVENINGSESSION', '0')
+                typename = stock_description.get('TYPENAME')
+                group = stock_description.get('GROUP')
+                type = stock_description.get('TYPE')
+                groupname = stock_description.get('GROUPNAME')
+
+                check_list = [ticker, name, isin, currency, latname, isqualifiedinvestors, issuedate, morningsession, eveningsession, typename, group, type, groupname]
+
+                if None in check_list:
+                    print("SOMETHING HAVE NOT BEEN LOADED - GOT NONE")
 
                 #Ищем инфу о ценах акции за весь период чтобы записать в JSONField
-                stock_board_history = get_stock_board_history(validated_ticker['ticker'])
+                stock_board_history = get_stock_board_history(ticker)
                 json_stock_board_data = make_json_trade_info_dict(stock_board_history)
 
                 obj = Stock()
-                obj.ticker = validated_ticker['ticker']
-                obj.name = validated_ticker['shortname']
+                obj.ticker = ticker
+                obj.name = name
+                obj.isin = isin
+                obj.currency = currency
+                obj.latname = latname
+                obj.isqualifiedinvestors = isqualifiedinvestors
+                obj.issuedate = issuedate
+                obj.morningsession = morningsession
+                obj.eveningsession = eveningsession
+                obj.typename = typename
+                obj.group = group
+                obj.type = type
+                obj.groupname = groupname
 
                 #obj.save()
                 #StockData(obj).update_stock_data()
