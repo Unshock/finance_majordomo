@@ -10,9 +10,9 @@
         <table class="table table-striped">
            <thead>
                 <tr>
-                    <th>ID</th>
                     <th>{% translate "Ticker" %}</th>
                     <th>{% translate "Name" %}</th>
+                    <th>{% translate "Currency" %}</th>
                     <th>{% translate "Quantity" %}</th>
                     <th>{% translate "Purchase price" %}</th>
                     <th>{% translate "Current price" %}</th>
@@ -24,9 +24,9 @@
             <tbody method="get">
                 {% for stock in stock_list %}
                 <tr>
-                    <td>{{ stock.stock.id }}</td>
                     <td>{{ stock.stock.ticker }}</td>
                     <td>{{ stock.stock.name }}</td>
+                    <td>{{ stock.stock.currency }}</td>
                     <td>{{ stock.current_quantity }}</td>
                     <td>{{ stock.purchase_price }}</td>
                     <td>{{ stock.current_price }}</td>

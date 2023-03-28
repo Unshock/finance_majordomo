@@ -453,7 +453,7 @@ class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
                 ticker = stock_description.get('SECID')
                 name = stock_description.get('SHORTNAME')
                 isin = stock_description.get('ISIN')
-                currency = stock_description.get('FACEUNIT')
+                currency = 'RUR' if stock_description.get('FACEUNIT') == 'SUR' else stock_description.get('FACEUNIT')
                 latname = stock_description.get('LATNAME')
                 isqualifiedinvestors = stock_description.get('ISQUALIFIEDINVESTORS')
                 issuedate = stock_description.get('ISSUEDATE')

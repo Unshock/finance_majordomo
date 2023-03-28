@@ -27,9 +27,10 @@ class TransactionForm(ModelForm):
     )
 
     date = forms.CharField(
-        label=_('Date YYYY-MM-DD'),
+        label=_('Date'),
         widget=forms.TextInput(
             attrs={"class": "form-control",
+                   "placeholder": _('YYYY-MM-DD'),
                    "rows": "10",
                    "cols": "40",
                    }

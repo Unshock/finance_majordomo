@@ -133,14 +133,18 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         # form = TransactionForm(self.request.POST)
         transaction_type = form.cleaned_data.get('transaction_type')
 
+        ticker = form.cleaned_data.get('ticker')
+        date = form.cleaned_data.get('date')
+        stock = Stock.objects.get(name=ticker)
+
+        if date < stock.issuedate:
+            form.add_error('date', _('The stock started trading after the specified date'))
+            return False
+
         if transaction_type == 'BUY':
             return True
 
         quantity = form.cleaned_data.get('quantity')
-        ticker = form.cleaned_data.get('ticker')
-        date = form.cleaned_data.get('date')
-
-        stock = Stock.objects.get(name=ticker)
         day_end_balance = UsersStocks.get_current_quantity(self.request, stock.id, date=date) - quantity
 
         if day_end_balance < 0:
