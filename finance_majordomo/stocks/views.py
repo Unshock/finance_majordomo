@@ -253,35 +253,48 @@ class StockData(object):
         if self.stock:
             self.stock_data = json.loads(stock.stock_data)
 
-    def get_data_last_date(self):
+    def get_data_last_date(self, trade_date_index=-1):
         """
         :return: returns the last date for the stock that is written in the DB
         """
         if self.stock_data:
-            last_date_dt = datetime.datetime.strptime(
-                max(self.stock_data['TRADEINFO'].keys()),
-                '%Y-%m-%d')
 
-            last_day_str = datetime.datetime.strftime(last_date_dt, '%Y-%m-%d')
+            dates = list(self.stock_data['TRADEINFO'].keys())
+            dates.sort()
+
+            date_str = dates[trade_date_index]
+
+            date_dt = datetime.datetime.strptime(
+                date_str, '%Y-%m-%d')
+
             #print(self.stock_data)
-            #print('LAST DAY:', last_day_str)
-            if self.stock_data['TRADEINFO'][last_day_str].get("CLOSE"):
+            print('LAST DAY:', date_str)
+            if self.stock_data['TRADEINFO'][date_str].get("CLOSE"):
                 status = 'CLOSED'
                 update_time = None
-            elif self.stock_data['TRADEINFO'][last_day_str].get("LAST"):
+            elif self.stock_data['TRADEINFO'][date_str].get("LAST"):
                 status = 'LAST'
-                update_time = self.stock_data['TRADEINFO'][last_day_str].get("UPDATE_TIME")
+                update_time = self.stock_data['TRADEINFO'][date_str].get("UPDATE_TIME")
             #print('STATUS:', status)
-            return last_date_dt, status, update_time
+            return date_dt, status, update_time
     def actualize_stock_data(self):
+
+        today_status = self.get_and_update_date_status(datetime.datetime.strftime(self.today, '%Y-%m-%d'))
+
         if self.stock_data:
             last_date_dt, status, update_time = self.get_data_last_date()
+
+            if status == 'LAST':
+                last_date_dt, status, update_time = self.get_data_last_date(trade_date_index=-2)
+
             last_date_str = datetime.datetime.strftime(last_date_dt, '%Y-%m-%d')
 
             actual_date_gap = (self.today - last_date_dt).days
 
             if actual_date_gap == 0:
-                return self.update_last_day()
+                if today_status == 'Working':
+                    return self.update_real_time_price()
+                raise Exception('SOMETHING GONE WRONG WITH DATES')
 
             elif actual_date_gap >= self.MAX_HOLIDAY_GAP:
                 """
@@ -290,8 +303,10 @@ class StockData(object):
                 must be updated anyway. Updating from the last date in DB.
                 """
                 self.update_stock_data(last_date_str)
-                stock = self.update_last_day()
-                return stock
+
+                if today_status == 'Working':
+                    self.update_real_time_price()
+                return self.stock
 
             else:
                 """
@@ -302,32 +317,39 @@ class StockData(object):
                 for gap in range(0, actual_date_gap):
                     #print('gap', gap, 'for', self.stock.ticker, 'last_day', last_day, 'actual date gap', actual_date_gap)
                     date_str = datetime.datetime.strftime((self.today - datetime.timedelta(gap)), '%Y-%m-%d')
-                    #print('DATE', date_str)
 
                     try:
-                        prod_date = ProdCalendar.objects.get(date=date_str)
-                        #print('prod_date', prod_date.date, prod_date.date_status)
-                    except ProdCalendar.DoesNotExist:
-                        #print("PRODCALENDAR DATE DOESNT EXIST")
-
-                        try:
-                            date_status = get_date_status(date_str)
-                        except ConnectionError:
-                            continue
-
-                        #print('datestatus from site: ', date_str, ' is ', date_status)
-
-                        prod_date = ProdCalendar()
-                        prod_date.date = date_str
-                        prod_date.date_status = date_status
-                        prod_date.save()
+                        prod_date = self.get_and_update_date_status(date_str)
+                    except ConnectionError:
+                        continue
 
                     if prod_date.date_status == 'Working':
-                        #print('last_date', last_date_str)
+                        print('last_date', last_date_str)
                         self.update_stock_data(last_date_str)
-                        self.update_last_day()
+                        if today_status == 'Working':
+                            self.update_real_time_price()
                         return self.stock
                 return self.stock
+
+    @staticmethod
+    def get_and_update_date_status(date: str):
+        try:
+            prod_date = ProdCalendar.objects.get(date=date)
+            # print('prod_date', prod_date.date, prod_date.date_status)
+        except ProdCalendar.DoesNotExist:
+            # print("PRODCALENDAR DATE DOESNT EXIST")
+
+            try:
+                date_status = get_date_status(date)
+            except ConnectionError:
+                raise ConnectionError('ne smog poluchit date status from internet')
+
+            prod_date = ProdCalendar()
+            prod_date.date = date
+            prod_date.date_status = date_status
+            prod_date.save()
+
+        return prod_date
 
     def update_stock_data(self, start_date=None):
         """
@@ -366,7 +388,7 @@ class StockData(object):
 
             return self.stock
 
-    def update_last_day(self):
+    def update_real_time_price(self):
 
         # In minutes
         STANDARD_MOEX_LAG = 16

@@ -26,6 +26,14 @@ class TransactionForm(ModelForm):
         ),
     )
 
+    ticker = forms.ModelChoiceField(
+        label=_('Ticker'),
+        queryset=Stock.objects.all(),
+        empty_label=_('Choose stock from the list'),
+
+        )
+
+
     date = forms.CharField(
         label=_('Date'),
         widget=forms.TextInput(
