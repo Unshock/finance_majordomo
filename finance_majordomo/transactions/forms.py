@@ -8,21 +8,30 @@ from finance_majordomo.stocks.views import UsersStocks
 
 from common.utils.stocks import validate_ticker
 
+from bootstrap4.widgets import RadioSelectButtonGroup
+
 
 class TransactionForm(ModelForm):
+
     asset_type = forms.ChoiceField(
         label=_('Asset type'),
         choices=Transaction.asset_type_choices,
         widget=forms.Select(
-            attrs={"class": "form-control"}
+            #attrs={"class": "form-control"}
         ),
     )
 
     transaction_type = forms.ChoiceField(
+        #initial='BUY',
+
         label=_('Transaction type'),
         choices=Transaction.transaction_type_choices,
-        widget=forms.Select(
-            attrs={'class': 'form-control'}
+
+        widget=RadioSelectButtonGroup(
+            # тут опции для каждой радио кнопки - хотелось бы расположить их все отцентрованно
+            attrs={'class': 'form-check-inline d-inline-flex justify-content-center',
+
+                   }
         ),
     )
 

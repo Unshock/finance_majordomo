@@ -143,7 +143,7 @@ class UsersStocks(LoginRequiredMixin, ListView):
     def get_purchace_price(request, stock_id):
         # С учетом метода FIFO
         users_transacions = Transaction.objects.filter(user=User.objects.get(id=request.user.id))
-        users_specific_asset_transacions = sorted(users_transacions.filter(ticker=Stock.objects.get(id=stock_id)), key=lambda x: x.date)
+        users_specific_asset_transacions = users_transacions.filter(ticker=Stock.objects.get(id=stock_id)).order_by('date')
         result = 0
         purchase_list = []
         total_sold = 0
@@ -268,7 +268,7 @@ class StockData(object):
                 date_str, '%Y-%m-%d')
 
             #print(self.stock_data)
-            print('LAST DAY:', date_str)
+            #print('LAST DAY:', date_str)
             if self.stock_data['TRADEINFO'][date_str].get("CLOSE"):
                 status = 'CLOSED'
                 update_time = None

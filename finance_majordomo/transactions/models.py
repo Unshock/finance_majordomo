@@ -15,6 +15,7 @@ class Transaction(models.Model):
     transaction_type_choices = [
         ('BUY', 'Buy'),
         ('SELL', 'Sell'),
+        #('SELL', 'Sell'),
     ]
 
     creation_date = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
