@@ -48,22 +48,22 @@ def get_stock_board_history(ticker: str, start_date:str=None):
         data = apimoex.get_board_history(session, ticker.upper(), start=start_date)
 
         if data:
-            print('данные получены')
+            return data#print('данные получены')
         else:
             print('ДАННЫЕ НЕ ПОЛУЧЕНЫ!!!!!!!!!')
 
-        return data
+
 
 def get_stock_current_price(ticker: str):
 
-    TIME_GAP_MINUTES = 1000
+    TIME_GAP_MINUTES = 60
 
     offset = datetime.timezone(datetime.timedelta(hours=3))
 
     current_time = datetime.datetime.now(offset)
     request_time = current_time - datetime.timedelta(minutes=TIME_GAP_MINUTES)
 
-    #print(current_time, request_time)
+    print(current_time, request_time)
 
     with requests.Session() as session:
         print(f'ZAPROS na poluchenie last_price of {ticker.upper()} poshel')
@@ -87,10 +87,27 @@ def get_stock_current_price(ticker: str):
 def get_stock_description(ticker: str):
     with requests.Session() as session:
         data = apimoex.find_security_description(session, ticker.upper())
+        #print(data)
         result_data = {}
         for elem in data:
             result_data[elem['name']] = elem['value']
         return result_data
+
+def get_security(security_info: str):
+    with requests.Session() as session:
+        data = apimoex.find_securities(session, security_info.upper(), columns=('secid', 'regnumber', 'name', 'type', 'group'))
+        #print(data)
+        return data
+
+
+# a = get_security('SU26222RMFS8, RU000A0JXQF2')
+# print(len(a))
+# for el in a[:10]:
+#    print(el['secid'], el['name'], el.get('type'), el.get('group'))
+#
+# b = get_stock_description('SU26222RMFS8')
+# for key, value in b.items():
+#    print(key, value)
 
 
 def make_json_trade_info_dict(data: list):

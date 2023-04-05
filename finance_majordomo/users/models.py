@@ -16,6 +16,11 @@ class User(AbstractUser):
         blank=True,
         related_name='users',
     )
+    fields_to_display = models.JSONField(
+        verbose_name='Поля для отображения',
+        blank=True,
+        null=True
+    )
 
     @property
     def full_name(self):

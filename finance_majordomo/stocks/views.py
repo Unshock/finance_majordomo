@@ -43,7 +43,7 @@ class UsersStocks(LoginRequiredMixin, ListView):
     context_object_name = 'stock'
 
     def get_context_data(self, *, object_list=None, **kwargs):
-        print(self.request.user.id)
+        #print(self.request.user.id)
         context = super().get_context_data(**kwargs)
         context['page_title'] = self.request.user.username + " " + _("stock list")
 
@@ -51,8 +51,11 @@ class UsersStocks(LoginRequiredMixin, ListView):
 
         total_price = {'total_purchase_price': self.get_total_purchase_price(user_stock_data),
                        'total_current_price': self.get_total_current_price(user_stock_data),
-                       'total_percent_result': self.get_percent_result(Decimal(self.get_total_purchase_price(user_stock_data)),
-                                                       Decimal(self.get_total_current_price(user_stock_data)))}
+                       'total_percent_result': self.get_percent_result(
+                           Decimal(self.get_total_purchase_price(user_stock_data)),
+                           Decimal(self.get_total_current_price(user_stock_data))
+                       )
+                       }
 
 
         #users_stocks = Stock.objects.filter(usersstocks__user_id=self.request.user.id)
@@ -60,6 +63,7 @@ class UsersStocks(LoginRequiredMixin, ListView):
         #print(users_stocks)
         # print([el for el in users_stocks])
         # self.get_current_quantity(1)
+        context['fields_to_display'] = json.loads(self.request.user.fields_to_display)
         context['stock_list'] = user_stock_data
         context['total_price'] = total_price
         return context
@@ -89,9 +93,12 @@ class UsersStocks(LoginRequiredMixin, ListView):
             current_price = self.get_current_price(stock)
             percent_result = self.get_percent_result(purchase_price, current_price)
 
-            user_stock_data.append({'stock': stock,
+            user_stock_data.append({'id': stock.id,
+                                    'ticker': stock.ticker,
+                                    'name': stock.name,
+                                    'currency': stock.currency,
+                                    'quantity': current_quantity,
                                     'purchase_price': purchase_price,
-                                    'current_quantity': current_quantity,
                                     'current_price': "{:.2f}".format(current_price),
                                     'percent_result': percent_result
                                     })
@@ -238,7 +245,8 @@ class UsersStocks(LoginRequiredMixin, ListView):
 
     @staticmethod
     def get_percent_result(purchase_price, current_price):
-
+        if current_price == 0 and purchase_price == 0:
+            return '+ 0.00'
         if current_price > 0 and purchase_price > 0:
             result = Decimal(current_price) / Decimal(purchase_price)
             return f'- {"{:.2%}".format((1 - result))}' if result < 1 else f'+ {"{:.2%}".format((result - 1))}'
@@ -279,22 +287,27 @@ class StockData(object):
             return date_dt, status, update_time
     def actualize_stock_data(self):
 
-        today_status = self.get_and_update_date_status(datetime.datetime.strftime(self.today, '%Y-%m-%d'))
+        today_status = self.get_and_update_date_status(datetime.datetime.strftime(self.today, '%Y-%m-%d')).date_status
+        #print('TODAY STATUS:', today_status.date, today_status.date_status)
 
         if self.stock_data:
             last_date_dt, status, update_time = self.get_data_last_date()
 
-            if status == 'LAST':
+            if status == 'LAST' and today_status == 'Nonworking':
                 last_date_dt, status, update_time = self.get_data_last_date(trade_date_index=-2)
+
 
             last_date_str = datetime.datetime.strftime(last_date_dt, '%Y-%m-%d')
 
             actual_date_gap = (self.today - last_date_dt).days
 
-            if actual_date_gap == 0:
+            if actual_date_gap == 0 or (actual_date_gap == 0 and status == 'CLOSED'):
                 if today_status == 'Working':
                     return self.update_real_time_price()
                 raise Exception('SOMETHING GONE WRONG WITH DATES')
+
+
+
 
             elif actual_date_gap >= self.MAX_HOLIDAY_GAP:
                 """
@@ -317,14 +330,16 @@ class StockData(object):
                 for gap in range(0, actual_date_gap):
                     #print('gap', gap, 'for', self.stock.ticker, 'last_day', last_day, 'actual date gap', actual_date_gap)
                     date_str = datetime.datetime.strftime((self.today - datetime.timedelta(gap)), '%Y-%m-%d')
-
+                    print('datestr',date_str)
                     try:
                         prod_date = self.get_and_update_date_status(date_str)
+                        #print(prod_date,'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk')
                     except ConnectionError:
                         continue
 
                     if prod_date.date_status == 'Working':
                         print('last_date', last_date_str)
+                        print('tod stat', today_status)
                         self.update_stock_data(last_date_str)
                         if today_status == 'Working':
                             self.update_real_time_price()
@@ -335,9 +350,9 @@ class StockData(object):
     def get_and_update_date_status(date: str):
         try:
             prod_date = ProdCalendar.objects.get(date=date)
-            # print('prod_date', prod_date.date, prod_date.date_status)
+            #print('prod_date', prod_date.date, prod_date.date_status)
         except ProdCalendar.DoesNotExist:
-            # print("PRODCALENDAR DATE DOESNT EXIST")
+            #print("PRODCALENDAR DATE DOESNT EXIST")
 
             try:
                 date_status = get_date_status(date)
@@ -367,9 +382,9 @@ class StockData(object):
             if stock data already exist and should be updated
             """
             current_stock_data_json = self.stock_data
-            print('start_date', start_date)
-            print('CURRENT', current_stock_data_json['TRADEINFO'][start_date])
-            print(start_date == datetime.datetime.today())
+            #print('start_date', start_date)
+            #print('CURRENT', current_stock_data_json['TRADEINFO'][start_date])
+            #print(start_date == datetime.datetime.today())
             current_stock_data_json['TRADEINFO'].update(stock_board_data_json['TRADEINFO'])
 
             stock_data = json.dumps(current_stock_data_json)
@@ -389,6 +404,7 @@ class StockData(object):
             return self.stock
 
     def update_real_time_price(self):
+        #print(f'START UPDATE RTP for {self.stock.name}')
 
         # In minutes
         STANDARD_MOEX_LAG = 16
@@ -412,13 +428,13 @@ class StockData(object):
                     return self.stock
 
                 time_gap = self.get_time_gap(update_time)
-                print('time_gap', time_gap, self.stock)
+                #print('time_gap', time_gap, self.stock)
                 if time_gap <= UPDATE_TIME_MINUTES:
                     return self.stock
 
             last_price, new_update_time = get_stock_current_price(self.stock.ticker)
             last_day_data = json.loads(make_json_last_price_dict(last_price, new_update_time))
-            print(self.stock, last_day_data)
+            #print(self.stock, last_day_data)
             current_stock_data_json = self.stock_data
 
             current_stock_data_json['TRADEINFO'].update(last_day_data['TRADEINFO'])

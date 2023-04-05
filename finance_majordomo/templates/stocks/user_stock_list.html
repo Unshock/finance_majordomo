@@ -10,7 +10,10 @@
         <table class="table table-striped">
            <thead>
                 <tr>
+                    {% if fields_to_display.Ticker == 1 %}
                     <th>{% translate "Ticker" %}</th>
+                    {% endif %}
+
                     <th>{% translate "Name" %}</th>
                     <th>{% translate "Currency" %}</th>
                     <th>{% translate "Quantity" %}</th>
@@ -24,22 +27,28 @@
             <tbody method="get">
                 {% for stock in stock_list %}
                 <tr>
-                    <td>{{ stock.stock.ticker }}</td>
-                    <td>{{ stock.stock.name }}</td>
-                    <td>{{ stock.stock.currency }}</td>
-                    <td>{{ stock.current_quantity }}</td>
+                    {% if fields_to_display.Ticker == 1 %}
+                    <td>{{ stock.ticker }}</td>
+                    {% endif %}
+
+                    <td>{{ stock.name }}</td>
+                    <td>{{ stock.currency }}</td>
+                    <td>{{ stock.quantity }}</td>
                     <td>{{ stock.purchase_price }}</td>
                     <td>{{ stock.current_price }}</td>
                     <td>{{ stock.percent_result }}</td>
                     <td>
                         <div class="d-flex justify-content-left">
-                            <a class="btn btn-primary btn-sm" href="{% url "add_transaction" stock.stock.id %}" role="button">{% translate "Add stock transaction" %}</a>
+                            <a class="btn btn-primary btn-sm" href="{% url "add_transaction" stock.id %}" role="button">{% translate "Add transaction" %}</a>
                         </div>
                     </td>
                 </tr>
                 {% endfor %}
                 <tr>
+                    {% if fields_to_display.Ticker == 1 %}
                     <td></td>
+                    {% endif %}
+
                     <td><b>Total</b></td>
                     <td></td>
                     <td></td>
