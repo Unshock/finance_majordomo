@@ -64,6 +64,7 @@ class UsersStocks(LoginRequiredMixin, ListView):
         # print([el for el in users_stocks])
         # self.get_current_quantity(1)
         context['fields_to_display'] = json.loads(self.request.user.fields_to_display)
+        print('FIELDS_TO', context['fields_to_display'])
         context['stock_list'] = user_stock_data
         context['total_price'] = total_price
         return context

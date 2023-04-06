@@ -46,3 +46,40 @@ class LoginUserForm(AuthenticationForm):
         attrs={"class": "form-control"}))
     password = forms.CharField(label=_('Password'), widget=forms.PasswordInput(
         attrs={"class": "form-control"}))
+
+
+class FieldsUserForm(forms.Form):
+
+    ticker = forms.BooleanField(
+        required=False,
+        )
+    name = forms.BooleanField(
+        required=False,
+        )
+    currency = forms.BooleanField(
+        required=False,
+        )
+    quantity = forms.BooleanField(
+        required=False,
+        )
+    purchase_price = forms.BooleanField(
+        required=False,
+        )
+    current_price = forms.BooleanField(
+        required=False,
+        )
+    result = forms.BooleanField(
+        required=False,
+        )
+
+    class Meta:
+        fields = [
+            'ticker',
+            'name',
+            'currency',
+            'quantity',
+            'purchase price',
+            'current price',
+            'result'
+        ]
+

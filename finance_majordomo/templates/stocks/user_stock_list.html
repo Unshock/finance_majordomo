@@ -3,40 +3,78 @@
 {% block content %}
     <div class="container wrapper flex-grow-1">
         <h1 class="my-4">{{ page_title }}</h1>
-        <div class="d-flex justify-content-left my-4">
+        <div class="d-flex justify-content-between my-4">
             <a class="btn btn-primary btn-sm" href="{% url "add_stock" %}" role="button">{% translate "Add stock" %}</a>
+            <a class="btn btn-primary btn-sm" href="{% url "set_fields" %}" role="button">{% translate "Set display options" %}</a>
         </div>
+
 
         <table class="table table-striped">
            <thead>
                 <tr>
-                    {% if fields_to_display.Ticker == 1 %}
+                    {% if fields_to_display.ticker %}
                     <th>{% translate "Ticker" %}</th>
                     {% endif %}
 
+                    {% if fields_to_display.name %}
                     <th>{% translate "Name" %}</th>
+                    {% endif %}
+
+                    {% if fields_to_display.currency %}
                     <th>{% translate "Currency" %}</th>
+                    {% endif %}
+
+                    {% if fields_to_display.quantity %}
                     <th>{% translate "Quantity" %}</th>
+                    {% endif %}
+
+                    {% if fields_to_display.purchase_price %}
                     <th>{% translate "Purchase price" %}</th>
+                    {% endif %}
+
+                    {% if fields_to_display.current_price %}
                     <th>{% translate "Current price" %}</th>
+                    {% endif %}
+
+                    {% if fields_to_display.percent_result %}
                     <th>{% translate "Result" %}</th>
+                    {% endif %}
+
                     <th></th>
+
                 </tr>
             </thead>
 
             <tbody method="get">
                 {% for stock in stock_list %}
                 <tr>
-                    {% if fields_to_display.Ticker == 1 %}
+                    {% if fields_to_display.ticker %}
                     <td>{{ stock.ticker }}</td>
                     {% endif %}
 
+                    {% if fields_to_display.name %}
                     <td>{{ stock.name }}</td>
+                    {% endif %}
+
+                    {% if fields_to_display.currency %}
                     <td>{{ stock.currency }}</td>
+                    {% endif %}
+
+                    {% if fields_to_display.quantity %}
                     <td>{{ stock.quantity }}</td>
+                    {% endif %}
+
+                    {% if fields_to_display.purchase_price %}
                     <td>{{ stock.purchase_price }}</td>
+                    {% endif %}
+
+                    {% if fields_to_display.current_price %}
                     <td>{{ stock.current_price }}</td>
+                    {% endif %}
+
+                    {% if fields_to_display.percent_result %}
                     <td>{{ stock.percent_result }}</td>
+                    {% endif %}
                     <td>
                         <div class="d-flex justify-content-left">
                             <a class="btn btn-primary btn-sm" href="{% url "add_transaction" stock.id %}" role="button">{% translate "Add transaction" %}</a>
@@ -45,17 +83,34 @@
                 </tr>
                 {% endfor %}
                 <tr>
-                    {% if fields_to_display.Ticker == 1 %}
+                    {% if fields_to_display.ticker %}
                     <td></td>
                     {% endif %}
 
+                    {% if fields_to_display.name %}
                     <td><b>Total</b></td>
+                    {% endif %}
+
+                    {% if fields_to_display.currency %}
                     <td></td>
+                    {% endif %}
+
+                    {% if fields_to_display.quantity %}
                     <td></td>
+                    {% endif %}
+
+                    {% if fields_to_display.purchase_price %}
                     <td><b>{{ total_price.total_purchase_price }}</b></td>
+                    {% endif %}
+
+                    {% if fields_to_display.current_price %}
                     <td><b>{{ total_price.total_current_price }}</b></td>
+                    {% endif %}
+
+                    {% if fields_to_display.percent_result %}
                     <td><b>{{ total_price.total_percent_result }}</b></td>
-                    <td></td>
+                    {% endif %}
+
                 </tr>
             </tbody>
         </table>

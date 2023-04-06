@@ -56,7 +56,8 @@ def get_stock_board_history(ticker: str, start_date:str=None):
 
 def get_stock_current_price(ticker: str):
 
-    TIME_GAP_MINUTES = 60
+    #тут нужно поправить для акций не торгующихся в вечернюю сессию
+    TIME_GAP_MINUTES = 600
 
     offset = datetime.timezone(datetime.timedelta(hours=3))
 
@@ -74,6 +75,8 @@ def get_stock_current_price(ticker: str):
             lastest_data = data[-1]
             last_price = lastest_data.get('close')
             actual_time = lastest_data.get('begin')
+
+            #print('last price:', last_price, 'actual_time:', actual_time)
 
             if last_price and actual_time:
                return last_price, actual_time
