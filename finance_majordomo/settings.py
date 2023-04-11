@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'finance_majordomo.users',
     'finance_majordomo.stocks',
     'finance_majordomo.transactions',
+    'finance_majordomo.currencies',
 
 ]
 

@@ -11,6 +11,8 @@ Django = "^4.1.4"
 django-bootstrap4 = "^22.3"
 requests = "^2.28.1"
 apimoex = "^1.2.0"
+beautifulsoup4 = "^4.12.2"
+lxml = "^4.9.2"
 
 [tool.poetry.dev-dependencies]
 
