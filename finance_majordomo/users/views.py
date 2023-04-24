@@ -189,7 +189,9 @@ class SetFieldsToDisplay(SuccessMessageMixin, LoginRequiredMixin, View):
 
         if form.is_valid():
 
-            fields_to_display = ['ticker', 'name', 'currency', 'quantity', 'purchase_price', 'current_price', 'result']
+            fields_to_display = ['ticker', 'name', 'currency',
+                                 'quantity', 'purchase_price',
+                                 'current_price', 'percent_result']
 
             user = User.objects.get(id=request.user.id)
             user_fields_to_display = json.loads(user.fields_to_display)

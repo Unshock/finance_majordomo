@@ -13,7 +13,7 @@ fields = {'ticker': True,
           'quantity': True,
           'purchase_price': True,
           'current_price': True,
-          'result': True
+          'percent_result': True
           }
 
 def set_fields_to_user(user):

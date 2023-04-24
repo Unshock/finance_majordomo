@@ -68,7 +68,7 @@ class FieldsUserForm(forms.Form):
     current_price = forms.BooleanField(
         required=False,
         )
-    result = forms.BooleanField(
+    percent_result = forms.BooleanField(
         required=False,
         )
 
@@ -80,6 +80,6 @@ class FieldsUserForm(forms.Form):
             'quantity',
             'purchase price',
             'current price',
-            'result'
+            'percent_result'
         ]
 

@@ -250,6 +250,7 @@ class UsersStocks(LoginRequiredMixin, ListView):
             return '+ 0.00'
         if current_price > 0 and purchase_price > 0:
             result = Decimal(current_price) / Decimal(purchase_price)
+            
             return f'- {"{:.2%}".format((1 - result))}' if result < 1 else f'+ {"{:.2%}".format((result - 1))}'
         #return '0'
         raise ValueError('current_price and purchase_price must be > 0')
