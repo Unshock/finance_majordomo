@@ -138,21 +138,25 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         stock = Stock.objects.get(name=ticker)
 
         if date < stock.issuedate:
-            form.add_error('date', _('The stock started trading after the specified date'))
+            form.add_error('date', _('The stock started trading'
+                                     ' after the specified date'))
             return False
 
         if transaction_type == 'BUY':
             return True
 
         quantity = form.cleaned_data.get('quantity')
-        day_end_balance = UsersStocks.get_current_quantity(self.request, stock.id, date=date) - quantity
+        day_end_balance = UsersStocks.get_current_quantity(
+            self.request, stock.id, date=date) - quantity
 
         if day_end_balance < 0:
             form.add_error('quantity', error_text)
             return False
 
-        users_transactions = Transaction.objects.filter(user=User.objects.get(id=self.request.user.id))
-        users_specific_asset_transactions = users_transactions.filter(ticker=stock.id).order_by('date')
+        users_transactions = Transaction.objects.filter(
+            user=User.objects.get(id=self.request.user.id))
+        users_specific_asset_transactions = users_transactions.filter(
+            ticker=stock.id).order_by('date')
         users_specific_asset_transactions = users_specific_asset_transactions.filter(date__gt=date)
 
         print(users_specific_asset_transactions)
@@ -284,6 +288,8 @@ class DeleteTransaction(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
             return False
         return True
 
+
+# заготовка - нерабочая функция
 def validate_transaction(request, ticker, quantity, date):
     transaction = Transaction.objects.get(id=self.get_object().id)
     transaction_type = transaction.transaction_type

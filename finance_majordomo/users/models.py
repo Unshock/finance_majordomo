@@ -38,6 +38,8 @@ class UsersStocks(models.Model):
                              null=True)
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE,
                               null=True)
+
+    #не используется
     quantity = models.IntegerField(null=True, blank=True)
 
 

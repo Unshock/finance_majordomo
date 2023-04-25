@@ -533,6 +533,9 @@ class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
                 obj.stock_data = json_stock_board_data #str
                 obj.save()
+
+
+                # add dividend for stock
             #return super().post(request, *args, **kwargs)
 
 

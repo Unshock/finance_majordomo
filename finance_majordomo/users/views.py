@@ -137,6 +137,7 @@ class AddStockToUser(SuccessMessageMixin, LoginRequiredMixin, View):
     #     messages.error(request, message_text)
     #     return redirect('users')
 
+
     #кажется не нужна
     def post(self, request, **kwargs):
         self.object = self.get_object()

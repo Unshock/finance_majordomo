@@ -108,7 +108,7 @@ def get_security(security_info: str):
 # for el in a[:10]:
 #    print(el['secid'], el['name'], el.get('type'), el.get('group'))
 #
-# b = get_stock_description('SU26222RMFS8')
+# b = get_stock_description('SBER')
 # for key, value in b.items():
 #    print(key, value)
 
