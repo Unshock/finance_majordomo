@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+    <div class="container wrapper flex-grow-1">
+        <h1 class="my-4">{{ page_title }}</h1>
+
+        <table class="table table-striped">
+           <thead>
+                <tr>
+                    {% if fields_to_display.ticker %}
+                    <th>{% translate "Ticker" %}</th>
+                    {% endif %}
+
+                    {% if fields_to_display.name %}
+                    <th>{% translate "Date" %}</th>
+                    {% endif %}
+
+                    {% if fields_to_display.currency %}
+                    <th>{% translate "Dividend" %}</th>
+                    {% endif %}
+
+                    {% if fields_to_display.quantity %}
+                    <th>{% translate "Total Dividend" %}</th>
+                    {% endif %}
+
+                    <th></th>
+
+                </tr>
+            </thead>
+
+            <tbody method="get">
+                {% for stock in stock_list %}
+                <tr>
+                    {% if fields_to_display.ticker %}
+                    <td>{{ dividend.ticker }}</td>
+                    {% endif %}
+
+                    {% if fields_to_display.name %}
+                    <td>{{ dividend.date }}</td>
+                    {% endif %}
+
+                    {% if fields_to_display.currency %}
+                    <td>{{ dividend.for_stock }}</td>
+                    {% endif %}
+
+                    {% if fields_to_display.quantity %}
+                    <td>{{ dividend.for_all }}</td>
+                    {% endif %}
+                
+                    <td>
+                        <div class="d-flex justify-content-left">
+                            <a class="btn btn-primary btn-sm" href="{% url "add_transaction" stock.id %}" role="button">{% translate "Add transaction" %}</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock content %}
