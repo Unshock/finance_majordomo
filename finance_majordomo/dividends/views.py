@@ -1,11 +1,16 @@
+from decimal import Decimal
+
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render
+from django.contrib.messages.views import SuccessMessageMixin
+from django.shortcuts import render, redirect
+from django.views import View
 from django.views.generic import ListView
 
-from finance_majordomo.dividends.models import Dividend
+from finance_majordomo.dividends.models import Dividend, DividendsOfUser
+from finance_majordomo.stocks.views import UsersStocks as US
 from django.utils.translation import gettext_lazy as _
 
-from finance_majordomo.users.models import UsersStocks
+from finance_majordomo.users.models import UsersStocks, User
 
 
 class Dividends(LoginRequiredMixin, ListView):
@@ -20,17 +25,84 @@ class Dividends(LoginRequiredMixin, ListView):
         
         dividend_list = []
         
-        for div in Dividends.objects.all():
-            stock_id = div.stock.id
-            try:
-                users_stock = UsersStocks.objects.get(user_id=self.request.user.id, stock_id=stock_id)
-            except UsersStocks.DoesNotExist:
-                continue
-            div_date = div.date
+        #users_stocks = UsersStocks.objects.get(user=self.request.user)
         
-        context['dividend_list'] = Dividend.objects.all()
+        user = self.request.user
+        
+        users_stocks_dividends = Dividend.objects.filter(stock__in=self.request.user.usersstocks_set.values_list('stock')).order_by('-date')
+        #print(self.request.user.usersstocks_set.values_list('stock'))
+        #print(users_stocks_dividends)
+
+        for div in users_stocks_dividends:
+            stock = div.stock
+            date = div.date
+            dividend = div.dividend
+            try:
+                dividend_of_user = DividendsOfUser.objects.get(user=user,
+                                                               dividend=div)
+                status = dividend_of_user.status
+            except DividendsOfUser.DoesNotExist:
+                status = False
+
+            #переделать функцию по получению количества - ней не место в листвьюхе
+            quantity_for_the_date = US.get_current_quantity(self.request, stock.id, date=date)
+            if quantity_for_the_date > 0:
+                total_div = Decimal(quantity_for_the_date * dividend)
+                dividend_list.append((div, quantity_for_the_date, total_div, status))
+
+        context['dividend_list'] = dividend_list
         return context
 
 
 class UsersDividends(LoginRequiredMixin, ListView):
     pass
+
+class AddDivToUser(SuccessMessageMixin, LoginRequiredMixin, View):
+    model = Dividend
+    login_url = 'login'
+    success_message = _("Stock has been successfully added to user's stock list")
+
+    def get(self, request, *args, **kwargs):
+        user = User.objects.get(id=self.request.user.id)
+
+        dividend_id = kwargs['pk_dividend']
+        dividend = Dividend.objects.get(id=dividend_id)
+
+        try:
+            dividend_of_user = DividendsOfUser.objects.get(user=user, dividend=dividend)
+        except DividendsOfUser.DoesNotExist:
+
+            dividend.users.add(user)
+            dividend.save()
+
+            dividend_of_user = DividendsOfUser.objects.get(user=user,
+                                                           dividend=dividend)
+        dividend_of_user.status = True
+        dividend_of_user.save()
+
+        return redirect('dividends')
+
+
+class RemoveDivFromUser(SuccessMessageMixin, LoginRequiredMixin, View):
+    model = Dividend
+    login_url = 'login'
+    success_message = _(
+        "Stock has been successfully added to user's stock list")
+
+    def get(self, request, *args, **kwargs):
+        user = User.objects.get(id=self.request.user.id)
+
+        dividend_id = kwargs['pk_dividend']
+        dividend = Dividend.objects.get(id=dividend_id)
+
+        try:
+            dividend_of_user = DividendsOfUser.objects.get(user=user,
+                                                           dividend=dividend)
+        except DividendsOfUser.DoesNotExist:
+
+            raise Exception('ne nashelsya sush dividend')
+
+        dividend_of_user.status = False
+        dividend_of_user.save()
+
+        return redirect('dividends')

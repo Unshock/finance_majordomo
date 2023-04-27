@@ -10,21 +10,41 @@
         <table class="table table-striped">
            <thead>
                 <tr>
-                    <th>ID</th>
+
                     <th>{% translate "Ticker" %}</th>
+                    <th>{% translate "Quantity" %}</th>
                     <th>{% translate "Date" %}</th>
-                    <th>{% translate "Dividend" %}</th>
+                    <th>{% translate "Dividend for each" %}</th>
+                    
+                    <th>{% translate "Dividends for all" %}</th>
+                    <th></th>
 
                 </tr>
             </thead>
 
             <tbody method="get">
-                {% for div in dividend_list %}
+                {% for div, quantity_for_the_date, total_div, status in dividend_list %}
                 <tr>
-                    <td>{{ div.id }}</td>
+
                     <td>{{ div.stock.latname }}</td>
+                    <td>{{ quantity_for_the_date }}</td>
                     <td>{{ div.date }}</td>
                     <td>{{ div.dividend }}</td>
+                    
+                    <td>{{ total_div }}</td>
+                    {% if status %}
+                    <td>
+                        <div class="d-flex justify-content-left">
+                            <a class="btn btn-success btn-sm" href="{% url "remove_div_from_user" div.id %}" role="button">{% translate "Remove dividend" %}</a>
+                        </div>
+                    </td>
+                    {% else %}
+                    <td>
+                        <div class="d-flex justify-content-left">
+                            <a class="btn btn-primary btn-sm" href="{% url "add_div_to_user" div.id %}" role="button">{% translate "Get dividend" %}</a>
+                        </div>
+                    </td>
+                    {% endif %}
 
                 </tr>
                 {% endfor %}

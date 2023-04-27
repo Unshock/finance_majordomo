@@ -114,7 +114,6 @@ class UsersStocks(LoginRequiredMixin, ListView):
 
         if date:
             users_specific_asset_transactions = users_specific_asset_transactions.filter(date__lte=date)
-            #print(users_specific_asset_transactions, '2')
         #print(users_specific_asset_transacions)
         #a = users_specific_asset_transacions.order_by('date')
         #if date is None:

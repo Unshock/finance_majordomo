@@ -47,3 +47,4 @@ class UsersStocks(models.Model):
         verbose_name = "Акция пользователя"
         verbose_name_plural = "Акции пользователей"
         ordering = ['stock']
+

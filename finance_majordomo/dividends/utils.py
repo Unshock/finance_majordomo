@@ -60,7 +60,7 @@ def get_stock_dividends(stock_obj):
         date = re.search(r'\d{1,2}\.\d{1,2}\.\d{4}', line[0])
 
         if date:
-            date = datetime.datetime.strptime(date.group(), "%d.%m.%Y").strftime("%d-%m-%Y")
+            date = datetime.datetime.strptime(date.group(), "%d.%m.%Y").strftime("%Y-%m-%d")
 
             dividend_dict[date] = {'common_share': {},
                                    'preferred_share': {}
@@ -122,7 +122,7 @@ def add_dividends_to_model(stock_obj, dividend_dict):
 
 
 from finance_majordomo.stocks.models import Stock
-stock_obj = Stock.objects.get(id=1)
+stock_obj = Stock.objects.get(id=4)
 
 
 a = get_stock_dividends(stock_obj)
