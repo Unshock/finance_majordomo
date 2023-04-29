@@ -7,11 +7,13 @@ import datetime
 import django
 import os
 
+from ..transactions.utils import get_quantity
+
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'finance_majordomo.settings')
 django.setup()
 
-from finance_majordomo.dividends.models import Dividend
+from .models import Dividend, DividendsOfUser
 
 
 def get_stock_dividends(stock_obj):
@@ -71,7 +73,7 @@ def get_stock_dividends(stock_obj):
                 if common_share_price:
                     common_share_div = True
                     common_share_price = common_share_price.group().replace(',', '.')
-                    
+
 
                 else:
                     common_share_div = False
@@ -105,7 +107,8 @@ def add_dividends_to_model(stock_obj, dividend_dict):
 
     for key, value in dividend_dict.items():
         try:
-            div = Dividend.objects.get(stock=stock_obj, date=key)
+            Dividend.objects.get(stock=stock_obj, date=key)
+            continue
 
         except Dividend.DoesNotExist:
             dividend = Dividend()
@@ -121,13 +124,19 @@ def add_dividends_to_model(stock_obj, dividend_dict):
 
 
 
-from finance_majordomo.stocks.models import Stock
-stock_obj = Stock.objects.get(id=4)
+def get_dividend_result(request, stock_obj):
 
+    users_dividends_received = Dividend.objects.filter(
+        stock=stock_obj.id,
+        id__in=request.user.dividendsofuser_set.filter(status=True).values_list('dividend'))
 
-a = get_stock_dividends(stock_obj)
-add_dividends_to_model(stock_obj, a)
+    sum_dividends_received = 0
 
+    for div in users_dividends_received:
 
+        quantity = get_quantity(request, stock_obj, date=div.date)
+        sum_dividends_received += quantity * div.dividend
+
+    return sum_dividends_received * Decimal(0.87)
 
 

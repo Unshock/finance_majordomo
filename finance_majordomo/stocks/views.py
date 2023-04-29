@@ -20,6 +20,9 @@ from django.utils.translation import gettext_lazy as _
 from common.utils.stocks import validate_ticker, get_stock_board_history, make_json_trade_info_dict, get_date_status, \
     get_stock_current_price, make_json_last_price_dict, get_stock_description
 from finance_majordomo.users.models import User
+from finance_majordomo.dividends.utils import get_stock_dividends, add_dividends_to_model
+from ..transactions.utils import get_quantity
+from ..dividends.utils import get_dividend_result
 
 
 class Stocks(LoginRequiredMixin, ListView):
@@ -58,13 +61,7 @@ class UsersStocks(LoginRequiredMixin, ListView):
                        }
 
 
-        #users_stocks = Stock.objects.filter(usersstocks__user_id=self.request.user.id)
-        #users_stocks = [(obj, self.get_current_quantity(self.request, obj.id), self.get_purchace_price(self.request, obj.id), self.get_current_price(obj.id)) for obj in users_stocks]
-        #print(users_stocks)
-        # print([el for el in users_stocks])
-        # self.get_current_quantity(1)
         context['fields_to_display'] = json.loads(self.request.user.fields_to_display)
-        print('FIELDS_TO', context['fields_to_display'])
         context['stock_list'] = user_stock_data
         context['total_price'] = total_price
         return context
@@ -79,13 +76,15 @@ class UsersStocks(LoginRequiredMixin, ListView):
 
     def get_user_stock_data(self):
         request = self.request
-        user_stocks = Stock.objects.filter(usersstocks__user_id=request.user.id)
+        users_stocks = Stock.objects.filter(usersstocks__user_id=request.user.id)
 
         #print(user_stocks)
 
         user_stock_data = []
-        for stock in user_stocks:
-            current_quantity = self.get_current_quantity(request, stock.id)
+        for stock in users_stocks:
+
+            current_quantity = get_quantity(request, stock)
+
 
             if current_quantity == 0:
                 continue
@@ -94,6 +93,12 @@ class UsersStocks(LoginRequiredMixin, ListView):
             current_price = self.get_current_price(stock)
             percent_result = self.get_percent_result(purchase_price, current_price)
 
+            money_result_without_divs = Decimal(current_price - purchase_price)
+            dividends_received = get_dividend_result(request, stock)
+            money_result_with_divs = money_result_without_divs +\
+                                        dividends_received
+            rate_of_return = money_result_with_divs / purchase_price * 100
+
             user_stock_data.append({'id': stock.id,
                                     'ticker': stock.ticker,
                                     'name': stock.name,
@@ -101,50 +106,14 @@ class UsersStocks(LoginRequiredMixin, ListView):
                                     'quantity': current_quantity,
                                     'purchase_price': purchase_price,
                                     'current_price': "{:.2f}".format(current_price),
-                                    'percent_result': percent_result
+                                    'percent_result': percent_result,
+                                    'dividends_received': "{:.0f}".format(dividends_received),
+                                    'money_result_without_divs': "{:.0f}".format(money_result_without_divs),
+                                    'money_result_with_divs': "{:.0f}".format(money_result_with_divs),
+                                    'rate_of_return': "{:.2f} %".format(rate_of_return),
                                     })
 
         return user_stock_data
-
-    @staticmethod
-    def get_current_quantity(request, stock_id, date=None):
-        users_transactions = Transaction.objects.filter(user=User.objects.get(id=request.user.id))
-        users_specific_asset_transactions = users_transactions.filter(ticker=Stock.objects.get(id=stock_id)).order_by('date')
-        #print(users_specific_asset_transactions, '1')
-
-        if date:
-            users_specific_asset_transactions = users_specific_asset_transactions.filter(date__lte=date)
-        #print(users_specific_asset_transacions)
-        #a = users_specific_asset_transacions.order_by('date')
-        #if date is None:
-        #    g = UsersStocks.get_current_quantity(request, stock_id, '2023-02-22')
-        #    if date is None:
-        #        print(stock_id, 'ALTER G', g)
-        #for el in a:
-        #    print(el.date)
-        #print(a)
-
-        result = 0
-        date = None
-        previous_date = None
-
-        for transaction in users_specific_asset_transactions:
-            #print(date, prev_date)
-            if date != previous_date and result < 0:
-                raise ValueError('quantity cant be lower than 0')
-            #print(transaction, transaction.date)
-            previous_date = date
-            date = transaction.date
-
-            if transaction.transaction_type == "BUY":
-                result += transaction.quantity
-            elif transaction.transaction_type == "SELL":
-                if previous_date is None:
-                    raise ValueError('quantity cant be lower than 0')
-                result -= transaction.quantity
-            else:
-                raise Exception('not buy or sell found')
-        return result
 
     @staticmethod
     def get_purchace_price(request, stock_id):
@@ -184,10 +153,8 @@ class UsersStocks(LoginRequiredMixin, ListView):
             if total_sold < 0:
                 raise Exception('тотал меньше 0')
 
+        return Decimal(purchase_price)
 
-        return purchase_price
-
-        #return result
 
     def get_current_price(self, stock):
 
@@ -225,7 +192,7 @@ class UsersStocks(LoginRequiredMixin, ListView):
         #        raise Exception('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
         # #print('last', last_day)
 
-        current_quantity = self.get_current_quantity(self.request, stock.id)
+        current_quantity = get_quantity(self.request, stock)
 
         #print(stock_data_json['TRADEINFO'])
         #print('last_day_str', last_day_str)
@@ -240,7 +207,7 @@ class UsersStocks(LoginRequiredMixin, ListView):
 
         qurrent_price = current_quantity * last_day_price
         #print(qurrent_price)
-        return qurrent_price
+        return Decimal(qurrent_price)
         #ПРОВЕРИТЬ ЧТО ПОСЛЕДНЯЯ ДАТА АКТУАЛЬНА
 
     @staticmethod
@@ -248,9 +215,9 @@ class UsersStocks(LoginRequiredMixin, ListView):
         if current_price == 0 and purchase_price == 0:
             return '+ 0.00'
         if current_price > 0 and purchase_price > 0:
-            result = Decimal(current_price) / Decimal(purchase_price)
-            
-            return f'- {"{:.2%}".format((1 - result))}' if result < 1 else f'+ {"{:.2%}".format((result - 1))}'
+            result = (Decimal(current_price) - Decimal(purchase_price)) / Decimal(purchase_price)
+
+            return f'- {"{:.1%}".format((-result))}' if result < 1 else f'+ {"{:.1%}".format((result))}'
         #return '0'
         raise ValueError('current_price and purchase_price must be > 0')
 
@@ -331,7 +298,7 @@ class StockData(object):
                 for gap in range(0, actual_date_gap):
                     #print('gap', gap, 'for', self.stock.ticker, 'last_day', last_day, 'actual date gap', actual_date_gap)
                     date_str = datetime.datetime.strftime((self.today - datetime.timedelta(gap)), '%Y-%m-%d')
-                    print('datestr',date_str)
+                    #print('datestr',date_str)
                     try:
                         prod_date = self.get_and_update_date_status(date_str)
                         #print(prod_date,'kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk')
@@ -512,30 +479,35 @@ class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
                 stock_board_history = get_stock_board_history(ticker)
                 json_stock_board_data = make_json_trade_info_dict(stock_board_history)
 
-                obj = Stock()
-                obj.ticker = ticker
-                obj.name = name
-                obj.isin = isin
-                obj.currency = currency
-                obj.latname = latname
-                obj.isqualifiedinvestors = isqualifiedinvestors
-                obj.issuedate = issuedate
-                obj.morningsession = morningsession
-                obj.eveningsession = eveningsession
-                obj.typename = typename
-                obj.group = group
-                obj.type = type
-                obj.groupname = groupname
+                stock_obj = Stock()
+                stock_obj.ticker = ticker
+                stock_obj.name = name
+                stock_obj.isin = isin
+                stock_obj.currency = currency
+                stock_obj.latname = latname
+                stock_obj.isqualifiedinvestors = isqualifiedinvestors
+                stock_obj.issuedate = issuedate
+                stock_obj.morningsession = morningsession
+                stock_obj.eveningsession = eveningsession
+                stock_obj.typename = typename
+                stock_obj.group = group
+                stock_obj.type = type
+                stock_obj.groupname = groupname
 
                 #obj.save()
                 #StockData(obj).update_stock_data()
 
-                obj.stock_data = json_stock_board_data #str
-                obj.save()
+                stock_obj.stock_data = json_stock_board_data #str
+                stock_obj.save()
 
 
                 # add dividend for stock
-            #return super().post(request, *args, **kwargs)
+                try:
+                    dividends_dict = get_stock_dividends(stock_obj)
+                    add_dividends_to_model(stock_obj, dividends_dict)
+
+                except Exception('something went wrong while download divs'):
+                    pass
 
 
                 messages.success(request, self.success_message)

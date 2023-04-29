@@ -7,7 +7,7 @@ from django.views import View
 from django.views.generic import ListView
 
 from finance_majordomo.dividends.models import Dividend, DividendsOfUser
-from finance_majordomo.stocks.views import UsersStocks as US
+from ..transactions.utils import get_quantity
 from django.utils.translation import gettext_lazy as _
 
 from finance_majordomo.users.models import UsersStocks, User
@@ -22,14 +22,17 @@ class Dividends(LoginRequiredMixin, ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         context['page_title'] = _("Dividend list")
-        
+
         dividend_list = []
-        
+        total_divs_payable = 0
+        total_divs_recieved = 0
+
         #users_stocks = UsersStocks.objects.get(user=self.request.user)
-        
+
         user = self.request.user
-        
+
         users_stocks_dividends = Dividend.objects.filter(stock__in=self.request.user.usersstocks_set.values_list('stock')).order_by('-date')
+
         #print(self.request.user.usersstocks_set.values_list('stock'))
         #print(users_stocks_dividends)
 
@@ -44,13 +47,17 @@ class Dividends(LoginRequiredMixin, ListView):
             except DividendsOfUser.DoesNotExist:
                 status = False
 
-            #переделать функцию по получению количества - ней не место в листвьюхе
-            quantity_for_the_date = US.get_current_quantity(self.request, stock.id, date=date)
+            quantity_for_the_date = get_quantity(
+                self.request, stock, date=date)
             if quantity_for_the_date > 0:
                 total_div = Decimal(quantity_for_the_date * dividend)
+                total_divs_payable += total_div
+                total_divs_recieved += total_div if status else 0
                 dividend_list.append((div, quantity_for_the_date, total_div, status))
 
         context['dividend_list'] = dividend_list
+        context['total_divs_payable'] = total_divs_payable
+        context['total_divs_recieved'] = total_divs_recieved
         return context
 
 
@@ -69,7 +76,8 @@ class AddDivToUser(SuccessMessageMixin, LoginRequiredMixin, View):
         dividend = Dividend.objects.get(id=dividend_id)
 
         try:
-            dividend_of_user = DividendsOfUser.objects.get(user=user, dividend=dividend)
+            dividend_of_user = DividendsOfUser.objects.get(user=user,
+                                                           dividend=dividend)
         except DividendsOfUser.DoesNotExist:
 
             dividend.users.add(user)

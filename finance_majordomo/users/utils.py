@@ -13,7 +13,8 @@ fields = {'ticker': True,
           'quantity': True,
           'purchase_price': True,
           'current_price': True,
-          'percent_result': True
+          'dividends_recieved': True,
+          'percent_result': True,
           }
 
 def set_fields_to_user(user):
@@ -33,7 +34,7 @@ def set_fields_to_all_users():
         user.save()
 
 
-# set_fields()
+#set_fields_to_all_users()
 
 
 

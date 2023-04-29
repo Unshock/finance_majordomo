@@ -16,8 +16,9 @@ from finance_majordomo.transactions.forms import TransactionForm
 from finance_majordomo.users.models import User
 from finance_majordomo.transactions.models import Transaction
 from finance_majordomo.stocks.views import UsersStocks
+from .utils import get_quantity
 
-# Create your views here.
+
 class TransactionList(LoginRequiredMixin, ListView):
     login_url = 'login'
     model = Transaction
@@ -146,8 +147,8 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
             return True
 
         quantity = form.cleaned_data.get('quantity')
-        day_end_balance = UsersStocks.get_current_quantity(
-            self.request, stock.id, date=date) - quantity
+        day_end_balance = get_quantity(self.request, stock,
+                                       date=date) - quantity
 
         if day_end_balance < 0:
             form.add_error('quantity', error_text)
@@ -255,7 +256,8 @@ class DeleteTransaction(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
         date = transaction.date
 
         stock = Stock.objects.get(name=ticker)
-        day_end_balance = UsersStocks.get_current_quantity(self.request, stock.id, date=date) - quantity
+        day_end_balance = get_quantity(self.request, stock,
+                                       date=date) - quantity
 
         if day_end_balance < 0:
             return False
@@ -302,7 +304,7 @@ def validate_transaction(request, ticker, quantity, date):
     date = transaction.date
 
     stock = Stock.objects.get(name=ticker)
-    day_end_balance = UsersStocks.get_current_quantity(request, stock.id, date=date) - quantity
+    day_end_balance = get_quantity(request, stock, date=date) - quantity
 
     if day_end_balance < 0:
         return False

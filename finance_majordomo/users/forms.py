@@ -68,9 +68,21 @@ class FieldsUserForm(forms.Form):
     current_price = forms.BooleanField(
         required=False,
         )
+    money_result_without_divs = forms.BooleanField(
+        required=False,
+        )
     percent_result = forms.BooleanField(
         required=False,
         )
+    dividends_received = forms.BooleanField(
+        required=False,
+        )
+    money_result_with_divs = forms.BooleanField(
+        required=False,
+        )
+    rate_of_return = forms.BooleanField(
+        required=False
+    )
 
     class Meta:
         fields = [
@@ -80,6 +92,10 @@ class FieldsUserForm(forms.Form):
             'quantity',
             'purchase price',
             'current price',
-            'percent_result'
+            'dividends_received',
+            'money_result_without_divs',
+            'money_result_with_divs',
+            'percent_result',
+            'rate_of_return',
         ]
 

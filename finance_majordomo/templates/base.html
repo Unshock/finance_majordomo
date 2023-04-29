@@ -10,43 +10,46 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         {% bootstrap_css %}
-        {% bootstrap_javascript %}
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css">
+        
 
         <title>{% translate "Financial majordomo" %}</title>
     </head>
-  {% block navbar %}
+  
     <body class="d-flex flex-column min-vh-100">
+    {% block navbar %}
         <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3 ">
             <a class="navbar-brand" href="{% url 'home' %}">{% translate "Financial majordomo" %}</a>
             <button class="navbar-toggler" data-toggle="collapse" data-target="navbarToggleExternalContent">
                 <span class="navbar-toggler-icon"></span>
             </button>
+            
+            <div class="collapse navbar-collapse" id="navbarToggleExternalContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'users' %}">{% translate "Users" %}</a>
+                    </li>
 
-      <div class="collapse navbar-collapse" id="navbarToggleExternalContent">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'users' %}">{% translate "Users" %}</a>
-            </li>
 
 
-
-            {% if request.user.is_authenticated %}
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'stocks' %}">{% translate "Stocks" %}</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'users_stocks' %}">{% translate "My Stocks" %}</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'transactions' %}">{% translate "Transactions" %}</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'user_transactions' %}">{% translate "My Transactions" %}</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'dividends' %}">{% translate "Dividends" %}</a>
-            </li>
-            {% endif %}
+            
+                    {% if request.user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'stocks' %}">{% translate "Stocks" %}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'users_stocks' %}">{% translate "My Stocks" %}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'transactions' %}">{% translate "Transactions" %}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'user_transactions' %}">{% translate "My Transactions" %}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'dividends' %}">{% translate "Dividends" %}</a>
+                        </li>
+                    {% endif %}
 
 
             {% comment %}
@@ -59,39 +62,51 @@
             </li>
             {% endcomment %}
 
-
-        </ul>
-        <ul class="navbar-nav">
-            {% if request.user.is_authenticated %}
-            <span class="navbar-brand">
-                {{ request.user.username }}
-            </span>
-            <li class="nav-item">
-                <a class="btn btn-primary ml-3" href="{% url 'logout' %}">{% translate "Logout" %}</a>
-            </li>
-            {% else %}
-            <li class="nav-item">
-                <a class="btn btn-outline-secondary" href="{% url 'login' %}">{% translate "Login" %}</a>
-            </li>
-            <li class="nav-item">
-                <a class="btn btn-primary ml-3" href="{% url 'create_user' %}">{% translate "Sign up" %}</a>
-            </li>
-            {% endif %}
-        </ul>
-      </div>
-    </nav>
+                </ul>
+                <ul class="navbar-nav">
+                    {% if request.user.is_authenticated %}
+                        <span class="navbar-brand">
+                            {{ request.user.username }}
+                        </span>
+                        <li class="nav-item">
+                            <a class="btn btn-primary ml-3" href="{% url 'logout' %}">{% translate "Logout" %}</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="btn btn-outline-secondary" href="{% url 'login' %}">{% translate "Login" %}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary ml-3" href="{% url 'create_user' %}">{% translate "Sign up" %}</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </nav>
     {% endblock navbar %}
-
-        <div class="container h-100">
-            {% bootstrap_messages %}
-            {% block content %}
-                <h1 class="my-4">{% translate "Hello!" %} {{ who }}!</h1>
-            {% endblock content %}
-            <footer>
-                <div class="container my-5 pt-4 border-top">
-                    <a target="_blank" href="https://t.me/Nedashkovskii">@Nedashkovsky</a>
-                </div>
-            </footer>
-        </div>
+    
+    <div class="container-fluid h-100">
+        {% bootstrap_messages %}
+        {% block content %}
+            <h1 class="my-4">{% translate "Hello!" %} {{ who }}!</h1>
+        {% endblock content %}
+    </div>
+    
+    <div class="container">
+        {% block footer %}
+            <div class="my-5 pt-4 border-top">
+                <a target="_blank" href="https://t.me/Nedashkovskii">@Nedashkovsky</a>
+            </div>
+        {% endblock footer %}
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.min.js"></script>
+    {% bootstrap_javascript %}
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('#myDataTable').DataTable();
+        });
+    </script>
+    
     </body>
 </html>
