@@ -22,7 +22,7 @@ from common.utils.stocks import validate_ticker, get_stock_board_history, make_j
     get_stock_current_price, make_json_last_price_dict, get_stock_description
 from finance_majordomo.users.models import User
 from finance_majordomo.dividends.utils import get_stock_dividends, add_dividends_to_model
-from ..transactions.utils import get_quantity
+from ..transactions.utils import get_quantity, get_purchace_price
 from .utils import get_money_result
 from ..dividends.utils import get_dividend_result, update_dividends_of_user
 
@@ -54,17 +54,17 @@ class UsersStocks(LoginRequiredMixin, ListView):
 
         user_stock_data = self.get_user_stock_data()
 
-        total_price = {'total_purchase_price': self.get_total_purchase_price(user_stock_data),
-                       'total_current_price': self.get_total_current_price(user_stock_data),
-                       'total_percent_result': self.get_percent_result(
-                           Decimal(self.get_total_purchase_price(user_stock_data)),
-                           Decimal(self.get_total_current_price(user_stock_data))
-                       )
-                       }
+        # total_price = {'total_purchase_price': self.get_total_purchase_price(user_stock_data),
+        #                'total_current_price': self.get_total_current_price(user_stock_data),
+        #                'total_percent_result': self.get_percent_result(
+        #                    Decimal(self.get_total_purchase_price(user_stock_data)),
+        #                    Decimal(self.get_total_current_price(user_stock_data))
+        #                )
+        #                }
 
         context['fields_to_display'] = json.loads(self.request.user.fields_to_display)
-        context['stock_list'] = user_stock_data
-        context['total_price'] = total_price
+        context['stock_list'] = user_stock_data['stock_list']
+        context['total_price'] = user_stock_data['total_results']
         return context
 
     def get_total_purchase_price(self, stock_list):
@@ -80,28 +80,35 @@ class UsersStocks(LoginRequiredMixin, ListView):
         users_stocks = Stock.objects.filter(usersstocks__user_id=request.user.id)
 
         #print(user_stocks)
+        total_purchase_price = 0
+        total_current_price = 0
+        total_divs = 0
 
-        user_stock_data = []
+        user_stock_data = {'total_results': {},
+                           'stock_list': []
+                           }
         for stock in users_stocks:
 
             current_quantity = get_quantity(request, stock)
 
-            ################################
-            update_dividends_of_user(request, stock)
-            ################################
-
-
             if current_quantity == 0:
                 continue
 
-            purchase_price = self.get_purchace_price(request, stock.id)
+            purchase_price = get_purchace_price(request, stock)
+            total_purchase_price += purchase_price
+
             current_price = self.get_current_price(stock)
+            total_current_price += current_price
+
             percent_result = self.get_percent_result(purchase_price, current_price)
 
             money_result_without_divs = moneyfmt(
                 get_money_result(current_price, purchase_price), sep=' ')
 
+
             dividends_received = get_dividend_result(request, stock)
+            total_divs += dividends_received
+
             money_result_with_divs = moneyfmt(
                 get_money_result(
                     current_price + dividends_received,
@@ -111,62 +118,38 @@ class UsersStocks(LoginRequiredMixin, ListView):
             rate_of_return = self.get_percent_result(
                 purchase_price, current_price + dividends_received)
 
-            user_stock_data.append(
+            user_stock_data['stock_list'].append(
                 {'id': stock.id,
                  'ticker': stock.ticker,
                  'name': stock.name,
                  'currency': stock.currency,
-                 'quantity': current_quantity,
-                 'purchase_price': purchase_price,
-                 'current_price': "{:.2f}".format(current_price),
+                 'quantity': moneyfmt(Decimal(current_quantity), sep=' ', places=0),
+                 'purchase_price': moneyfmt(purchase_price, sep=' '),
+                 'current_price': moneyfmt(current_price, sep=' '),
                  'percent_result': percent_result,
-                 'dividends_received': "{:.0f}".format(dividends_received),
+                 'dividends_received': moneyfmt(dividends_received, sep=' '),
                  'money_result_without_divs': money_result_without_divs,
                  'money_result_with_divs': money_result_with_divs,
                  'rate_of_return': rate_of_return,
                  })
 
+        total_financial_result_no_divs = total_current_price - total_purchase_price
+        total_financial_result_with_divs = total_current_price + total_divs - total_purchase_price
+        total_percent_result = self.get_percent_result(
+            total_purchase_price, total_current_price)
+
+        user_stock_data['total_results'] = {
+            'total_purchase_price': moneyfmt(total_purchase_price, sep=' '),
+            'total_current_price': moneyfmt(total_current_price, sep=' '),
+            'total_percent_result': total_percent_result,
+            'total_divs': moneyfmt(total_divs, sep=' '),
+            'total_financial_result_no_divs': moneyfmt(
+                total_financial_result_no_divs, sep=' '),
+            'total_financial_result_with_divs': moneyfmt(
+                total_financial_result_with_divs, sep=' '),
+        }
+
         return user_stock_data
-
-    @staticmethod
-    def get_purchace_price(request, stock_id):
-        # С учетом метода FIFO
-        users_transacions = Transaction.objects.filter(user=User.objects.get(id=request.user.id))
-        users_specific_asset_transacions = users_transacions.filter(ticker=Stock.objects.get(id=stock_id)).order_by('date')
-        result = 0
-        purchase_list = []
-        total_sold = 0
-        purchase_price = 0
-        for transaction in users_specific_asset_transacions:
-            if transaction.transaction_type == "BUY":
-                result += transaction.quantity
-                purchase_list.append({
-                    'quantity': transaction.quantity,
-                    'price': transaction.price
-                })
-            elif transaction.transaction_type == "SELL":
-                result -= transaction.quantity
-                total_sold += transaction.quantity
-            else:
-                raise Exception('not buy nor sell')
-
-        for elem in purchase_list:
-            #print('total_sold', total_sold)
-            if elem['quantity'] >= total_sold:
-                elem['quantity'] -= total_sold
-                total_sold = 0
-
-            else:
-                sold = elem['quantity']
-                elem['quantity'] = 0
-                total_sold -= sold
-
-            purchase_price += elem['quantity'] * elem['price']
-
-            if total_sold < 0:
-                raise Exception('тотал меньше 0')
-
-        return Decimal(purchase_price)
 
 
     def get_current_price(self, stock):
