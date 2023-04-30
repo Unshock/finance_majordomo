@@ -125,10 +125,11 @@ def add_dividends_to_model(stock_obj, dividend_dict):
 
 
 def get_dividend_result(request, stock_obj):
-
+    
     users_dividends_received = Dividend.objects.filter(
         stock=stock_obj.id,
-        id__in=request.user.dividendsofuser_set.filter(status=True).values_list('dividend'))
+        id__in=request.user.dividendsofuser_set.filter(status=True).values_list(
+            'dividend'))
 
     sum_dividends_received = 0
 
@@ -138,5 +139,41 @@ def get_dividend_result(request, stock_obj):
         sum_dividends_received += quantity * div.dividend
 
     return sum_dividends_received * Decimal(0.87)
+
+
+def update_dividends_of_user(request, stock_obj, date=None):
+
+    stock_dividends = Dividend.objects.filter(stock=stock_obj.id)
+
+    if date:
+        stock_dividends = stock_dividends.filter(date__gte=date)
+
+    users_dividends = Dividend.objects.filter(
+        stock=stock_obj.id,
+        id__in=request.user.dividendsofuser_set.values_list(
+            'dividend'))
+
+    for div in stock_dividends:
+
+        quantity = get_quantity(request, stock_obj, div.date)
+
+        try:
+            dividend_of_user = DividendsOfUser.objects.get(user=request.user,
+                                                           dividend=div)
+            if quantity <= 0:
+                dividend_of_user.status = False
+
+        except DividendsOfUser.DoesNotExist:
+            dividend_of_user = DividendsOfUser.objects.create(
+                user=request.user,
+                dividend=div,
+                status=False
+            )
+
+        dividend_of_user.save()
+
+
+
+
 
 

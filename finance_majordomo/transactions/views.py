@@ -17,6 +17,7 @@ from finance_majordomo.users.models import User
 from finance_majordomo.transactions.models import Transaction
 from finance_majordomo.stocks.views import UsersStocks
 from .utils import get_quantity
+from ..dividends.utils import update_dividends_of_user
 
 
 class TransactionList(LoginRequiredMixin, ListView):
@@ -107,6 +108,9 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
                 obj.fee = fee
                 obj.quantity = quantity
                 obj.save()
+
+                stock_obj = Stock.objects.get(id=obj.ticker.id)
+                update_dividends_of_user(request, stock_obj, date)
 
                 messages.success(request, self.success_message)
                 return redirect(self.success_url)
@@ -229,6 +233,11 @@ class DeleteTransaction(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
     def post(self, request, *args, **kwargs):
 
         if self.validate_deletion():
+
+            transaction = Transaction.objects.get(id=self.get_object().id)
+            stock_obj = Stock.objects.get(id=transaction.ticker.id)
+            update_dividends_of_user(request, stock_obj, transaction.date)
+
             return super().post(request, *args, **kwargs)
 
         else:

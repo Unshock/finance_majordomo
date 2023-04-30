@@ -1,5 +1,6 @@
 import json
 from decimal import Decimal
+from moneyfmt import moneyfmt
 
 import datetime
 from django.contrib import messages
@@ -22,7 +23,8 @@ from common.utils.stocks import validate_ticker, get_stock_board_history, make_j
 from finance_majordomo.users.models import User
 from finance_majordomo.dividends.utils import get_stock_dividends, add_dividends_to_model
 from ..transactions.utils import get_quantity
-from ..dividends.utils import get_dividend_result
+from .utils import get_money_result
+from ..dividends.utils import get_dividend_result, update_dividends_of_user
 
 
 class Stocks(LoginRequiredMixin, ListView):
@@ -60,7 +62,6 @@ class UsersStocks(LoginRequiredMixin, ListView):
                        )
                        }
 
-
         context['fields_to_display'] = json.loads(self.request.user.fields_to_display)
         context['stock_list'] = user_stock_data
         context['total_price'] = total_price
@@ -85,6 +86,10 @@ class UsersStocks(LoginRequiredMixin, ListView):
 
             current_quantity = get_quantity(request, stock)
 
+            ################################
+            update_dividends_of_user(request, stock)
+            ################################
+
 
             if current_quantity == 0:
                 continue
@@ -93,25 +98,33 @@ class UsersStocks(LoginRequiredMixin, ListView):
             current_price = self.get_current_price(stock)
             percent_result = self.get_percent_result(purchase_price, current_price)
 
-            money_result_without_divs = Decimal(current_price - purchase_price)
-            dividends_received = get_dividend_result(request, stock)
-            money_result_with_divs = money_result_without_divs +\
-                                        dividends_received
-            rate_of_return = money_result_with_divs / purchase_price * 100
+            money_result_without_divs = moneyfmt(
+                get_money_result(current_price, purchase_price), sep=' ')
 
-            user_stock_data.append({'id': stock.id,
-                                    'ticker': stock.ticker,
-                                    'name': stock.name,
-                                    'currency': stock.currency,
-                                    'quantity': current_quantity,
-                                    'purchase_price': purchase_price,
-                                    'current_price': "{:.2f}".format(current_price),
-                                    'percent_result': percent_result,
-                                    'dividends_received': "{:.0f}".format(dividends_received),
-                                    'money_result_without_divs': "{:.0f}".format(money_result_without_divs),
-                                    'money_result_with_divs': "{:.0f}".format(money_result_with_divs),
-                                    'rate_of_return': "{:.2f} %".format(rate_of_return),
-                                    })
+            dividends_received = get_dividend_result(request, stock)
+            money_result_with_divs = moneyfmt(
+                get_money_result(
+                    current_price + dividends_received,
+                    purchase_price),
+                sep=' ')
+
+            rate_of_return = self.get_percent_result(
+                purchase_price, current_price + dividends_received)
+
+            user_stock_data.append(
+                {'id': stock.id,
+                 'ticker': stock.ticker,
+                 'name': stock.name,
+                 'currency': stock.currency,
+                 'quantity': current_quantity,
+                 'purchase_price': purchase_price,
+                 'current_price': "{:.2f}".format(current_price),
+                 'percent_result': percent_result,
+                 'dividends_received': "{:.0f}".format(dividends_received),
+                 'money_result_without_divs': money_result_without_divs,
+                 'money_result_with_divs': money_result_with_divs,
+                 'rate_of_return': rate_of_return,
+                 })
 
         return user_stock_data
 
@@ -217,7 +230,8 @@ class UsersStocks(LoginRequiredMixin, ListView):
         if current_price > 0 and purchase_price > 0:
             result = (Decimal(current_price) - Decimal(purchase_price)) / Decimal(purchase_price)
 
-            return f'- {"{:.1%}".format((-result))}' if result < 1 else f'+ {"{:.1%}".format((result))}'
+
+            return f'- {"{:.2%}".format(-result)}' if result < 0 else f'+ {"{:.2%}".format(result)}'
         #return '0'
         raise ValueError('current_price and purchase_price must be > 0')
 

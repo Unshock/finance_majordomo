@@ -103,6 +103,14 @@ htmlsoup = ["BeautifulSoup4"]
 source = ["Cython (>=0.29.7)"]
 
 [[package]]
+name = "moneyfmt"
+version = "1.0.3"
+description = "Converte tipo Decimal para uma string formatda como dinheiro."
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "requests"
 version = "2.28.2"
 description = "Python HTTP for Humans."
@@ -165,7 +173,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "980f6b785edf3bbb4fe66c5020ca17b346063f654f78c11041fa2ae675285506"
+content-hash = "edb13b1c124767980516155927220ea3495e1cbc2218f8374d4886e4b9d83cc1"
 
 [metadata.files]
 apimoex = [
@@ -351,6 +359,9 @@ lxml = [
     {file = "lxml-4.9.2-pp39-pypy39_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_24_x86_64.whl", hash = "sha256:01d36c05f4afb8f7c20fd9ed5badca32a2029b93b1750f571ccc0b142531caf7"},
     {file = "lxml-4.9.2-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:7b515674acfdcadb0eb5d00d8a709868173acece5cb0be3dd165950cbfdf5409"},
     {file = "lxml-4.9.2.tar.gz", hash = "sha256:2455cfaeb7ac70338b3257f41e21f0724f4b5b0c0e7702da67ee6c3640835b67"},
+]
+moneyfmt = [
+    {file = "moneyfmt-1.0.3.tar.gz", hash = "sha256:8c0361d80b2791efe650782e51a55d67fc5cbde1c72eaecc4d8dbe0339975c19"},
 ]
 requests = [
     {file = "requests-2.28.2-py3-none-any.whl", hash = "sha256:64299f4909223da747622c030b781c0d7811e359c37124b4bd368fb8c6518baa"},
