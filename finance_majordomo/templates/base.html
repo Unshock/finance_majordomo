@@ -104,7 +104,11 @@
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
     <script type="text/javascript">
         $(document).ready(function(){
-            $('#myDataTable').DataTable();
+            $('#myDataTable').DataTable({
+                paging: false,
+                {#pageLength : 50,#}
+                {#lengthMenu: [[50, 100], [50, 100]]#}
+            });
         });
     </script>
     

@@ -1,0 +1,46 @@
+{% load i18n %}
+<div class="container-xxl px-4">
+    <div class="card-deck d-flex justify-content-between">
+
+        <div class="card border-info bg-light mb-3 d-flex" style="max-width: 28rem;">
+            <div class="card-header border-info">
+                  <h4 class="mb-0"><b>{% translate "Current price" %}</b></h4>
+            </div>
+            <div class="card-body">
+                <h4 class="card-title">{{ total_price.total_current_price }} RUR</h4>
+                <p class="card-text">{{ total_price.total_current_price}} $</p>
+            </div>
+        </div>
+
+        <div class="card border-info bg-light mb-3" style="max-width: 28rem;">
+            <div class="card-header border-info">
+                <h4 class="mb-0"><b>{% translate "Financial result" %}</b></h4>
+            </div>
+            <div class="card-body">
+                <h4 class="card-title">{{ total_price.total_financial_result_with_divs }} RUR</h4>
+                <p class="card-text">{{ total_price.total_financial_result_with_divs}} $</p>
+            </div>
+        </div>
+
+        <div class="card border-info bg-light mb-3" style="max-width: 28rem;">
+            <div class="card-header border-info">
+                <h4 class="mb-0"><b>{% translate "Rate of return" %}</b></h4>
+            </div>
+            <div class="card-body">
+                <h4 class="card-title">{{ total_price.total_rate_of_return }}</h4>
+            </div>
+        </div>
+
+
+        <div class="card border-info bg-light mb-3" style="max-width: 28rem;">
+            <div class="card-header border-info">
+                <h4 class="mb-0"><b>{% translate "Daily gain" %}</b></h4>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Stub</h5>
+                <p class="card-text">Stub</p>
+            </div>
+        </div>
+
+    </div>
+</div> 

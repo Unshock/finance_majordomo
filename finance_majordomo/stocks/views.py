@@ -123,7 +123,8 @@ class UsersStocks(LoginRequiredMixin, ListView):
                  'ticker': stock.ticker,
                  'name': stock.name,
                  'currency': stock.currency,
-                 'quantity': moneyfmt(Decimal(current_quantity), sep=' ', places=0),
+                 'quantity': moneyfmt(Decimal(current_quantity),
+                                      sep=' ', places=0),
                  'purchase_price': moneyfmt(purchase_price, sep=' '),
                  'current_price': moneyfmt(current_price, sep=' '),
                  'percent_result': percent_result,
@@ -137,6 +138,8 @@ class UsersStocks(LoginRequiredMixin, ListView):
         total_financial_result_with_divs = total_current_price + total_divs - total_purchase_price
         total_percent_result = self.get_percent_result(
             total_purchase_price, total_current_price)
+        total_rate_of_return = self.get_percent_result(
+            total_purchase_price, (total_financial_result_with_divs + total_purchase_price))
 
         user_stock_data['total_results'] = {
             'total_purchase_price': moneyfmt(total_purchase_price, sep=' '),
@@ -147,6 +150,7 @@ class UsersStocks(LoginRequiredMixin, ListView):
                 total_financial_result_no_divs, sep=' '),
             'total_financial_result_with_divs': moneyfmt(
                 total_financial_result_with_divs, sep=' '),
+            'total_rate_of_return': total_rate_of_return,
         }
 
         return user_stock_data

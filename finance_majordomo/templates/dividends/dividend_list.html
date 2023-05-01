@@ -3,9 +3,6 @@
 {% block content %}
     <div class="container wrapper flex-grow-1">
         <h1 class="my-4">{{ page_title }}</h1>
-        <div class="d-flex justify-content-left my-4">
-            <a class="btn btn-primary btn-sm" href="{% url "add_stock" %}" role="button">{% translate "Add stock" %}</a>
-        </div>
 
         <table id="myDataTable" class="table table-striped">
            <thead>

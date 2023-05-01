@@ -16,14 +16,27 @@ class Stock(models.Model):
         max_length=10, verbose_name="Валюта номинала", blank=True)
     issuedate = models.CharField(
         max_length=10, verbose_name="Дата начала торгов", blank=True)
+
     latname = models.CharField(
-        max_length=100, verbose_name="Английское наименование", blank=True)
+        max_length=100,
+        verbose_name="Английское наименование",
+        blank=True)
+
     isqualifiedinvestors = models.CharField(
-        max_length=1, verbose_name="Бумаги для квалифицированных инвесторов", blank=True)
+        max_length=1,
+        verbose_name="Бумаги для квалифицированных инвесторов",
+        blank=True)
+
     morningsession = models.CharField(
-        max_length=1, verbose_name="Допуск к утренней дополнительной торговой сессии", blank=True)
+        max_length=1,
+        verbose_name="Допуск к утренней дополнительной торговой сессии",
+        blank=True)
+
     eveningsession = models.CharField(
-        max_length=1, verbose_name="Допуск к вечерней дополнительной торговой сессии", blank=True)
+        max_length=1,
+        verbose_name="Допуск к вечерней дополнительной торговой сессии",
+        blank=True)
+
     typename = models.CharField(
         max_length=100, verbose_name="Вид/категория ценной бумаги", blank=True)
     group = models.CharField(
@@ -32,6 +45,7 @@ class Stock(models.Model):
         max_length=100, verbose_name="Тип бумаги", blank=True)
     groupname = models.CharField(
         max_length=100, verbose_name="Тип инструмента", blank=True)
+
     #сделать сессионс дата
     stock_data = models.JSONField(
         verbose_name="Данные об акции")
