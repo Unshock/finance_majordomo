@@ -1,1 +1,1 @@
-#### Finance majordomo app that help you to watch your financial portfolio
+#### Finance majordomo app that helps you to monitor the status of your financial portfolio
