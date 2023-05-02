@@ -125,7 +125,7 @@ def add_dividends_to_model(stock_obj, dividend_dict):
 
 
 def get_dividend_result(request, stock_obj):
-    
+
     users_dividends_received = Dividend.objects.filter(
         stock=stock_obj.id,
         id__in=request.user.dividendsofuser_set.filter(status=True).values_list(
@@ -148,10 +148,10 @@ def update_dividends_of_user(request, stock_obj, date=None):
     if date:
         stock_dividends = stock_dividends.filter(date__gte=date)
 
-    users_dividends = Dividend.objects.filter(
-        stock=stock_obj.id,
-        id__in=request.user.dividendsofuser_set.values_list(
-            'dividend'))
+    # users_dividends = Dividend.objects.filter(
+    #     stock=stock_obj.id,
+    #     id__in=request.user.dividendsofuser_set.values_list(
+    #         'dividend'))
 
     for div in stock_dividends:
 

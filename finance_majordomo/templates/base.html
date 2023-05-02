@@ -1,6 +1,7 @@
 {% load i18n %}
 {% get_current_language as LANGUAGE_CODE %}
 {% load bootstrap4 %}
+{% load static %}
 
 <!-- Current language: {{ LANGUAGE_CODE }} -->
 <!DOCTYPE html>
@@ -11,6 +12,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         {% bootstrap_css %}
         <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.css">
+        <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
         
 
         <title>{% translate "Financial majordomo" %}</title>
@@ -106,8 +108,18 @@
         $(document).ready(function(){
             $('#myDataTable').DataTable({
                 paging: false,
+                
                 {#pageLength : 50,#}
                 {#lengthMenu: [[50, 100], [50, 100]]#}
+            });
+        });
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('#myDivDataTable').DataTable({
+                paging: false,
+                info: false,
+                order: [[2, 'desc']],
             });
         });
     </script>

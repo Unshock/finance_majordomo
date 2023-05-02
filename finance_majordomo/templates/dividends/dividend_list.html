@@ -1,10 +1,13 @@
 {% extends 'base.html' %}
 {% load i18n %}
+
 {% block content %}
     <div class="container wrapper flex-grow-1">
         <h1 class="my-4">{{ page_title }}</h1>
+    
+        {% include 'dividends/_cards_deck_dividends.html' %}
 
-        <table id="myDataTable" class="table table-striped">
+        <table id="myDivDataTable" class="table table-striped">
            <thead>
                 <tr>
 
@@ -20,7 +23,7 @@
             </thead>
 
             <tbody>
-                {% for div, quantity_for_the_date, total_div, status in dividend_list %}
+                {% for div, quantity_for_the_date, total_div, status, date_status in dividend_list %}
                 <tr>
                     <td>{{ div.stock.latname }}</td>
                     <td>{{ quantity_for_the_date }}</td>
@@ -28,7 +31,13 @@
                     <td>{{ div.dividend }}</td>
                     
                     <td>{{ total_div }}</td>
-                    {% if status %}
+                    {% if not date_status %}
+                    <td>
+                        <div class="d-flex justify-content-left">
+                            <a class="btn btn-info btn-sm" role="button">{% translate "Upcoming dividend" %}</a>
+                        </div>
+                    </td>    
+                    {% elif status %}
                     <td>
                         <div class="d-flex justify-content-left">
                             <a class="btn btn-success btn-sm" href="{% url "remove_div_from_user" div.id %}" role="button">{% translate "Remove dividend" %}</a>
@@ -43,15 +52,9 @@
                     {% endif %}
                 </tr>
                 {% endfor %}
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td><b>{{ total_divs_payable }}</b></td>
-                    <td><b>{{ total_divs_recieved }}</b></td>
-                </tr>
+                
             </tbody>
         </table>
     </div>
+
 {% endblock content %}

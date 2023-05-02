@@ -1,0 +1,35 @@
+{% load i18n %}
+<div class="container-xxl px-4">
+    <div class="card-deck d-flex justify-content-between">
+
+        <div class="card border-info bg-light mb-3 d-flex" style="max-width: 28rem;">
+            <div class="card-header border-info">
+                  <h5 class="mb-0"><b>{% translate "Dividends for the holding period" %}</b></h5>
+            </div>
+            <div class="card-body">
+                <h4 class="card-title">{{ total_divs_payable }} RUR</h4>
+                <p class="card-text">Including tax payment</p>
+            </div>
+        </div>
+
+        <div class="card border-info bg-light mb-3" style="max-width: 28rem;">
+            <div class="card-header border-info">
+                <h4 class="mb-0"><b>{% translate "Dividends received" %}</b></h4>
+            </div>
+            <div class="card-body">
+                <h4 class="card-title">{{ total_divs_received }} RUR</h4>
+                <p class="card-text">Including tax payment</p>
+            </div>
+        </div>
+
+        <div class="card border-info bg-light mb-3" style="max-width: 28rem;">
+            <div class="card-header border-info">
+                <h4 class="mb-0"><b>{% translate "Upcoming payments" %}</b></h4>
+            </div>
+            <div class="card-body">
+                <h4 class="card-title">{{ total_divs_upcoming }} RUR</h4>
+            </div>
+        </div>
+
+    </div>
+</div> 
