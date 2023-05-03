@@ -18,8 +18,8 @@ def get_quantity(request, asset_obj, date=None) -> int:
     # print(users_specific_asset_transactions, '1')
 
     if date:
-        users_specific_asset_transactions = users_specific_asset_transactions.filter(
-            date__lte=date)
+        users_specific_asset_transactions = \
+            users_specific_asset_transactions.filter(date__lte=date)
 
     quantity = 0
     date = None

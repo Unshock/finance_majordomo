@@ -24,7 +24,7 @@
 
             <tbody>
                 {% for div, quantity_for_the_date, total_div, status, date_status in dividend_list %}
-                <tr>
+                <tr id="dividend_id_{{ div.id }}"> 
                     <td>{{ div.stock.latname }}</td>
                     <td>{{ quantity_for_the_date }}</td>
                     <td>{{ div.date }}</td>
