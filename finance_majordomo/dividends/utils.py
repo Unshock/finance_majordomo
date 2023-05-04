@@ -6,6 +6,7 @@ import re
 import datetime
 import django
 import os
+from datetime import datetime
 
 from ..transactions.utils import get_quantity
 
@@ -59,10 +60,11 @@ def get_stock_dividends(stock_obj):
 
     for line in data[1:]:
 
-        date = re.search(r'\d{1,2}\.\d{1,2}\.\d{4}', line[0])
+        date = re.search(r'(?!(00|0\.))\d{1,2}\.(?!(00|0\.))\d{1,2}\.\d{4}', line[0])
 
         if date:
-            date = datetime.datetime.strptime(date.group(), "%d.%m.%Y").strftime("%Y-%m-%d")
+
+            date = datetime.strptime(date.group(), "%d.%m.%Y").strftime("%Y-%m-%d")
 
             dividend_dict[date] = {'common_share': {},
                                    'preferred_share': {}
@@ -112,16 +114,21 @@ def add_dividends_to_model(stock_obj, dividend_dict):
 
         except Dividend.DoesNotExist:
             dividend = Dividend()
-            dividend.date = key
+
+            dividend.date = datetime.strptime(key, "%Y-%m-%d")
             dividend.stock = stock_obj
+
             if stock_type == 'preferred_share' and \
                     value['preferred_share']['div'] is True:
-                dividend.dividend = Decimal(value['preferred_share']['value'])
+                dividend.amount = Decimal(value['preferred_share']['value'])
             elif stock_type == 'common_share' and \
                     value['common_share']['div'] is True:
-                dividend.dividend = Decimal(value['common_share']['value'])
+                dividend.amount = Decimal(value['common_share']['value'])
             dividend.save()
 
+    stock_obj.latest_dividend_update = datetime.today()
+    print('stock', stock_obj, stock_obj.latest_dividend_update)
+    stock_obj.save()
 
 
 def get_dividend_result(request, stock_obj):
@@ -171,9 +178,3 @@ def update_dividends_of_user(request, stock_obj, date=None):
             )
 
         dividend_of_user.save()
-
-
-
-
-
-

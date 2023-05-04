@@ -53,6 +53,8 @@ class UsersStocks(LoginRequiredMixin, ListView):
         context['page_title'] = self.request.user.username + " " + _("stock list")
 
         user_stock_data = self.get_user_stock_data()
+        
+        print(user_stock_data)
 
         # total_price = {'total_purchase_price': self.get_total_purchase_price(user_stock_data),
         #                'total_current_price': self.get_total_current_price(user_stock_data),
@@ -77,7 +79,12 @@ class UsersStocks(LoginRequiredMixin, ListView):
 
     def get_user_stock_data(self):
         request = self.request
-        users_stocks = Stock.objects.filter(usersstocks__user_id=request.user.id)
+        users_stocks = Stock.objects.filter(
+            id__in=request.user.stocksofuser_set.values_list('stock'))
+        
+        print(request.user.stocksofuser_set.values_list('stock'))
+        print(users_stocks)
+
 
         #print(user_stocks)
         total_purchase_price = 0
@@ -458,20 +465,31 @@ class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
             if stock_description:
 
                 ticker = stock_description.get('SECID')
-                name = stock_description.get('SHORTNAME')
                 isin = stock_description.get('ISIN')
-                currency = 'RUR' if stock_description.get('FACEUNIT') == 'SUR' else stock_description.get('FACEUNIT')
+
+                name = stock_description.get('SHORTNAME')
                 latname = stock_description.get('LATNAME')
-                isqualifiedinvestors = stock_description.get('ISQUALIFIEDINVESTORS')
+
+                currency = 'RUR' if stock_description.get('FACEUNIT') == 'SUR' else stock_description.get('FACEUNIT')
                 issuedate = stock_description.get('ISSUEDATE')
-                morningsession = stock_description.get('MORNINGSESSION', '0')
-                eveningsession = stock_description.get('EVENINGSESSION', '0')
-                typename = stock_description.get('TYPENAME')
-                group = stock_description.get('GROUP')
+
+                isqualifiedinvestors = True if stock_description.get(
+                    'ISQUALIFIEDINVESTORS') == '1' else False
+                morningsession = True if stock_description.get(
+                    'MORNINGSESSION') == '1' else False
+                eveningsession = True if stock_description.get(
+                    'EVENINGSESSION') == '1' else False
+
                 type = stock_description.get('TYPE')
+                typename = stock_description.get('TYPENAME')
+
+                group = stock_description.get('GROUP')
                 groupname = stock_description.get('GROUPNAME')
 
-                check_list = [ticker, name, isin, currency, latname, isqualifiedinvestors, issuedate, morningsession, eveningsession, typename, group, type, groupname]
+                check_list = [ticker, name, isin,
+                              currency, latname, isqualifiedinvestors,
+                              issuedate, morningsession, eveningsession,
+                              typename, group, type, groupname]
 
                 if None in check_list:
                     print("SOMETHING HAVE NOT BEEN LOADED - GOT NONE")

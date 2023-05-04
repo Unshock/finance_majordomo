@@ -1,3 +1,5 @@
+import datetime
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
@@ -138,11 +140,16 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         # form = TransactionForm(self.request.POST)
         transaction_type = form.cleaned_data.get('transaction_type')
 
-        ticker = form.cleaned_data.get('ticker')
+        stock_latname = form.cleaned_data.get('ticker')
         date = form.cleaned_data.get('date')
-        stock = Stock.objects.get(name=ticker)
 
-        if date < stock.issuedate:
+        stock = Stock.objects.get(latname=stock_latname)
+        print(stock.issuedate)
+        issuedate = datetime.datetime.strftime(stock.issuedate, '%Y-%m-%d')
+        
+        print(issuedate)
+
+        if date < issuedate:
             form.add_error('date', _('The stock started trading'
                                      ' after the specified date'))
             return False

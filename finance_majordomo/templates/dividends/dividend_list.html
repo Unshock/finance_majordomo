@@ -28,9 +28,10 @@
                     <td>{{ div.stock.latname }}</td>
                     <td>{{ quantity_for_the_date }}</td>
                     <td>{{ div.date }}</td>
-                    <td>{{ div.dividend }}</td>
+                    <td>{{ div.amount }}</td>
                     
                     <td>{{ total_div }}</td>
+                
                     {% if not date_status %}
                     <td>
                         <div class="d-flex justify-content-left">
@@ -50,6 +51,7 @@
                         </div>
                     </td>
                     {% endif %}
+                
                 </tr>
                 {% endfor %}
                 

@@ -14,7 +14,7 @@ from django.utils.translation import gettext_lazy as _
 
 from finance_majordomo.stocks.models import Stock
 from finance_majordomo.users.forms import RegisterUserForm, LoginUserForm, FieldsUserForm
-from finance_majordomo.users.models import User, UsersStocks
+from finance_majordomo.users.models import User
 from finance_majordomo.users.utils import set_fields_to_user
 
 
@@ -111,6 +111,11 @@ class AddStockToUser(SuccessMessageMixin, LoginRequiredMixin, View):
     success_message = _("Stock has been successfully added to user's stock list")
 
     def get(self, request, *args, **kwargs):
+        stock = Stock.objects.get(id=kwargs['pk_stock'])
+        stock.users.add(request.user)
+        stock.save()
+        return redirect('stocks')
+        
         user = User.objects.get(id=kwargs['pk_user'])
         user.stocks.add(Stock.objects.get(id=kwargs['pk_stock']))
         user.save()

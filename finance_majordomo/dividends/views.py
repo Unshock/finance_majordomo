@@ -8,10 +8,11 @@ from django.views import View
 from django.views.generic import ListView
 
 from finance_majordomo.dividends.models import Dividend, DividendsOfUser
+from ..stocks.models import StocksOfUser
 from ..transactions.utils import get_quantity
 from django.utils.translation import gettext_lazy as _
 
-from finance_majordomo.users.models import UsersStocks, User
+from finance_majordomo.users.models import User
 
 
 class Dividends(LoginRequiredMixin, ListView):
@@ -31,18 +32,25 @@ class Dividends(LoginRequiredMixin, ListView):
 
         user = self.request.user
 
-        users_stocks_dividends = Dividend.objects.filter(stock__in=self.request.user.usersstocks_set.values_list('stock')).order_by('-date')
+        # users_stocks_dividends = Dividend.objects.filter(
+        #     stock__in=self.request.user.usersstocks_set.values_list('stock')).order_by('-date')
+        
+        users_stocks_dividends = Dividend.objects.filter(
+            stock__in=user.stocksofuser_set.values_list('stock')).order_by('-date')
+
+            
+
 
         #print(self.request.user.usersstocks_set.values_list('stock'))
         #print(users_stocks_dividends)
 
         for div in users_stocks_dividends:
             stock = div.stock
-            date_str = div.date
-            dividend = div.dividend
+            date_dt = div.date
+            amount = div.amount
 
-            date_today = datetime.datetime.today()
-            date_dt = datetime.datetime.strptime(date_str, '%Y-%m-%d')
+            date_today = datetime.datetime.today().date()
+            date_str = datetime.datetime.strftime(date_dt, '%Y-%m-%d')
             date_status = True if date_dt <= date_today else False
 
             try:
@@ -56,7 +64,7 @@ class Dividends(LoginRequiredMixin, ListView):
                 self.request, stock, date=date_str)
 
             if quantity_for_the_date > 0:
-                total_div = Decimal(quantity_for_the_date * dividend)
+                total_div = Decimal(quantity_for_the_date * amount)
 
                 if date_status:
                     total_divs_payable += total_div
@@ -83,7 +91,7 @@ class AddDivToUser(SuccessMessageMixin, LoginRequiredMixin, View):
     success_message = _("Stock has been successfully added to user's stock list")
 
     def get(self, request, *args, **kwargs):
-        user = User.objects.get(id=self.request.user.id)
+        user = request.user
 
         dividend_id = kwargs['pk_dividend']
         dividend = Dividend.objects.get(id=dividend_id)
@@ -93,8 +101,8 @@ class AddDivToUser(SuccessMessageMixin, LoginRequiredMixin, View):
                                                            dividend=dividend)
         except DividendsOfUser.DoesNotExist:
 
-            dividend.users.add(user)
-            dividend.save()
+            #dividend.users.add(user)
+            #dividend.save()
 
             dividend_of_user = DividendsOfUser.objects.get(user=user,
                                                            dividend=dividend)
@@ -111,7 +119,7 @@ class RemoveDivFromUser(SuccessMessageMixin, LoginRequiredMixin, View):
         "Stock has been successfully added to user's stock list")
 
     def get(self, request, *args, **kwargs):
-        user = User.objects.get(id=self.request.user.id)
+        user = request.user
 
         dividend_id = kwargs['pk_dividend']
         dividend = Dividend.objects.get(id=dividend_id)
@@ -121,7 +129,7 @@ class RemoveDivFromUser(SuccessMessageMixin, LoginRequiredMixin, View):
                                                            dividend=dividend)
         except DividendsOfUser.DoesNotExist:
 
-            raise Exception('ne nashelsya sush dividend')
+            raise Exception('such dividend has not been found')
 
         dividend_of_user.status = False
         dividend_of_user.save()
