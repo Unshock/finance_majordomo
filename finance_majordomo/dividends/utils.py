@@ -143,7 +143,7 @@ def get_dividend_result(request, stock_obj):
     for div in users_dividends_received:
 
         quantity = get_quantity(request, stock_obj, date=div.date)
-        sum_dividends_received += quantity * div.dividend
+        sum_dividends_received += quantity * div.amount
 
     return sum_dividends_received * Decimal(0.87)
 

@@ -54,7 +54,7 @@ class UsersStocks(LoginRequiredMixin, ListView):
 
         user_stock_data = self.get_user_stock_data()
         
-        print(user_stock_data)
+        #print(user_stock_data)
 
         # total_price = {'total_purchase_price': self.get_total_purchase_price(user_stock_data),
         #                'total_current_price': self.get_total_current_price(user_stock_data),
@@ -66,7 +66,7 @@ class UsersStocks(LoginRequiredMixin, ListView):
 
         context['fields_to_display'] = json.loads(self.request.user.fields_to_display)
         context['stock_list'] = user_stock_data['stock_list']
-        context['total_price'] = user_stock_data['total_results']
+        context['total_results'] = user_stock_data['total_results']
         return context
 
     def get_total_purchase_price(self, stock_list):
@@ -82,8 +82,8 @@ class UsersStocks(LoginRequiredMixin, ListView):
         users_stocks = Stock.objects.filter(
             id__in=request.user.stocksofuser_set.values_list('stock'))
         
-        print(request.user.stocksofuser_set.values_list('stock'))
-        print(users_stocks)
+        #print(request.user.stocksofuser_set.values_list('stock'))
+        #print(users_stocks)
 
 
         #print(user_stocks)

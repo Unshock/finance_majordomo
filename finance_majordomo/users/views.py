@@ -115,7 +115,7 @@ class AddStockToUser(SuccessMessageMixin, LoginRequiredMixin, View):
         stock.users.add(request.user)
         stock.save()
         return redirect('stocks')
-        
+
         user = User.objects.get(id=kwargs['pk_user'])
         user.stocks.add(Stock.objects.get(id=kwargs['pk_stock']))
         user.save()

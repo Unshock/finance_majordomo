@@ -23,31 +23,32 @@
             </thead>
 
             <tbody>
-                {% for div, quantity_for_the_date, total_div, status, date_status in dividend_list %}
+
+                {% for dividend in dividend_list %}
                 <tr id="dividend_id_{{ div.id }}"> 
-                    <td>{{ div.stock.latname }}</td>
-                    <td>{{ quantity_for_the_date }}</td>
-                    <td>{{ div.date }}</td>
-                    <td>{{ div.amount }}</td>
+                    <td>{{ dividend.div_obj.stock.latname }}</td>
+                    <td>{{ dividend.quantity }}</td>
+                    <td>{{ dividend.date }}</td>
+                    <td>{{ dividend.div_obj.amount }}</td>
                     
-                    <td>{{ total_div }}</td>
+                    <td>{{ dividend.total_div }}</td>
                 
-                    {% if not date_status %}
+                    {% if dividend.is_upcoming %}
                     <td>
                         <div class="d-flex justify-content-left">
                             <a class="btn btn-info btn-sm" role="button">{% translate "Upcoming dividend" %}</a>
                         </div>
                     </td>    
-                    {% elif status %}
+                    {% elif dividend.is_received %}
                     <td>
                         <div class="d-flex justify-content-left">
-                            <a class="btn btn-success btn-sm" href="{% url "remove_div_from_user" div.id %}" role="button">{% translate "Remove dividend" %}</a>
+                            <a class="btn btn-success btn-sm" href="{% url "remove_div_from_user" dividend.div_obj.id %}" role="button">{% translate "Remove dividend" %}</a>
                         </div>
                     </td>
                     {% else %}
                     <td>
                         <div class="d-flex justify-content-left">
-                            <a class="btn btn-primary btn-sm" href="{% url "add_div_to_user" div.id %}" role="button">{% translate "Get dividend" %}</a>
+                            <a class="btn btn-primary btn-sm" href="{% url "add_div_to_user" dividend.div_obj.id %}" role="button">{% translate "Get dividend" %}</a>
                         </div>
                     </td>
                     {% endif %}

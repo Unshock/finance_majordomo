@@ -271,7 +271,7 @@ class DeleteTransaction(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
         ticker = transaction.ticker
         date = transaction.date
 
-        stock = Stock.objects.get(name=ticker)
+        stock = Stock.objects.get(latname=ticker)
         day_end_balance = get_quantity(self.request, stock,
                                        date=date) - quantity
 
@@ -319,7 +319,7 @@ def validate_transaction(request, ticker, quantity, date):
     ticker = transaction.ticker
     date = transaction.date
 
-    stock = Stock.objects.get(name=ticker)
+    stock = Stock.objects.get(latname=ticker)
     day_end_balance = get_quantity(request, stock, date=date) - quantity
 
     if day_end_balance < 0:
