@@ -33,9 +33,9 @@ class DividendsOfUser(models.Model):
                              null=True)
     dividend = models.ForeignKey(Dividend, on_delete=models.CASCADE,
                                  null=True)
-    status = models.BooleanField(default=False,
-                                 help_text='shows if user got dividend',
-                                 verbose_name='dividend status')
+    is_received = models.BooleanField(default=False,
+                                      help_text='shows if user got dividend',
+                                      verbose_name='dividend status')
 
     class Meta:
         verbose_name = "Дивиденд пользователя"

@@ -400,7 +400,7 @@ class StockData(object):
             if update_time:
 
                 # IF STOCK IS NOT ON EVENING SESSION AND UPDATE TIME LATER THAN 18:30:00 TODAY => NO NEED TO UPDATE
-                if self.stock.eveningsession == '0' and update_time > EVENING_CUT_OFF:
+                if not self.stock.eveningsession and update_time > EVENING_CUT_OFF:
                     return self.stock
 
                 time_gap = self.get_time_gap(update_time)

@@ -60,21 +60,25 @@ def get_stock_dividends(stock_obj):
 
     for line in data[1:]:
 
-        date = re.search(r'(?!(00|0\.))\d{1,2}\.(?!(00|0\.))\d{1,2}\.\d{4}', line[0])
+        date = re.search(
+            r'(?!0{1,2}\.)\d{1,2}\.(?!0{1,2}\.)\d{1,2}\.\d{4}', line[0])
 
         if date:
 
-            date = datetime.strptime(date.group(), "%d.%m.%Y").strftime("%Y-%m-%d")
+            date = datetime.strptime(
+                date.group(), "%d.%m.%Y").strftime("%Y-%m-%d")
 
             dividend_dict[date] = {'common_share': {},
                                    'preferred_share': {}
                                    }
 
             if common_share_row:
-                common_share_price = re.search(r'\d+,\d+', line[common_share_row])
+                common_share_price = re.search(
+                    r'\d+,\d+', line[common_share_row])
                 if common_share_price:
                     common_share_div = True
-                    common_share_price = common_share_price.group().replace(',', '.')
+                    common_share_price = common_share_price.group().replace(
+                        ',', '.')
 
 
                 else:
@@ -86,10 +90,12 @@ def get_stock_dividends(stock_obj):
                      'value': common_share_price}
 
             if preferred_share_row:
-                preferred_share_price = re.search(r'\d+,\d+', line[preferred_share_row])
+                preferred_share_price = re.search(
+                    r'\d+,\d+', line[preferred_share_row])
                 if preferred_share_price:
                     preferred_share_div = True
                     preferred_share_price = preferred_share_price.group().replace(',', '.')
+                    
                 else:
                     preferred_share_div = False
                     preferred_share_price = '0.00'
@@ -97,7 +103,6 @@ def get_stock_dividends(stock_obj):
                 dividend_dict[date]['preferred_share'] = \
                     {'div': preferred_share_div,
                      'value': preferred_share_price}
-
 
     #print(dividend_dict)
     return dividend_dict
@@ -107,23 +112,30 @@ def add_dividends_to_model(stock_obj, dividend_dict):
 
     stock_type = stock_obj.type
 
-    for key, value in dividend_dict.items():
+    for date, div_value in dividend_dict.items():
+
+        if stock_type == 'preferred_share' and \
+                div_value['preferred_share']['div'] is True:
+            amount = Decimal(div_value['preferred_share']['value'])
+        elif stock_type == 'common_share' and \
+                div_value['common_share']['div'] is True:
+            amount = Decimal(div_value['common_share']['value'])
+
         try:
-            Dividend.objects.get(stock=stock_obj, date=key)
+            existing_div = Dividend.objects.get(stock=stock_obj, date=date)
+
+            if not existing_div.amount == amount:
+                print('Dividend has been changed while updating. '
+                      'Probably mistake!')
             continue
 
         except Dividend.DoesNotExist:
             dividend = Dividend()
 
-            dividend.date = datetime.strptime(key, "%Y-%m-%d")
+            dividend.date = datetime.strptime(date, "%Y-%m-%d")
             dividend.stock = stock_obj
+            dividend.amount = amount
 
-            if stock_type == 'preferred_share' and \
-                    value['preferred_share']['div'] is True:
-                dividend.amount = Decimal(value['preferred_share']['value'])
-            elif stock_type == 'common_share' and \
-                    value['common_share']['div'] is True:
-                dividend.amount = Decimal(value['common_share']['value'])
             dividend.save()
 
     stock_obj.latest_dividend_update = datetime.today()
@@ -135,7 +147,7 @@ def get_dividend_result(request, stock_obj):
 
     users_dividends_received = Dividend.objects.filter(
         stock=stock_obj.id,
-        id__in=request.user.dividendsofuser_set.filter(status=True).values_list(
+        id__in=request.user.dividendsofuser_set.filter(is_received=True).values_list(
             'dividend'))
 
     sum_dividends_received = 0
@@ -168,13 +180,13 @@ def update_dividends_of_user(request, stock_obj, date=None):
             dividend_of_user = DividendsOfUser.objects.get(user=request.user,
                                                            dividend=div)
             if quantity <= 0:
-                dividend_of_user.status = False
+                dividend_of_user.is_received = False
 
         except DividendsOfUser.DoesNotExist:
             dividend_of_user = DividendsOfUser.objects.create(
                 user=request.user,
                 dividend=div,
-                status=False
+                is_received=False
             )
 
         dividend_of_user.save()

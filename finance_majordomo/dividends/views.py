@@ -48,7 +48,7 @@ class Dividends(LoginRequiredMixin, ListView):
             is_upcoming = False if date_dt <= date_today_dt else True
 
             is_received = DividendsOfUser.objects.get(
-                user=user, dividend=div_obj).status
+                user=user, dividend=div_obj).is_received
 
             quantity_for_the_date = get_quantity(
                 self.request, stock, date=date_str)
@@ -109,7 +109,7 @@ class AddDivToUser(SuccessMessageMixin, LoginRequiredMixin, View):
 
             dividend_of_user = DividendsOfUser.objects.get(user=user,
                                                            dividend=dividend)
-        dividend_of_user.status = True
+        dividend_of_user.is_received = True
         dividend_of_user.save()
 
         return redirect('dividends')
@@ -134,7 +134,7 @@ class RemoveDivFromUser(SuccessMessageMixin, LoginRequiredMixin, View):
 
             raise Exception('such dividend has not been found')
 
-        dividend_of_user.status = False
+        dividend_of_user.is_received = False
         dividend_of_user.save()
 
         return redirect('dividends')
