@@ -26,7 +26,9 @@ def get_stock_dividends(stock_obj):
     else:
         raise Exception('stock_type не опознан')
 
-    url = f'https://закрытияреестров.рф/{ticker.upper()}/'
+    url = f'https://' \
+          f'{"закрытияреестров.рф".encode("idna").decode()}' \
+          f'/{ticker.upper()}/'
 
     dividend_page_code = requests.get(url)
     dividend_page_code.encoding = 'utf-8'
