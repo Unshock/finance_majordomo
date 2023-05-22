@@ -62,4 +62,26 @@ class SettingsDividends(TestCase):
             stock_data={},
         )
 
+        cls.stock_id_3 = Stock.objects.create(
+            ticker="TATN",
+            type="common_share",
+            isin="isin_id_3",
+            issuedate=datetime.date(2000, 1, 1),
+            isqualifiedinvestors=False,
+            morningsession=False,
+            eveningsession=False,
+            stock_data={},
+        )
+
+        cls.stock_id_4 = Stock.objects.create(
+            ticker="TATNP",
+            type="preferred_share",
+            isin="isin_id_4",
+            issuedate=datetime.date(2000, 1, 1),
+            isqualifiedinvestors=False,
+            morningsession=False,
+            eveningsession=False,
+            stock_data={},
+        )
+
 

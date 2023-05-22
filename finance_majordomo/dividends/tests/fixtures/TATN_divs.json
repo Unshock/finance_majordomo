@@ -1,0 +1,362 @@
+{
+  "2023-07-04": {
+    "common_share": {
+      "div": true,
+      "value": "27.71"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "27.71"
+    }
+  },
+  "2023-01-10": {
+    "common_share": {
+      "div": true,
+      "value": "6.86"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "6.86"
+    }
+  },
+  "2022-10-11": {
+    "common_share": {
+      "div": true,
+      "value": "32.71"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "32.71"
+    }
+  },
+  "2022-07-08": {
+    "common_share": {
+      "div": true,
+      "value": "16.14"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "16.14"
+    }
+  },
+  "2022-01-10": {
+    "common_share": {
+      "div": true,
+      "value": "9.98"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "9.98"
+    }
+  },
+  "2021-10-12": {
+    "common_share": {
+      "div": true,
+      "value": "16.52"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "16.52"
+    }
+  },
+  "2021-07-09": {
+    "common_share": {
+      "div": true,
+      "value": "12.30"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "12.30"
+    }
+  },
+  "2020-10-12": {
+    "common_share": {
+      "div": true,
+      "value": "9.94"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "9.94"
+    }
+  },
+  "2020-06-30": {
+    "common_share": {
+      "div": false,
+      "value": "0.00"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "1.00"
+    }
+  },
+  "2019-12-30": {
+    "common_share": {
+      "div": true,
+      "value": "24.36"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "24.36"
+    }
+  },
+  "2019-09-27": {
+    "common_share": {
+      "div": true,
+      "value": "40.11"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "40.11"
+    }
+  },
+  "2019-07-05": {
+    "common_share": {
+      "div": true,
+      "value": "32.38"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "32.38"
+    }
+  },
+  "2019-01-09": {
+    "common_share": {
+      "div": true,
+      "value": "22.26"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "22.26"
+    }
+  },
+  "2018-10-12": {
+    "common_share": {
+      "div": true,
+      "value": "30.27"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "30.27"
+    }
+  },
+  "2018-07-06": {
+    "common_share": {
+      "div": true,
+      "value": "12.16"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "12.16"
+    }
+  },
+  "2017-12-23": {
+    "common_share": {
+      "div": true,
+      "value": "27.78"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "27.78"
+    }
+  },
+  "2017-07-07": {
+    "common_share": {
+      "div": true,
+      "value": "22.81"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "22.81"
+    }
+  },
+  "2016-07-08": {
+    "common_share": {
+      "div": true,
+      "value": "10.96"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "10.96"
+    }
+  },
+  "2015-07-15": {
+    "common_share": {
+      "div": true,
+      "value": "10.58"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "10.58"
+    }
+  },
+  "2014-07-16": {
+    "common_share": {
+      "div": true,
+      "value": "8.23"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "8.23"
+    }
+  },
+  "2013-05-13": {
+    "common_share": {
+      "div": true,
+      "value": "8.60"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "8.60"
+    }
+  },
+  "2012-05-14": {
+    "common_share": {
+      "div": true,
+      "value": "7.08"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "7.08"
+    }
+  },
+  "2011-05-06": {
+    "common_share": {
+      "div": true,
+      "value": "5.02"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "5.02"
+    }
+  },
+  "2010-05-07": {
+    "common_share": {
+      "div": true,
+      "value": "6.56"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "6.56"
+    }
+  },
+  "2009-05-12": {
+    "common_share": {
+      "div": true,
+      "value": "4.42"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "4.42"
+    }
+  },
+  "2008-05-12": {
+    "common_share": {
+      "div": true,
+      "value": "5.65"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "5.65"
+    }
+  },
+  "2007-05-14": {
+    "common_share": {
+      "div": true,
+      "value": "4.60"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "4.60"
+    }
+  },
+  "2006-05-15": {
+    "common_share": {
+      "div": true,
+      "value": "1.00"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "1.00"
+    }
+  },
+  "2005-05-12": {
+    "common_share": {
+      "div": true,
+      "value": "0.90"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "1.00"
+    }
+  },
+  "2004-05-10": {
+    "common_share": {
+      "div": true,
+      "value": "0.30"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "1.00"
+    }
+  },
+  "2003-05-11": {
+    "common_share": {
+      "div": true,
+      "value": "0.10"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "1.00"
+    }
+  },
+  "2002-05-09": {
+    "common_share": {
+      "div": true,
+      "value": "0.10"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "1.00"
+    }
+  },
+  "2001-04-20": {
+    "common_share": {
+      "div": true,
+      "value": "0.10"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "0.20"
+    }
+  },
+  "2000-04-21": {
+    "common_share": {
+      "div": true,
+      "value": "0.10"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "0.15"
+    }
+  },
+  "1999-04-30": {
+    "common_share": {
+      "div": true,
+      "value": "0.04"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "0.10"
+    }
+  },
+  "1998-05-22": {
+    "common_share": {
+      "div": true,
+      "value": "0.06"
+    },
+    "preferred_share": {
+      "div": true,
+      "value": "0.10"
+    }
+  }
+}

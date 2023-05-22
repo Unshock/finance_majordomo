@@ -35,7 +35,9 @@ def get_stock_dividends(stock_obj):
 
     dividend_page_soup = BeautifulSoup(dividend_page_code.text, 'lxml')
 
-    table = dividend_page_soup.find('table', style=lambda value: value and 'border: 1px solid #208ede;' in value)
+    table = dividend_page_soup.find(
+        'table',
+        style=lambda value: value and 'border: 1px solid #208ede;' in value)
 
     data = []
     table_body = table.find('tbody')
@@ -50,7 +52,6 @@ def get_stock_dividends(stock_obj):
     #preferred_share = {}
     dividend_dict = {}
 
-    date_row = 0
     common_share_row = None
     preferred_share_row = None
 
@@ -79,9 +80,8 @@ def get_stock_dividends(stock_obj):
                     r'\d+,\d+', line[common_share_row])
                 if common_share_price:
                     common_share_div = True
-                    common_share_price = common_share_price.group().replace(
-                        ',', '.')
-
+                    common_share_price = \
+                        common_share_price.group().replace(',', '.')
 
                 else:
                     common_share_div = False
@@ -96,8 +96,9 @@ def get_stock_dividends(stock_obj):
                     r'\d+,\d+', line[preferred_share_row])
                 if preferred_share_price:
                     preferred_share_div = True
-                    preferred_share_price = preferred_share_price.group().replace(',', '.')
-                    
+                    preferred_share_price = \
+                        preferred_share_price.group().replace(',', '.')
+
                 else:
                     preferred_share_div = False
                     preferred_share_price = '0.00'
@@ -116,12 +117,21 @@ def add_dividends_to_model(stock_obj, dividend_dict):
 
     for date, div_value in dividend_dict.items():
 
-        if stock_type == 'preferred_share' and \
-                div_value['preferred_share']['div'] is True:
-            amount = Decimal(div_value['preferred_share']['value'])
-        elif stock_type == 'common_share' and \
-                div_value['common_share']['div'] is True:
-            amount = Decimal(div_value['common_share']['value'])
+        if stock_type in ['preferred_share', 'common_share'] and \
+                div_value[stock_type]['div'] is True:
+            amount = Decimal(div_value[stock_type]['value'])
+
+            #print(date, amount)
+        
+        else:
+            continue
+
+        # if stock_type == 'preferred_share' and \
+        #         div_value['preferred_share']['div'] is True:
+        #     amount = Decimal(div_value['preferred_share']['value'])
+        # elif stock_type == 'common_share' and \
+        #         div_value['common_share']['div'] is True:
+        #     amount = Decimal(div_value['common_share']['value'])
 
         try:
             existing_div = Dividend.objects.get(stock=stock_obj, date=date)
@@ -132,16 +142,16 @@ def add_dividends_to_model(stock_obj, dividend_dict):
             continue
 
         except Dividend.DoesNotExist:
-            dividend = Dividend()
-
-            dividend.date = datetime.strptime(date, "%Y-%m-%d")
-            dividend.stock = stock_obj
-            dividend.amount = amount
+            dividend = Dividend.objects.create(
+                date=datetime.strptime(date, "%Y-%m-%d"),
+                stock=stock_obj,
+                amount=amount
+            )
 
             dividend.save()
 
     stock_obj.latest_dividend_update = datetime.today()
-    print('stock', stock_obj, stock_obj.latest_dividend_update)
+    #print('stock', stock_obj, stock_obj.latest_dividend_update)
     stock_obj.save()
 
 
@@ -149,8 +159,8 @@ def get_dividend_result(request, stock_obj):
 
     users_dividends_received = Dividend.objects.filter(
         stock=stock_obj.id,
-        id__in=request.user.dividendsofuser_set.filter(is_received=True).values_list(
-            'dividend'))
+        id__in=request.user.dividendsofuser_set.filter(
+            is_received=True).values_list('dividend'))
 
     sum_dividends_received = 0
 
@@ -179,8 +189,10 @@ def update_dividends_of_user(request, stock_obj, date=None):
         quantity = get_quantity(request, stock_obj, div.date)
 
         try:
-            dividend_of_user = DividendsOfUser.objects.get(user=request.user,
-                                                           dividend=div)
+            dividend_of_user = DividendsOfUser.objects.get(
+                user=request.user,
+                dividend=div)
+
             if quantity <= 0:
                 dividend_of_user.is_received = False
 
