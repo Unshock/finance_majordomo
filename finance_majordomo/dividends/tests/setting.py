@@ -43,6 +43,18 @@ class SettingsDividends(TestCase):
         cls.stock_id_1 = Stock.objects.create(
             ticker="LSNG",
             type="common_share",
+            isin="isin_id_1",
+            issuedate=datetime.date(2000, 1, 1),
+            isqualifiedinvestors=False,
+            morningsession=False,
+            eveningsession=False,
+            stock_data={},
+        )
+
+        cls.stock_id_2 = Stock.objects.create(
+            ticker="LSNGP",
+            type="preferred_share",
+            isin="isin_id_2",
             issuedate=datetime.date(2000, 1, 1),
             isqualifiedinvestors=False,
             morningsession=False,
