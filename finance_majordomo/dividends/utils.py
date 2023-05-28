@@ -121,17 +121,8 @@ def add_dividends_to_model(stock_obj, dividend_dict):
                 div_value[stock_type]['div'] is True:
             amount = Decimal(div_value[stock_type]['value'])
 
-            #print(date, amount)
-        
         else:
             continue
-
-        # if stock_type == 'preferred_share' and \
-        #         div_value['preferred_share']['div'] is True:
-        #     amount = Decimal(div_value['preferred_share']['value'])
-        # elif stock_type == 'common_share' and \
-        #         div_value['common_share']['div'] is True:
-        #     amount = Decimal(div_value['common_share']['value'])
 
         try:
             existing_div = Dividend.objects.get(stock=stock_obj, date=date)

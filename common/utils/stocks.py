@@ -1,5 +1,7 @@
 import json
 import datetime
+import pprint
+
 import requests
 from urllib3.util.retry import Retry
 
@@ -31,6 +33,8 @@ def validate_ticker(ticker: str):
             ticker_data = None
         #print(ticker_data)
         return ticker_data
+    
+
 
 
 
@@ -38,15 +42,16 @@ def validate_ticker(ticker: str):
 def get_stock_board_history(ticker: str, start_date:str=None):
     """
     :param ticker: ticker for MOEX API
-    :param start_date: the earliest trading date from which information will be received to current date
-    :return: list of dicts with data for every day from start_day or first historic day if start_day is None
+    :param start_date: the earliest trading date from which information will be
+     received till current date
+    :return: list of dicts with data for every day from start_day or first
+     historic day if start_day is None
     """
 
     with requests.Session() as session:
         print(f"ZAPROS данных по тикеру {ticker} начиная с {start_date}")
 
         data = apimoex.get_board_history(session, ticker.upper(), start=start_date)
-
         if data:
             return data#print('данные получены')
         else:
@@ -95,6 +100,10 @@ def get_stock_description(ticker: str):
         for elem in data:
             result_data[elem['name']] = elem['value']
         return result_data
+
+# import pprint
+# pp = pprint.pformat(get_stock_board_history('tech'), indent=2)
+# print(pp)
 
 def get_security(security_info: str):
     with requests.Session() as session:

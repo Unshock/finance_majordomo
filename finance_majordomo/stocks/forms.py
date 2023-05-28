@@ -4,7 +4,7 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 from finance_majordomo.stocks.models import Stock
 
-from common.utils.stocks import validate_ticker
+from common.utils.stocks import validate_ticker, get_stock_description
 
 
 class StockForm(ModelForm):
@@ -18,9 +18,19 @@ class StockForm(ModelForm):
         fields = ['ticker']
 
     def clean_ticker(self):
-        ticker = self.cleaned_data['ticker']
-        validated_ticker = validate_ticker(ticker)
+        ticker = self.cleaned_data['ticker'].upper()
 
-        if not validated_ticker:
-            raise ValidationError(_(f"Тикер {ticker} не найден"))
-        return validated_ticker['ticker']
+        if Stock.objects.filter(ticker=ticker).count() == 1:
+            raise ValidationError(_(f"Тикер {ticker} уже добавлен"))
+
+        stock_description = get_stock_description(
+            self.cleaned_data.get('ticker'))
+
+        if not stock_description:
+            raise ValidationError(_(f"Ticker {ticker} hasn't been found"))
+
+        if stock_description.get("GROUP") != "stock_shares":
+            raise ValidationError(_(f"Only shares accepted"))
+
+        self.cleaned_data['stock_description'] = stock_description
+        return ticker

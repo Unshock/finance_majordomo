@@ -447,8 +447,11 @@ class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     login_url = 'login'
     form_class = StockForm
     template_name = 'base_create_and_update.html'
+
     success_url = reverse_lazy('stocks')
     success_message = _("Stock has been successfully added!")
+
+    self_url = reverse_lazy('add_stock')
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -460,77 +463,72 @@ class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         form = StockForm(request.POST)
 
         if form.is_valid():
-            #validated_ticker = validate_ticker(form.cleaned_data.get('ticker'))
-            stock_description = get_stock_description(form.cleaned_data.get('ticker'))
-            if stock_description:
 
-                ticker = stock_description.get('SECID')
-                isin = stock_description.get('ISIN')
+            stock_description = form.cleaned_data.get('stock_description')
 
-                name = stock_description.get('SHORTNAME')
-                latname = stock_description.get('LATNAME')
+            ticker = stock_description.get('SECID')
+            isin = stock_description.get('ISIN')
 
-                currency = 'RUR' if stock_description.get('FACEUNIT') == 'SUR' else stock_description.get('FACEUNIT')
-                issuedate = stock_description.get('ISSUEDATE')
+            name = stock_description.get('SHORTNAME')
+            latname = stock_description.get('LATNAME')
 
-                isqualifiedinvestors = True if stock_description.get(
-                    'ISQUALIFIEDINVESTORS') == '1' else False
-                morningsession = True if stock_description.get(
-                    'MORNINGSESSION') == '1' else False
-                eveningsession = True if stock_description.get(
-                    'EVENINGSESSION') == '1' else False
+            currency = 'RUR' if stock_description.get(
+                'FACEUNIT') == 'SUR' else stock_description.get('FACEUNIT')
+            issuedate = stock_description.get('ISSUEDATE')
 
-                type = stock_description.get('TYPE')
-                typename = stock_description.get('TYPENAME')
+            isqualifiedinvestors = True if\
+                stock_description.get('ISQUALIFIEDINVESTORS') == '1' else False
+            morningsession = True if\
+                stock_description.get('MORNINGSESSION') == '1' else False
+            eveningsession = True if\
+                stock_description.get('EVENINGSESSION') == '1' else False
 
-                group = stock_description.get('GROUP')
-                groupname = stock_description.get('GROUPNAME')
+            type = stock_description.get('TYPE')
+            typename = stock_description.get('TYPENAME')
 
-                check_list = [ticker, name, isin,
-                              currency, latname, isqualifiedinvestors,
-                              issuedate, morningsession, eveningsession,
-                              typename, group, type, groupname]
+            group = stock_description.get('GROUP')
+            groupname = stock_description.get('GROUPNAME')
 
-                if None in check_list:
-                    print("SOMETHING HAVE NOT BEEN LOADED - GOT NONE")
+            check_list = [ticker, name, isin,
+                          currency, latname, isqualifiedinvestors,
+                          issuedate, morningsession, eveningsession,
+                          typename, group, type, groupname]
 
-                #Ищем инфу о ценах акции за весь период чтобы записать в JSONField
-                stock_board_history = get_stock_board_history(ticker)
-                json_stock_board_data = make_json_trade_info_dict(stock_board_history)
+            if None in check_list:
+                print("SOMETHING HAVE NOT BEEN LOADED - GOT NONE")
 
-                stock_obj = Stock()
-                stock_obj.ticker = ticker
-                stock_obj.name = name
-                stock_obj.isin = isin
-                stock_obj.currency = currency
-                stock_obj.latname = latname
-                stock_obj.isqualifiedinvestors = isqualifiedinvestors
-                stock_obj.issuedate = issuedate
-                stock_obj.morningsession = morningsession
-                stock_obj.eveningsession = eveningsession
-                stock_obj.typename = typename
-                stock_obj.group = group
-                stock_obj.type = type
-                stock_obj.groupname = groupname
+            #Ищем инфу о ценах акции за весь период чтобы записать в JSONField
+            stock_board_history = get_stock_board_history(ticker)
+            json_stock_board_data = make_json_trade_info_dict(
+                stock_board_history)
 
-                #obj.save()
-                #StockData(obj).update_stock_data()
+            stock_obj = Stock.objects.create(
+                ticker=ticker,
+                name=name,
+                isin=isin,
+                currency=currency,
+                latname=latname,
+                isqualifiedinvestors=isqualifiedinvestors,
+                issuedate=issuedate,
+                morningsession=morningsession,
+                eveningsession=eveningsession,
+                typename=typename,
+                group=group,
+                type=type,
+                groupname=groupname,
+                stock_data=json_stock_board_data,
+            )
 
-                stock_obj.stock_data = json_stock_board_data #str
-                stock_obj.save()
+            # add dividend for stock
+            try:
+                dividends_dict = get_stock_dividends(stock_obj)
+                add_dividends_to_model(stock_obj, dividends_dict)
 
+            except Exception('something went wrong while download divs'):
+                pass
 
-                # add dividend for stock
-                try:
-                    dividends_dict = get_stock_dividends(stock_obj)
-                    add_dividends_to_model(stock_obj, dividends_dict)
-
-                except Exception('something went wrong while download divs'):
-                    pass
-
-
-                messages.success(request, self.success_message)
-                return redirect(self.success_url)
+            messages.success(request, self.success_message)
+            return redirect(self.success_url)
         return super().post(request, *args, **kwargs)
 
     @staticmethod
@@ -540,12 +538,12 @@ class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         today = datetime.datetime.strptime(today, '%Y-%m-%d')
         last_day = datetime.datetime.strptime(start_date, '%Y-%m-%d')
 
-
-
         json_current_stock_data = json.loads(stock.stock_data)
 
-        stock_board_history = get_stock_board_history(stock.ticker, start_date)
-        json_stock_board_data = json.loads(make_json_trade_info_dict(stock_board_history))
+        stock_board_history = get_stock_board_history(
+            stock.ticker, start_date)
+        json_stock_board_data = json.loads(
+            make_json_trade_info_dict(stock_board_history))
 
         #print('======')
         #print(json_stock_data['TRADEINFO'])
@@ -554,7 +552,8 @@ class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         #print(json_stock_board_data['TRADEINFO'])
         #print('##======##')
 
-        json_current_stock_data['TRADEINFO'].update(json_stock_board_data['TRADEINFO'])
+        json_current_stock_data['TRADEINFO'].update(
+            json_stock_board_data['TRADEINFO'])
 
         #print('##########')
         #print(json_stock_data)
