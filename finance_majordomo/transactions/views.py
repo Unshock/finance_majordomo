@@ -51,7 +51,8 @@ class UsersTransactionList(LoginRequiredMixin, ListView):
 class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     login_url = 'login'
     form_class = TransactionForm
-    template_name = 'base_create_and_update.html'
+    #template_name = 'base_create_and_update.html'
+    template_name = 'transactions/transaction_form.html'
     success_url = reverse_lazy('transactions')
     success_message = _("Transaction has been successfully added!")
 

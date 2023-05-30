@@ -119,7 +119,7 @@ class TestDividendUtils(SettingsDividends):
 
         add_dividends_to_model(self.stock_id_3, valid_dividend_dict)
 
-        dividends = Dividend.objects.all()
+        dividends = Dividend.objects.filter(stock_id=3)
 
         assert dividends.count() == 35
         with self.assertRaises(Dividend.DoesNotExist):
@@ -127,9 +127,9 @@ class TestDividendUtils(SettingsDividends):
         assert sum([div.amount for div in dividends]) == Decimal("418.69")
 
         add_dividends_to_model(self.stock_id_4, valid_dividend_dict)
-        dividends = Dividend.objects.all()
+        dividends = Dividend.objects.filter(stock_id=4)
 
-        assert dividends.count() == 71
+        assert dividends.count() == 71 - 35
         assert Dividend.objects.get(date='2020-06-30').stock == self.stock_id_4
         assert len(Dividend.objects.filter(date='2004-05-10')) == 2
         assert Dividend.objects.get(
@@ -138,4 +138,4 @@ class TestDividendUtils(SettingsDividends):
         assert Dividend.objects.get(
             date='2004-05-10',
             stock=self.stock_id_4).amount == Decimal("1")
-        assert sum([div.amount for div in dividends]) == Decimal("841.23")
+        assert sum([div.amount for div in dividends]) == Decimal("841.23") - Decimal("418.69")

@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'bootstrap4',
+    'crispy_forms',
+    'crispy_bootstrap4',
 
     'finance_majordomo',
     'finance_majordomo.users',
@@ -55,6 +57,8 @@ INSTALLED_APPS = [
     'finance_majordomo.assets',
 
 ]
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

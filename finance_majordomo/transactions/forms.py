@@ -6,12 +6,26 @@ from finance_majordomo.stocks.models import Stock
 from finance_majordomo.transactions.models import Transaction
 from finance_majordomo.stocks.views import UsersStocks
 
-from common.utils.stocks import validate_ticker
+from common.utils.stocks import validate_ticker, get_stock_description
 
 from bootstrap4.widgets import RadioSelectButtonGroup
 
 
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Submit
+
+
 class TransactionForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'id-exampleForm'
+        self.helper.form_class = 'blueForms'
+        self.helper.form_method = 'post'
+        self.helper.form_action = 'submit_survey'
+
+        self.helper.add_input(Submit('submit', 'Submit'))
 
     asset_type = forms.ChoiceField(
         label=_('Asset type'),
@@ -36,12 +50,15 @@ class TransactionForm(ModelForm):
     )
 
     ticker = forms.ModelChoiceField(
-        label=_('Ticker'),
+        label=_('Share'),
         queryset=Stock.objects.all(),
         empty_label=_('Choose stock from the list'),
 
         )
 
+    ticker_new = forms.CharField(
+        label=_("Ticker"),
+    )
 
     date = forms.CharField(
         label=_('Date'),
@@ -104,12 +121,31 @@ class TransactionForm(ModelForm):
             raise ValidationError(_("Fee must be more or equal 0"))
         return fee
 
+    def clean_ticker(self):
+        ticker = self.cleaned_data['ticker_new'].upper()
+
+        # if Stock.objects.filter(ticker=ticker).count() == 1:
+        #     raise ValidationError(_(f"Тикер {ticker} уже добавлен"))
+
+        stock_description = get_stock_description(
+            self.cleaned_data.get('ticker'))
+
+        if not stock_description:
+            raise ValidationError(_(f"Ticker {ticker} hasn't been found"))
+
+        if stock_description.get("GROUP") != "stock_shares":
+            raise ValidationError(_(f"Only shares accepted"))
+
+        self.cleaned_data['stock_description'] = stock_description
+        return ticker
+
     class Meta:
         model = Transaction
         fields = [
             'transaction_type',
             'asset_type',
             'ticker',
+            'ticker_new',
             'date',
             'price',
             'fee',

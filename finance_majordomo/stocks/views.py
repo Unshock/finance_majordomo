@@ -130,8 +130,8 @@ class UsersStocks(LoginRequiredMixin, ListView):
                  'ticker': stock.ticker,
                  'name': stock.name,
                  'currency': stock.currency,
-                 'quantity': moneyfmt(Decimal(current_quantity),
-                                      sep=' ', places=0),
+                 'quantity': moneyfmt(
+                     Decimal(current_quantity), sep=' ', places=0),
                  'purchase_price': moneyfmt(purchase_price, sep=' '),
                  'current_price': moneyfmt(current_price, sep=' '),
                  'percent_result': percent_result,
@@ -531,6 +531,8 @@ class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
             return redirect(self.success_url)
         return super().post(request, *args, **kwargs)
 
+
+    # не используется?
     @staticmethod
     def actualize_stock_data(stock, start_date=None):
 

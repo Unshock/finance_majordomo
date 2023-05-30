@@ -104,7 +104,6 @@ def logout_user(request):
     return redirect('home')
 
 
-
 class AddStockToUser(SuccessMessageMixin, LoginRequiredMixin, View):
     model = User
     login_url = 'login'
