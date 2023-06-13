@@ -5,6 +5,7 @@ from django.test import TestCase, Client
 
 from ..models import Dividend, DividendsOfUser
 from ...stocks.models import Stock
+from ...transactions.models import Transaction
 
 
 class SettingsDividends(TestCase):
@@ -21,8 +22,15 @@ class SettingsDividends(TestCase):
             first_name="Authenticated",
             last_name="UserNotAdmin"
         )
-
         cls.client_authenticated.force_login(user.objects.last())
+
+        cls.client_authenticated_another = Client()
+        cls.user_authenticated_another = user.objects.create(
+            username="user_authenticated_another",
+            first_name="Authenticated",
+            last_name="UserNotAdmin"
+        )
+        cls.client_authenticated_another.force_login(user.objects.get(id=2))
 
         cls.client_unauthenticated = Client()
         cls.user_unauthenticated = user.objects.create(
@@ -91,6 +99,16 @@ class SettingsDividends(TestCase):
             amount="100000.00",
         )
 
+        cls.transaction_id_1 = Transaction.objects.create(
+            transaction_type='BUY',
+            asset_type='STOCK',
+            user=cls.user_authenticated,
+            ticker=cls.stock_id_1,
+            date='1999-12-31',
+            price='10',
+            quantity=1
+        )
+
 
         cls.dividend_of_user_id_1 = DividendsOfUser.objects.create(
             user=cls.user_authenticated,
@@ -101,7 +119,6 @@ class SettingsDividends(TestCase):
             user=cls.user_authenticated,
             dividend=cls.dividend_id_2,
         )
-        
+
         cls.dividend_of_user_id_2.is_received = True
-
-
+        cls.dividend_of_user_id_2.save()

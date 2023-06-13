@@ -103,15 +103,15 @@ class AddDivToUser(SuccessMessageMixin, LoginRequiredMixin, View):
             dividend_of_user = DividendsOfUser.objects.get(user=user,
                                                            dividend=dividend)
         except DividendsOfUser.DoesNotExist:
-
+            raise Exception('such dividend has not been found')
             #dividend.users.add(user)
             #dividend.save()
-
-            dividend_of_user = DividendsOfUser.objects.get(user=user,
-                                                           dividend=dividend)
+            # dividend_of_user = DividendsOfUser.objects.get(user=user,
+            #                                                dividend=dividend)
+        print(dividend_of_user.is_received)
         dividend_of_user.is_received = True
         dividend_of_user.save()
-
+        print(dividend_of_user.is_received)
         return redirect('dividends')
 
 
@@ -136,5 +136,6 @@ class RemoveDivFromUser(SuccessMessageMixin, LoginRequiredMixin, View):
 
         dividend_of_user.is_received = False
         dividend_of_user.save()
+
 
         return redirect('dividends')
