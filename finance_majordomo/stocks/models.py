@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MinLengthValidator
 from django.urls import reverse
 from ..assets.models import Asset
 from django.utils.translation import gettext_lazy as _
@@ -9,41 +10,78 @@ from ..users.models import User
 class Stock(Asset):
 
     ticker = models.CharField(
-        max_length=10, verbose_name="Тикер акции", unique=True)
+        max_length=10,
+        verbose_name="Тикер акции", 
+        unique=True
+    )
+
     name = models.CharField(
-        max_length=100, verbose_name="Имя акции")
+        max_length=100,
+        verbose_name="Имя акции"
+    )
+
     isin = models.CharField(
-        max_length=100, verbose_name="ISIN", blank=True, unique=True)
+        max_length=100,
+        verbose_name="ISIN",
+        blank=True,
+        unique=True
+    )
+
     currency = models.CharField(
-        max_length=10, verbose_name="Валюта номинала", blank=True)
+        max_length=10,
+        verbose_name="Валюта номинала",
+        blank=True
+    )
+
     issuedate = models.DateField(
-        verbose_name="Дата начала торгов", blank=True)
+        verbose_name="Дата начала торгов",
+        blank=True
+    )
 
     latname = models.CharField(
         max_length=100,
         verbose_name="Английское наименование",
-        blank=True)
+        blank=True
+    )
 
     isqualifiedinvestors = models.BooleanField(
         verbose_name="Бумаги для квалифицированных инвесторов",
-        blank=True)
+        blank=True
+    )
 
     morningsession = models.BooleanField(
         verbose_name="Допуск к утренней дополнительной торговой сессии",
-        blank=True)
+        blank=True
+    )
 
     eveningsession = models.BooleanField(
         verbose_name="Допуск к вечерней дополнительной торговой сессии",
-        blank=True)
+        blank=True
+    )
 
     typename = models.CharField(
-        max_length=100, verbose_name="Вид/категория ценной бумаги", blank=True)
+        max_length=100,
+        verbose_name="Вид/категория ценной бумаги",
+        blank=True
+    )
+
     group = models.CharField(
-        max_length=100, verbose_name="Код типа инструмента", blank=True)
+        max_length=100,
+        verbose_name="Код типа инструмента",
+        blank=True
+    )
+
     type = models.CharField(
-        max_length=100, verbose_name="Тип бумаги", blank=True)
+        max_length=100,
+        verbose_name="Тип бумаги",
+        blank=True
+    )
+
     groupname = models.CharField(
-        max_length=100, verbose_name="Тип инструмента", blank=True)
+        max_length=100,
+        verbose_name="Тип инструмента",
+        blank=True
+    )
 
     stock_data = models.JSONField(
         verbose_name="Данные об акции")
@@ -75,9 +113,15 @@ class Stock(Asset):
 
 
 class StocksOfUser(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
 
+    stock = models.ForeignKey(
+        Stock,
+        on_delete=models.CASCADE
+    )
 
     class Meta:
         verbose_name = "Акции пользователя"
@@ -92,10 +136,16 @@ class ProdCalendar(models.Model):
         ('1', 'Nonworking'),
     ]
 
-    date = models.CharField(max_length=10, verbose_name='Дата')
-    date_status = models.CharField(max_length=10,
-                                   choices=date_status_choice,
-                                   verbose_name='Статус дня')
+    date = models.DateField(
+        max_length=10,
+        verbose_name='Дата'
+    )
+
+    date_status = models.CharField(
+        max_length=10,
+        choices=date_status_choice,
+        verbose_name='Статус дня'
+    )
 
     class Meta:
         ordering = ['date', 'date_status']

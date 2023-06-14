@@ -33,7 +33,7 @@ def validate_ticker(ticker: str):
             ticker_data = None
         #print(ticker_data)
         return ticker_data
-    
+
 
 
 
@@ -49,13 +49,17 @@ def get_stock_board_history(ticker: str, start_date:str=None):
     """
 
     with requests.Session() as session:
-        print(f"ZAPROS данных по тикеру {ticker} начиная с {start_date}")
+        print(f"Start request of data for ticker: {ticker.upper()}"
+              f" from date: {start_date}")
 
-        data = apimoex.get_board_history(session, ticker.upper(), start=start_date)
+        data = apimoex.get_board_history(
+            session, ticker.upper(), start=start_date)
         if data:
-            return data#print('данные получены')
+            return data
         else:
             print('ДАННЫЕ НЕ ПОЛУЧЕНЫ!!!!!!!!!')
+            
+#print(get_stock_board_history('gazp'))
 
 
 
@@ -73,7 +77,8 @@ def get_stock_current_price(ticker: str):
 
     with requests.Session() as session:
         print(f'ZAPROS na poluchenie last_price of {ticker.upper()} poshel')
-        data = apimoex.get_board_candles(session, ticker.upper(), start=str(request_time), interval=1)
+        data = apimoex.get_board_candles(
+            session, ticker.upper(), start=str(request_time), interval=1)
         #data = apimoex.find_security_description(session, ticker.upper())
         #print('data', '\n'.join(str(d) for d in data))
         if data:
@@ -86,10 +91,12 @@ def get_stock_current_price(ticker: str):
             if last_price and actual_time:
                return last_price, actual_time
             else:
-               raise ValueError(f'Could not get data for {ticker} in {get_stock_current_price}')
+               raise ValueError(f'Could not get data for {ticker}'
+                                f' in {get_stock_current_price}')
 
 
-        raise ValueError(f'Could not get data for {ticker} in {get_stock_current_price}')
+        raise ValueError(f'Could not get data for {ticker}'
+                         f' in {get_stock_current_price}')
 
 
 def get_stock_description(ticker: str):
@@ -100,6 +107,9 @@ def get_stock_description(ticker: str):
         for elem in data:
             result_data[elem['name']] = elem['value']
         return result_data
+    
+#print(get_stock_description('lsrg'))
+
 
 # import pprint
 # pp = pprint.pformat(get_stock_board_history('tech'), indent=2)
@@ -107,8 +117,12 @@ def get_stock_description(ticker: str):
 
 def get_security(security_info: str):
     with requests.Session() as session:
-        data = apimoex.find_securities(session, security_info.upper(), columns=('secid', 'regnumber', 'name', 'type', 'group'))
-        #print(data)
+        data = apimoex.find_securities(
+            session,
+            security_info.upper(),
+            columns=('secid', 'regnumber', 'name', 'type', 'group')
+        )
+
         return data
 
 

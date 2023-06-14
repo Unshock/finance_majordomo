@@ -6,13 +6,23 @@ from finance_majordomo.users.models import User
 
 
 class Dividend(models.Model):
-    creation_date = models.DateTimeField(auto_now_add=True,
-                                         verbose_name=_("Creation date"))
-    stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
-    date = models.DateField(verbose_name=_("Dividend date"))
+    creation_date = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_("Creation date"))
+
+    stock = models.ForeignKey(
+        Stock,
+        on_delete=models.CASCADE
+    )
+
+    date = models.DateField(
+        verbose_name=_("Dividend date")
+    )
+
     #make not null:
     amount = models.DecimalField(
-        max_digits=8, decimal_places=2,
+        max_digits=8,
+        decimal_places=2,
         verbose_name=_("Dividend amount for one share"))
 
     users = models.ManyToManyField(
@@ -31,13 +41,22 @@ class Dividend(models.Model):
 
 
 class DividendsOfUser(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE,
-                             null=True)
-    dividend = models.ForeignKey(Dividend, on_delete=models.CASCADE,
-                                 null=True)
-    is_received = models.BooleanField(default=False,
-                                      help_text='shows if user got dividend',
-                                      verbose_name='Dividend status')
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        null=True
+    )
+
+    dividend = models.ForeignKey(
+        Dividend,
+        on_delete=models.CASCADE,
+        null=True
+    )
+
+    is_received = models.BooleanField(
+        default=False,
+        help_text='shows if user got dividend',
+        verbose_name='Dividend status')
 
     class Meta:
 

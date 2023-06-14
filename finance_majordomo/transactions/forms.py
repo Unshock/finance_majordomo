@@ -56,9 +56,9 @@ class TransactionForm(ModelForm):
 
         )
 
-    ticker_new = forms.CharField(
-        label=_("Ticker"),
-    )
+    # ticker_new = forms.CharField(
+    #     label=_("Ticker"),
+    # )
 
     date = forms.CharField(
         label=_('Date'),
@@ -121,23 +121,23 @@ class TransactionForm(ModelForm):
             raise ValidationError(_("Fee must be more or equal 0"))
         return fee
 
-    def clean_ticker(self):
-        ticker = self.cleaned_data['ticker_new'].upper()
-
-        # if Stock.objects.filter(ticker=ticker).count() == 1:
-        #     raise ValidationError(_(f"Тикер {ticker} уже добавлен"))
-
-        stock_description = get_stock_description(
-            self.cleaned_data.get('ticker'))
-
-        if not stock_description:
-            raise ValidationError(_(f"Ticker {ticker} hasn't been found"))
-
-        if stock_description.get("GROUP") != "stock_shares":
-            raise ValidationError(_(f"Only shares accepted"))
-
-        self.cleaned_data['stock_description'] = stock_description
-        return ticker
+    # def clean_ticker(self):
+    #     ticker = self.cleaned_data['ticker_new'].upper()
+    # 
+    #     # if Stock.objects.filter(ticker=ticker).count() == 1:
+    #     #     raise ValidationError(_(f"Тикер {ticker} уже добавлен"))
+    # 
+    #     stock_description = get_stock_description(
+    #         self.cleaned_data.get('ticker'))
+    # 
+    #     if not stock_description:
+    #         raise ValidationError(_(f"Ticker {ticker} hasn't been found"))
+    # 
+    #     if stock_description.get("GROUP") != "stock_shares":
+    #         raise ValidationError(_(f"Only shares accepted"))
+    # 
+    #     self.cleaned_data['stock_description'] = stock_description
+    #     return ticker
 
     class Meta:
         model = Transaction
@@ -145,7 +145,7 @@ class TransactionForm(ModelForm):
             'transaction_type',
             'asset_type',
             'ticker',
-            'ticker_new',
+            #'ticker_new',
             'date',
             'price',
             'fee',

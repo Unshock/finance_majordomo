@@ -13,7 +13,8 @@ from finance_majordomo.stocks.models import Stock
 
 from django.utils.translation import gettext_lazy as _
 
-from common.utils.stocks import validate_ticker, get_stock_board_history, make_json_trade_info_dict
+from common.utils.stocks import validate_ticker, get_stock_board_history,\
+    make_json_trade_info_dict
 from finance_majordomo.transactions.forms import TransactionForm
 from finance_majordomo.users.models import User
 from finance_majordomo.transactions.models import Transaction
@@ -43,16 +44,18 @@ class UsersTransactionList(LoginRequiredMixin, ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['page_title'] = self.request.user.username + " " + _("transaction list")
-        context['transaction_list'] = Transaction.objects.filter(user=self.request.user.id)
+        context['page_title'] = self.request.user.username + " " + _(
+            "transaction list")
+        context['transaction_list'] = Transaction.objects.filter(
+            user=self.request.user.id)
         return context
 
 
 class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     login_url = 'login'
     form_class = TransactionForm
-    #template_name = 'base_create_and_update.html'
-    template_name = 'transactions/transaction_form.html'
+    template_name = 'base_create_and_update.html'
+    #template_name = 'transactions/transaction_form.html'
     success_url = reverse_lazy('transactions')
     success_message = _("Transaction has been successfully added!")
 
@@ -82,10 +85,15 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         if asset_type:
            transaction_form.initial['asset_type'] = asset_type
 
-        return render(request, self.template_name, {'form': transaction_form,
-                                                    'page_title': _("Add new transaction"),
-                                                    'button_text': _('Add')
-                                                    })
+        return render(
+            request,
+            self.template_name,
+            {'form': transaction_form,
+             'page_title': _("Add new transaction"),
+             'button_text': _('Add')
+             }
+        )
+
     def post(self, request, *args, **kwargs):
         form = TransactionForm(request.POST)
         #print('f', form.cleaned_data)
@@ -101,15 +109,17 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
                 user = User.objects.get(id=request.user.id)
 
-                obj = Transaction()
-                obj.asset_type = asset_type
-                obj.transaction_type = transaction_type
-                obj.user = user
-                obj.ticker = ticker
-                obj.date = date
-                obj.price = price
-                obj.fee = fee
-                obj.quantity = quantity
+                obj = Transaction.objects.create(
+                    asset_type=asset_type,
+                    transaction_type=transaction_type,
+                    user=user,
+                    ticker=ticker,
+                    date=date,
+                    price=price,
+                    fee=fee,
+                    quantity=quantity
+                )
+
                 obj.save()
 
                 stock_obj = Stock.objects.get(id=obj.ticker.id)
@@ -117,15 +127,24 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
                 messages.success(request, self.success_message)
                 return redirect(self.success_url)
-            return render(request, self.template_name, {'form': form,
-                                                        'page_title': _("Add new transaction"),
-                                                        'button_text': _("Add")
-                                                        })
 
-        return render(request, self.template_name, {'form': form,
-                                                    'page_title': _("Add new transaction"),
-                                                    'button_text': _('Add')
-                                                    })
+            return render(
+                request,
+                self.template_name,
+                {'form': form,
+                 'page_title': _("Add new transaction"),
+                 'button_text': _("Add")
+                 }
+            )
+
+        return render(
+            request,
+            self.template_name,
+            {'form': form,
+             'page_title': _("Add new transaction"),
+             'button_text': _('Add')
+             }
+        )
 
 
             # else:
@@ -147,7 +166,7 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         stock = Stock.objects.get(latname=stock_latname)
         print(stock.issuedate)
         issuedate = datetime.datetime.strftime(stock.issuedate, '%Y-%m-%d')
-        
+
         print(issuedate)
 
         if date < issuedate:
@@ -309,33 +328,31 @@ class DeleteTransaction(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
 
 
 # заготовка - нерабочая функция
-def validate_transaction(request, ticker, quantity, date):
-    transaction = Transaction.objects.get(id=self.get_object().id)
-    transaction_type = transaction.transaction_type
+def validate_transaction(request, latname, quantity, date, transaction_type, validator='add_validator'):
 
-    if transaction_type == 'SELL':
+    if transaction_type == 'SELL' and validator == 'delete_validator' or\
+            transaction_type == 'BUY' and validator == 'add_validator':
         return True
 
-    quantity = transaction.quantity
-    ticker = transaction.ticker
-    date = transaction.date
-
-    stock = Stock.objects.get(latname=ticker)
+    stock = Stock.objects.get(latname=latname)
     day_end_balance = get_quantity(request, stock, date=date) - quantity
 
     if day_end_balance < 0:
         return False
 
-    users_transactions = Transaction.objects.filter(user=User.objects.get(id=self.request.user.id))
-    users_specific_asset_transactions = users_transactions.filter(ticker=stock.id).order_by('date')
-    users_specific_asset_transactions = users_specific_asset_transactions.filter(date__gt=date)
+    user = request.user
 
-    if len(users_specific_asset_transactions) == 0:
+    users_transactions = Transaction.objects.filter(
+        user=user,
+        ticker=stock.id,
+        date__gt=date).order_by('date')
+
+    if len(users_transactions) == 0:
         return True
 
     cur_date = date
 
-    for transaction in users_specific_asset_transactions:
+    for transaction in users_transactions:
 
         prev_date = cur_date
         cur_date = transaction.date

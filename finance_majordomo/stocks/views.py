@@ -50,10 +50,11 @@ class UsersStocks(LoginRequiredMixin, ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         #print(self.request.user.id)
         context = super().get_context_data(**kwargs)
-        context['page_title'] = self.request.user.username + " " + _("stock list")
 
+        context['page_title'] = self.request.user.username + " " + _(
+            "stock list")
         user_stock_data = self.get_user_stock_data()
-        
+
         #print(user_stock_data)
 
         # total_price = {'total_purchase_price': self.get_total_purchase_price(user_stock_data),
@@ -64,7 +65,8 @@ class UsersStocks(LoginRequiredMixin, ListView):
         #                )
         #                }
 
-        context['fields_to_display'] = json.loads(self.request.user.fields_to_display)
+        context['fields_to_display'] = json.loads(
+            self.request.user.fields_to_display)
         context['stock_list'] = user_stock_data['stock_list']
         context['total_results'] = user_stock_data['total_results']
         return context
@@ -81,12 +83,9 @@ class UsersStocks(LoginRequiredMixin, ListView):
         request = self.request
         users_stocks = Stock.objects.filter(
             id__in=request.user.stocksofuser_set.values_list('stock'))
-        
+
         #print(request.user.stocksofuser_set.values_list('stock'))
-        #print(users_stocks)
 
-
-        #print(user_stocks)
         total_purchase_price = 0
         total_current_price = 0
         total_divs = 0
@@ -107,7 +106,8 @@ class UsersStocks(LoginRequiredMixin, ListView):
             current_price = self.get_current_price(stock)
             total_current_price += current_price
 
-            percent_result = self.get_percent_result(purchase_price, current_price)
+            percent_result = self.get_percent_result(
+                purchase_price, current_price)
 
             money_result_without_divs = moneyfmt(
                 get_money_result(current_price, purchase_price), sep=' ')
@@ -229,6 +229,7 @@ class UsersStocks(LoginRequiredMixin, ListView):
         #return '0'
         raise ValueError('current_price and purchase_price must be > 0')
 
+
 class StockData(object):
     MAX_HOLIDAY_GAP = 10 #max holidays continuous sequence in russian prod calendar
     def __init__(self, stock=None):
@@ -261,6 +262,7 @@ class StockData(object):
                 update_time = self.stock_data['TRADEINFO'][date_str].get("UPDATE_TIME")
             #print('STATUS:', status)
             return date_dt, status, update_time
+
     def actualize_stock_data(self):
 
         today_status = self.get_and_update_date_status(datetime.datetime.strftime(self.today, '%Y-%m-%d')).date_status
@@ -607,8 +609,8 @@ class DeleteStock(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
             return super().post(request, *args, **kwargs)
         except ProtectedError:
             messages.error(request, _(
-                'Label that is given to the task can not be deleted'))
-            return redirect('labels')
+                'error'))
+            return redirect('stocks')
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
