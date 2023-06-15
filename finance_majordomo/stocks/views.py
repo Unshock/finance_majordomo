@@ -9,8 +9,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import ProtectedError
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
-from django.core.exceptions import ObjectDoesNotExist
+from django.views.generic import ListView, CreateView, DeleteView
 
 from finance_majordomo.stocks.forms import StockForm
 from finance_majordomo.stocks.models import Stock, ProdCalendar
@@ -18,13 +17,12 @@ from finance_majordomo.transactions.models import Transaction
 
 from django.utils.translation import gettext_lazy as _
 
-from common.utils.stocks import validate_ticker, get_stock_board_history, make_json_trade_info_dict, get_date_status, \
-    get_stock_current_price, make_json_last_price_dict, get_stock_description
-from finance_majordomo.users.models import User
+from common.utils.stocks import get_stock_board_history, make_json_trade_info_dict, get_date_status, \
+    get_stock_current_price, make_json_last_price_dict
 from finance_majordomo.dividends.utils import get_stock_dividends, add_dividends_to_model
 from ..transactions.utils import get_quantity, get_purchace_price
 from .utils import get_money_result
-from ..dividends.utils import get_dividend_result, update_dividends_of_user
+from ..dividends.utils import get_dividend_result
 
 
 class Stocks(LoginRequiredMixin, ListView):

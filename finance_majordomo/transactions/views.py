@@ -3,23 +3,18 @@ import datetime
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
-from django.db.models import ProtectedError
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, CreateView, DeleteView
 
-from finance_majordomo.stocks.forms import StockForm
 from finance_majordomo.stocks.models import Stock
 
 from django.utils.translation import gettext_lazy as _
 
-from common.utils.stocks import validate_ticker, get_stock_board_history,\
-    make_json_trade_info_dict
 from finance_majordomo.transactions.forms import TransactionForm
 from finance_majordomo.users.models import User
 from finance_majordomo.transactions.models import Transaction
-from finance_majordomo.stocks.views import UsersStocks
-from .utils import get_quantity
+from ..transactions.utils import get_quantity
 from ..dividends.utils import update_dividends_of_user
 
 

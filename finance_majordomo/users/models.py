@@ -2,19 +2,7 @@ from django.db import models
 from django.urls import reverse
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
-
-
-def get_default_display_options():
-    fields = {'ticker': True,
-              'name': True,
-              'currency': True,
-              'quantity': True,
-              'purchase_price': True,
-              'current_price': True,
-              'dividends_received': True,
-              'percent_result': True,
-              }
-    return fields
+from .utils.fields_to_display import get_default_display_options
 
 
 class User(AbstractUser):
