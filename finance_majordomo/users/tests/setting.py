@@ -27,8 +27,8 @@ class SettingsUsers(TestCase):
         cls.client_authenticated_another = Client()
         cls.user_authenticated_another = user.objects.create(
             username="user_authenticated_another",
-            first_name="Authenticated",
-            last_name="UserNotAdmin"
+            first_name="AuthenticatedAnother",
+            last_name="UserNotAdminAnother"
         )
         cls.client_authenticated_another.force_login(user.objects.get(id=2))
 

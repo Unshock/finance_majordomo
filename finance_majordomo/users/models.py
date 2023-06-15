@@ -1,3 +1,5 @@
+import json
+
 from django.db import models
 from django.urls import reverse
 from django.contrib.auth.models import AbstractUser
@@ -11,7 +13,7 @@ class User(AbstractUser):
 
     fields_to_display = models.JSONField(
         verbose_name='Поля для отображения',
-        default=get_default_display_options()
+        default=json.dumps(get_default_display_options())
     )
 
     @property

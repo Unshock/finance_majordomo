@@ -31,7 +31,7 @@
                     </td>
                     <td>
                         <div class="d-flex justify-content-left">
-                            <a class="btn btn-primary btn-sm" href="{% url "add_stock_to_user" pk_user=request.user.id pk_stock=stock.id %}" role="button">{% translate "Add stock to my list" %}</a>
+                            <a class="btn btn-primary btn-sm" href="{% url "add_stock_to_user" pk_stock=stock.id %}" role="button">{% translate "Add stock to my list" %}</a>
                         </div>
                     </td>
                 </tr>

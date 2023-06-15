@@ -113,6 +113,7 @@ class AddStockToUser(SuccessMessageMixin, LoginRequiredMixin, View):
         stock = Stock.objects.get(id=kwargs['pk_stock'])
         stock.users.add(request.user)
         stock.save()
+
         return redirect('stocks')
 
         # user = User.objects.get(id=kwargs['pk_user'])
@@ -144,11 +145,11 @@ class AddStockToUser(SuccessMessageMixin, LoginRequiredMixin, View):
     #         self.object.save()
     #     return super().post(request, **kwargs)
 
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['page_title'] = _("Update users")
-        context['button_text'] = _("Update")
-        return context
+    # def get_context_data(self, *, object_list=None, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     context['page_title'] = _("Update users")
+    #     context['button_text'] = _("Update")
+    #     return context
 
 
 class SetFieldsToDisplay(SuccessMessageMixin, LoginRequiredMixin, View):
@@ -166,7 +167,9 @@ class SetFieldsToDisplay(SuccessMessageMixin, LoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         display_form = FieldsUserForm()
+
         user_fields_to_display = json.loads(request.user.fields_to_display)
+
 
         for key, value in user_fields_to_display.items():
             display_form.initial[key] = value
@@ -191,6 +194,7 @@ class SetFieldsToDisplay(SuccessMessageMixin, LoginRequiredMixin, View):
 
             for key, value in form.cleaned_data.items():
                 if key in fields_to_display:
+
                     user_fields_to_display[key] = value
 
             set_fields_to_user(request.user, user_fields_to_display)
