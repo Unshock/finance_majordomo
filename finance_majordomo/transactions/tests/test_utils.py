@@ -1,141 +1,154 @@
-import json
-import os
 from _decimal import Decimal
-
-from django.test.client import RequestFactory
 import requests_mock
-from django.core.exceptions import ObjectDoesNotExist
-from finance_majordomo.dividends.models import Dividend
-from finance_majordomo.dividends.tests.setting import SettingsDividends
-from finance_majordomo.dividends.utils import get_stock_dividends, add_dividends_to_model
+
+from ..models import Transaction
+from .setting import SettingsTransactions
+from ..utils import get_quantity, get_purchase_price, get_average_purchase_price
 
 
-FIXTURES_FOLDER = 'fixtures'
-HTML_FILE_LSNG = 'LSNG_divs.html'
-HTML_FILE_TATN = 'TATN_divs.html'
-TEST_URL_LSNG = f"https://{'закрытияреестров.рф'.encode('idna').decode()}/LSNG/"
-TEST_URL_TATN = f"https://{'закрытияреестров.рф'.encode('idna').decode()}/TATN/"
-
-
-class TestDividendUtils(SettingsDividends):
+class TestTransactionsUtils(SettingsTransactions):
 
     def setUp(self):
-        # Every test needs access to the request factory.
-        self.factory = RequestFactory()
-        self.requests_mock = requests_mock
 
-    def test_dividend_parser_common_share_1(self):
-        LSNG_HTML_PATH = os.path.join(os.path.dirname(__file__),
-                                      FIXTURES_FOLDER,
-                                      HTML_FILE_LSNG)
+        self.transacton_id_2 = Transaction.objects.create(
+            transaction_type='BUY',
+            asset_type='STOCK',
+            user=self.user_authenticated,
+            ticker=self.stock_id_3,
+            date='2018-01-01',
+            price='100',
+            quantity=4
+        )
 
-        with open(LSNG_HTML_PATH, 'r') as get_expected:
+        self.transacton_id_3 = Transaction.objects.create(
+            transaction_type='SELL',
+            asset_type='STOCK',
+            user=self.user_authenticated,
+            ticker=self.stock_id_3,
+            date='2019-01-01',
+            price='120',
+            quantity=3
+        )
 
-            with requests_mock.Mocker() as r:
+        self.transacton_id_4 = Transaction.objects.create(
+            transaction_type='BUY',
+            asset_type='STOCK',
+            user=self.user_authenticated,
+            ticker=self.stock_id_3,
+            date='2020-01-01',
+            price='80',
+            quantity=2
+        )
 
-                r.register_uri("GET", TEST_URL_LSNG, text=get_expected.read())
+        self.transacton_id_5 = Transaction.objects.create(
+            transaction_type='SELL',
+            asset_type='STOCK',
+            user=self.user_authenticated,
+            ticker=self.stock_id_3,
+            date='2021-01-01',
+            price='200',
+            quantity=1
+        )
 
-                result = get_stock_dividends(self.stock_id_1)
+    def test_get_quantity(self):
 
-                lsng_result = json.load(
-                    open(os.path.join(os.path.dirname(__file__),
-                                      FIXTURES_FOLDER,
-                                      "LSNG_divs.json"), 'r'))
+        with requests_mock.Mocker() as r:
 
-                assert result == lsng_result
+            r.user = self.user_authenticated
 
-    def test_dividend_parser_preferred_share_1(self):
+            result = get_quantity(r, self.stock_id_3)
 
-        LSNG_HTML_PATH = os.path.join(os.path.dirname(__file__),
-                                      FIXTURES_FOLDER,
-                                      HTML_FILE_LSNG)
+            self.assertEqual(result, 2)
+            self.assertTrue(isinstance(result, int))
 
-        with open(LSNG_HTML_PATH, 'r') as get_expected:
+            result = get_quantity(r, self.stock_id_3, date='2019-01-01')
 
-            with requests_mock.Mocker() as r:
+            self.assertEqual(result, 1)
+            self.assertTrue(isinstance(result, int))
 
-                r.register_uri("GET", TEST_URL_LSNG, text=get_expected.read())
+            result = get_quantity(r, self.stock_id_3, date='2018-12-31')
 
-                result = get_stock_dividends(self.stock_id_2)
+            self.assertEqual(result, 4)
+            self.assertTrue(isinstance(result, int))
 
-                lsng_result = json.load(
-                    open(os.path.join(os.path.dirname(__file__),
-                                      FIXTURES_FOLDER,
-                                      "LSNG_divs.json"), 'r'))
+    #Stopped raise of ValueError for now
+    # def test_get_quantity_value_error_1(self):
+    # 
+    #     with requests_mock.Mocker() as r:
+    # 
+    #         r.user = self.user_authenticated
+    # 
+    #         self.transacton_value_error_1 = Transaction.objects.create(
+    #             transaction_type='SELL',
+    #             asset_type='STOCK',
+    #             user=self.user_authenticated,
+    #             ticker=self.stock_id_3,
+    #             date='2019-12-31',
+    #             price='200',
+    #             quantity=100
+    #         )
+    # 
+    #         with self.assertRaises(ValueError):
+    #             get_quantity(r, self.stock_id_3, date='2020-01-01')
+    # 
+    # def test_get_quantity_value_error_2(self):
+    # 
+    #     with requests_mock.Mocker() as r:
+    # 
+    #         r.user = self.user_authenticated
+    # 
+    #         self.transacton_value_error_2 = Transaction.objects.create(
+    #             transaction_type='SELL',
+    #             asset_type='STOCK',
+    #             user=self.user_authenticated,
+    #             ticker=self.stock_id_3,
+    #             date='2005-12-31',
+    #             price='200',
+    #             quantity=100
+    #         )
+    # 
+    #         with self.assertRaises(ValueError):
+    #             get_quantity(r, self.stock_id_3, date='2020-01-01')
 
-                assert result == lsng_result
+    def test_get_purchase_price_1(self):
+        with requests_mock.Mocker() as r:
 
-    def test_dividend_parser_common_share_2(self):
+            r.user = self.user_authenticated
 
-        TATN_HTML_PATH = os.path.join(os.path.dirname(__file__),
-                                      FIXTURES_FOLDER,
-                                      HTML_FILE_TATN)
+            result = get_purchase_price(r, self.stock_id_3)
 
+            self.assertTrue(isinstance(result, Decimal))
+            self.assertEqual(result, Decimal(160))
 
-        with open(TATN_HTML_PATH, 'r') as get_expected:
+    def test_get_purchase_price_2(self):
 
-            with requests_mock.Mocker() as r:
+        Transaction.objects.last().delete()
 
-                r.register_uri("GET", TEST_URL_TATN, text=get_expected.read())
+        with requests_mock.Mocker() as r:
 
-                result = get_stock_dividends(self.stock_id_3)
+            r.user = self.user_authenticated
 
-                tatn_result = json.load(
-                    open(os.path.join(os.path.dirname(__file__),
-                                      FIXTURES_FOLDER,
-                                      "TATN_divs.json"), 'r'))
+            result = get_purchase_price(r, self.stock_id_3)
 
-                assert result == tatn_result
+            self.assertTrue(isinstance(result, Decimal))
+            self.assertEqual(result, Decimal(260))
 
-    def test_dividend_parser_preferred_share_2(self):
+    def test_get_average_purchase_price(self):
 
-        TATN_HTML_PATH = os.path.join(os.path.dirname(__file__),
-                                      FIXTURES_FOLDER,
-                                      HTML_FILE_TATN)
+        Transaction.objects.last().delete()
 
+        with requests_mock.Mocker() as r:
 
-        with open(TATN_HTML_PATH, 'r') as get_expected:
+            r.user = self.user_authenticated
 
-            with requests_mock.Mocker() as r:
+            result = get_average_purchase_price(r, self.stock_id_3)
 
-                r.register_uri("GET", TEST_URL_TATN, text=get_expected.read())
+            self.assertTrue(isinstance(result, Decimal))
+            self.assertEqual(result, Decimal(Decimal(260) / 3))
 
-                result = get_stock_dividends(self.stock_id_4)
+            result = get_average_purchase_price(
+                r, self.stock_id_3, date='2018-06-01')
 
-                tatn_result = json.load(
-                    open(os.path.join(os.path.dirname(__file__),
-                                      FIXTURES_FOLDER,
-                                      "TATN_divs.json"), 'r'))
-
-                assert result == tatn_result
-                assert isinstance(result, dict)
-
-    def test_add_dividend_to_model(self):
-
-        valid_dividend_dict = json.load(
-                    open(os.path.join(os.path.dirname(__file__),
-                                      FIXTURES_FOLDER,
-                                      "TATN_divs.json"), 'r'))
-
-        add_dividends_to_model(self.stock_id_3, valid_dividend_dict)
-
-        dividends = Dividend.objects.filter(stock_id=3)
-
-        assert dividends.count() == 35
-        with self.assertRaises(Dividend.DoesNotExist):
-            Dividend.objects.get(date='2020-06-30')
-        assert sum([div.amount for div in dividends]) == Decimal("418.69")
-
-        add_dividends_to_model(self.stock_id_4, valid_dividend_dict)
-        dividends = Dividend.objects.filter(stock_id=4)
-
-        assert dividends.count() == 71 - 35
-        assert Dividend.objects.get(date='2020-06-30').stock == self.stock_id_4
-        assert len(Dividend.objects.filter(date='2004-05-10')) == 2
-        assert Dividend.objects.get(
-            date='2004-05-10',
-            stock=self.stock_id_3).amount == Decimal("0.30")
-        assert Dividend.objects.get(
-            date='2004-05-10',
-            stock=self.stock_id_4).amount == Decimal("1")
-        assert sum([div.amount for div in dividends]) == Decimal("841.23") - Decimal("418.69")
+            self.assertTrue(isinstance(result, Decimal))
+            self.assertEqual(result, Decimal(100))
+ 

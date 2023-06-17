@@ -1,5 +1,3 @@
-import datetime
-
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
@@ -14,7 +12,7 @@ from django.utils.translation import gettext_lazy as _
 from finance_majordomo.transactions.forms import TransactionForm
 from finance_majordomo.users.models import User
 from finance_majordomo.transactions.models import Transaction
-from ..transactions.utils import get_quantity
+from ..transactions.utils import validate_transaction
 from ..dividends.utils import update_dividends_of_user
 
 
@@ -50,17 +48,13 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     login_url = 'login'
     form_class = TransactionForm
     template_name = 'base_create_and_update.html'
+    #alter for beauty for tests:
     #template_name = 'transactions/transaction_form.html'
     success_url = reverse_lazy('transactions')
     success_message = _("Transaction has been successfully added!")
 
     unsuccess_url = reverse_lazy('add_transaction')
     unsuccess_message = _("Transaction has not been added!")
-
-    # def __init__(self, asset_type=None, asset_id=None):
-    #     self.asset_type = asset_type
-    #     self.asset_id = asset_id
-
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -75,10 +69,10 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         asset_type = kwargs.get('asset_type')
 
         if asset_id:
-           transaction_form.initial['ticker'] = asset_id
+            transaction_form.initial['ticker'] = asset_id
 
         if asset_type:
-           transaction_form.initial['asset_type'] = asset_type
+            transaction_form.initial['asset_type'] = asset_type
 
         return render(
             request,
@@ -90,48 +84,41 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         )
 
     def post(self, request, *args, **kwargs):
-        form = TransactionForm(request.POST)
-        #print('f', form.cleaned_data)
+        form = TransactionForm(request.POST, request=request)
+
         if form.is_valid():
-            if self.validate_form(form):
-                asset_type = form.cleaned_data.get('asset_type')
-                transaction_type = form.cleaned_data.get('transaction_type')
-                ticker = form.cleaned_data.get('ticker')
-                date = form.cleaned_data.get('date')
-                price = form.cleaned_data.get('price')
-                fee = form.cleaned_data.get('fee')
-                quantity = form.cleaned_data.get('quantity')
 
-                user = User.objects.get(id=request.user.id)
+            asset_type = form.cleaned_data.get('asset_type')
+            transaction_type = form.cleaned_data.get('transaction_type')
+            ticker = form.cleaned_data.get('ticker')
+            date = form.cleaned_data.get('date')
+            price = form.cleaned_data.get('price')
+            fee = form.cleaned_data.get('fee')
+            quantity = form.cleaned_data.get('quantity')
 
-                obj = Transaction.objects.create(
-                    asset_type=asset_type,
-                    transaction_type=transaction_type,
-                    user=user,
-                    ticker=ticker,
-                    date=date,
-                    price=price,
-                    fee=fee,
-                    quantity=quantity
-                )
+            user = request.user
 
-                obj.save()
+            obj = Transaction.objects.create(
+                asset_type=asset_type,
+                transaction_type=transaction_type,
+                user=user,
+                ticker=ticker,
+                date=date,
+                price=price,
+                fee=fee,
+                quantity=quantity
+            )
 
+            obj.save()
+
+            if obj.ticker.asset_type == 'stocks':
                 stock_obj = Stock.objects.get(id=obj.ticker.id)
                 update_dividends_of_user(request, stock_obj, date)
 
-                messages.success(request, self.success_message)
-                return redirect(self.success_url)
+            messages.success(request, self.success_message)
+            return redirect(self.success_url)
 
-            return render(
-                request,
-                self.template_name,
-                {'form': form,
-                 'page_title': _("Add new transaction"),
-                 'button_text': _("Add")
-                 }
-            )
-
+        #return super().post(request, *args, **kwargs)
         return render(
             request,
             self.template_name,
@@ -141,100 +128,6 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
              }
         )
 
-
-            # else:
-            #     #form.errors()
-            #     messages.error(request, self.unsuccess_message)
-            #     return redirect(self.unsuccess_url)
-        #return super().post(request, *args, **kwargs)
-
-    def validate_form(self, form):
-
-        error_text = _('Such a SELL would raise a short sale situation. '
-                       'Short sales are not supported!')
-        # form = TransactionForm(self.request.POST)
-        transaction_type = form.cleaned_data.get('transaction_type')
-
-        stock_latname = form.cleaned_data.get('ticker')
-        date = form.cleaned_data.get('date')
-
-        stock = Stock.objects.get(latname=stock_latname)
-        print(stock.issuedate)
-        issuedate = datetime.datetime.strftime(stock.issuedate, '%Y-%m-%d')
-
-        print(issuedate)
-
-        if date < issuedate:
-            form.add_error('date', _('The stock started trading'
-                                     ' after the specified date'))
-            return False
-
-        if transaction_type == 'BUY':
-            return True
-
-        quantity = form.cleaned_data.get('quantity')
-        day_end_balance = get_quantity(self.request, stock,
-                                       date=date) - quantity
-
-        if day_end_balance < 0:
-            form.add_error('quantity', error_text)
-            return False
-
-        users_transactions = Transaction.objects.filter(
-            user=User.objects.get(id=self.request.user.id))
-        users_specific_asset_transactions = users_transactions.filter(
-            ticker=stock.id).order_by('date')
-        users_specific_asset_transactions = users_specific_asset_transactions.filter(date__gt=date)
-
-        print(users_specific_asset_transactions)
-
-        if len(users_specific_asset_transactions) == 0:
-            return True
-
-        cur_date = date
-
-        for transaction in users_specific_asset_transactions:
-            print(transaction)
-            print('transaction_date: ', transaction.date)
-
-            prev_date = cur_date
-            cur_date = transaction.date
-
-            if prev_date != cur_date and day_end_balance < 0:
-                form.add_error('quantity', error_text)
-                return False
-
-            if transaction.transaction_type == "BUY":
-                day_end_balance += transaction.quantity
-            elif transaction.transaction_type == "SELL":
-                day_end_balance -= transaction.quantity
-            else:
-                raise Exception('not BUY or SELL found')
-
-        if day_end_balance < 0:
-            form.add_error('quantity', error_text)
-            return False
-        return True
-
-        #
-        # print("VALIDATION")
-        # print('tika', form.cleaned_data.get('ticker'))
-        # stock = Stock.objects.get(name=form.cleaned_data['ticker'])
-        # print(stock)
-        # total_stocks = UsersStocks.get_current_quantity(self.request, stock.id)
-        # print(form.cleaned_data['quantity'], '999', total_stocks)
-        #
-        # print(form.cleaned_data.get('transaction_type'), form.cleaned_data.get('quantity'))
-        # if form.cleaned_data['transaction_type'] == 'SELL' and form.cleaned_data['quantity'] > total_stocks:
-        #     form.add_error('quantity', _('You don\'t have enough stocks'))
-        #     return False
-        # return True
-
-    def form_valid(self, form):
-        print("VALIDATION 2 ")
-        form.instance.creator = self.request.user
-        print('validation 2 ok')
-        return super().form_valid(form)
 
 class DeleteTransaction(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
     login_url = 'login'
@@ -254,11 +147,20 @@ class DeleteTransaction(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
 
     def post(self, request, *args, **kwargs):
 
-        if self.validate_deletion():
+        transaction = self.get_object()
+        asset_obj = transaction.ticker
 
-            transaction = Transaction.objects.get(id=self.get_object().id)
-            stock_obj = Stock.objects.get(id=transaction.ticker.id)
-            update_dividends_of_user(request, stock_obj, transaction.date)
+        validation_dict = {
+            'validator': 'delete_validator',
+            'asset_obj': asset_obj,
+            'transaction_type': transaction.transaction_type,
+            'date': transaction.date,
+            'quantity': transaction.quantity
+        }
+
+        if validate_transaction(self.request, validation_dict):
+            if asset_obj.asset_type == 'stocks':
+                update_dividends_of_user(request, asset_obj, transaction.date)
 
             return super().post(request, *args, **kwargs)
 
@@ -268,101 +170,7 @@ class DeleteTransaction(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['page_title'] = _("Delete stock")
+        context['page_title'] = _("Delete transaction")
         context['button_text'] = _("Delete")
-        context['delete_object'] = str(
-            Transaction.objects.get(id=self.get_object().id))
+        context['delete_object'] = str(self.get_object())
         return context
-
-    def validate_deletion(self):
-
-        transaction = Transaction.objects.get(id=self.get_object().id)
-        transaction_type = transaction.transaction_type
-
-        if transaction_type == 'SELL':
-            return True
-
-        quantity = transaction.quantity
-        ticker = transaction.ticker
-        date = transaction.date
-
-        stock = Stock.objects.get(latname=ticker)
-        day_end_balance = get_quantity(self.request, stock,
-                                       date=date) - quantity
-
-        if day_end_balance < 0:
-            return False
-
-        users_transactions = Transaction.objects.filter(user=User.objects.get(id=self.request.user.id))
-        users_specific_asset_transactions = users_transactions.filter(ticker=stock.id).order_by('date')
-        users_specific_asset_transactions = users_specific_asset_transactions.filter(date__gt=date)
-
-        if len(users_specific_asset_transactions) == 0:
-            return True
-
-        cur_date = date
-
-        for transaction in users_specific_asset_transactions:
-
-            prev_date = cur_date
-            cur_date = transaction.date
-
-            if prev_date != cur_date and day_end_balance < 0:
-                return False
-
-            if transaction.transaction_type == "BUY":
-                day_end_balance += transaction.quantity
-            elif transaction.transaction_type == "SELL":
-                day_end_balance -= transaction.quantity
-            else:
-                raise Exception('not BUY or SELL found')
-
-        if day_end_balance < 0:
-            return False
-        return True
-
-
-# заготовка - нерабочая функция
-def validate_transaction(request, latname, quantity, date, transaction_type, validator='add_validator'):
-
-    if transaction_type == 'SELL' and validator == 'delete_validator' or\
-            transaction_type == 'BUY' and validator == 'add_validator':
-        return True
-
-    stock = Stock.objects.get(latname=latname)
-    day_end_balance = get_quantity(request, stock, date=date) - quantity
-
-    if day_end_balance < 0:
-        return False
-
-    user = request.user
-
-    users_transactions = Transaction.objects.filter(
-        user=user,
-        ticker=stock.id,
-        date__gt=date).order_by('date')
-
-    if len(users_transactions) == 0:
-        return True
-
-    cur_date = date
-
-    for transaction in users_transactions:
-
-        prev_date = cur_date
-        cur_date = transaction.date
-
-        if prev_date != cur_date and day_end_balance < 0:
-            return False
-
-        if transaction.transaction_type == "BUY":
-            day_end_balance += transaction.quantity
-        elif transaction.transaction_type == "SELL":
-            day_end_balance -= transaction.quantity
-        else:
-            raise Exception('not BUY or SELL found')
-
-    if day_end_balance < 0:
-        return False
-    return True
-# не используется, не доделана - можно задраить

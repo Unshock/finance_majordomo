@@ -39,13 +39,7 @@ class TransactionsModelsTest(SettingsTransactions):
 
     def test_price_validation_fail_2(self):
         price_invalid = '100,10'
-        Transaction.objects.create(
-            price=price_invalid,
-            quantity=1,
-            date='2020-03-02',
-            ticker=self.stock_id_1,
-            user=self.user_authenticated
-        )
+
         with self.assertRaises(ValidationError):
             Transaction.objects.create(
                 price=price_invalid,

@@ -1,3 +1,5 @@
+import datetime
+
 from django.core.exceptions import ValidationError
 from django.forms import ModelForm
 from django import forms
@@ -5,6 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from finance_majordomo.stocks.models import Stock
 from finance_majordomo.transactions.models import Transaction
 from finance_majordomo.stocks.views import UsersStocks
+from .utils import validate_transaction
 
 from common.utils.stocks import validate_ticker, get_stock_description
 
@@ -18,6 +21,7 @@ from crispy_forms.layout import Submit
 class TransactionForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_id = 'id-exampleForm'
@@ -103,6 +107,33 @@ class TransactionForm(ModelForm):
         )
     )
 
+    def clean(self):
+
+        cleaned_data = super().clean()
+
+        ticker = cleaned_data.get('ticker')
+        transaction_type = cleaned_data.get('transaction_type')
+        date = cleaned_data.get('date')
+        quantity = cleaned_data.get('quantity')
+
+        if ticker and transaction_type and date and quantity:
+
+            validate_dict = {
+                'validator': 'add_validator',
+                'asset_obj': Stock.objects.get(latname=ticker),
+                'transaction_type': transaction_type,
+                'date': date,
+                'quantity': quantity
+            }
+
+            if not validate_transaction(self.request, validate_dict):
+                raise ValidationError(_(
+                    'Such a SELL would raise a short sale situation. '
+                    'Short sales are not supported! '
+                    'Please check the transaction type, date and quantity'))
+
+        return cleaned_data
+
     def clean_price(self):
         price = self.cleaned_data.get('price')
         if price <= 0:
@@ -121,23 +152,17 @@ class TransactionForm(ModelForm):
             raise ValidationError(_("Fee must be more or equal 0"))
         return fee
 
-    # def clean_ticker(self):
-    #     ticker = self.cleaned_data['ticker_new'].upper()
-    # 
-    #     # if Stock.objects.filter(ticker=ticker).count() == 1:
-    #     #     raise ValidationError(_(f"Тикер {ticker} уже добавлен"))
-    # 
-    #     stock_description = get_stock_description(
-    #         self.cleaned_data.get('ticker'))
-    # 
-    #     if not stock_description:
-    #         raise ValidationError(_(f"Ticker {ticker} hasn't been found"))
-    # 
-    #     if stock_description.get("GROUP") != "stock_shares":
-    #         raise ValidationError(_(f"Only shares accepted"))
-    # 
-    #     self.cleaned_data['stock_description'] = stock_description
-    #     return ticker
+    def clean_date(self):
+        date = self.cleaned_data.get('date')
+        asset = self.cleaned_data.get('ticker')
+        issuedate = Stock.objects.get(latname=asset).issuedate
+        issuedate = datetime.datetime.strftime(issuedate, '%Y-%m-%d')
+        if date < issuedate:
+            raise ValidationError(
+                _("The stock started trading after the specified date") +
+                f" ({issuedate})"
+            )
+        return date
 
     class Meta:
         model = Transaction

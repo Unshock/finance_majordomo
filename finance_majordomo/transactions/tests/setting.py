@@ -27,8 +27,8 @@ class SettingsTransactions(TestCase):
         cls.client_authenticated_another = Client()
         cls.user_authenticated_another = user.objects.create(
             username="user_authenticated_another",
-            first_name="Authenticated",
-            last_name="UserNotAdmin"
+            first_name="AuthenticatedAnother",
+            last_name="UserNotAdminAnother"
         )
         cls.client_authenticated_another.force_login(user.objects.get(id=2))
 
@@ -44,6 +44,7 @@ class SettingsTransactions(TestCase):
             ticker="LSNG",
             type="common_share",
             isin="isin_id_1",
+            latname='lsng',
             issuedate=datetime.date(2000, 1, 1),
             isqualifiedinvestors=False,
             morningsession=False,

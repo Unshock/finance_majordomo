@@ -20,7 +20,7 @@ from django.utils.translation import gettext_lazy as _
 from common.utils.stocks import get_stock_board_history, make_json_trade_info_dict, get_date_status, \
     get_stock_current_price, make_json_last_price_dict
 from finance_majordomo.dividends.utils import get_stock_dividends, add_dividends_to_model
-from ..transactions.utils import get_quantity, get_purchace_price
+from ..transactions.utils import get_quantity, get_purchase_price
 from .utils import get_money_result
 from ..dividends.utils import get_dividend_result
 
@@ -98,7 +98,7 @@ class UsersStocks(LoginRequiredMixin, ListView):
             if current_quantity == 0:
                 continue
 
-            purchase_price = get_purchace_price(request, stock)
+            purchase_price = get_purchase_price(request, stock)
             total_purchase_price += purchase_price
 
             current_price = self.get_current_price(stock)
