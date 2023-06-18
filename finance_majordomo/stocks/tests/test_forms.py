@@ -1,20 +1,28 @@
-from .setting import SettingsTransactions
-from ..forms import TransactionForm
+from .setting import SettingsStocks
+from ..forms import StockForm
+import mock
+from common.utils.stocks import get_stock_description
+#from mocked_utils import mocked_get_stock_description
+from .mocked_utils import mocked_get_stock_description
 from django.utils.translation import gettext_lazy as _
 
 
-class UserFormTest(SettingsTransactions):
+class TestStockForm(SettingsStocks):
 
+    #@mock.patch('common.utils.stocks.get_stock_description',
+    #            side_effect=mocked_get_stock_description)
+    #def test_case(self, mocked):
+    #    print(get_stock_description('lsng'))  # will print: 'Hey'
+
+    # @mock.patch('common.utils.stocks.get_stock_description',
+    #             side_effect=mocked_get_stock_description)
     def test_valid_transaction_form(self):
-        form = TransactionForm(data={
-            'transaction_type': 'BUY',
-            'asset_type': 'STOCK',
-            'user': self.user_authenticated,
-            'ticker': self.stock_id_1,
-            'date': '2010-12-31',
-            'price': '10',
-            'quantity': 1
-        })
+
+        with mock.patch('common.utils.stocks.get_stock_description',
+                side_effect=mocked_get_stock_description):
+            form = StockForm(data={
+                'ticker': 'tatnp',
+            })
 
         self.assertTrue(form.is_valid())
 

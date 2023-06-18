@@ -14,15 +14,15 @@ class TransactionsModelsTest(SettingsTransactions):
         self.assertEqual(self.transaction_id_1.date, "1999-12-31")
         self.assertEqual(self.transaction_id_1.price, "10")
         self.assertEqual(self.transaction_id_1.fee, '0.00')
-        self.assertEqual(Transaction.objects.count(), 1)
+        self.assertEqual(Transaction.objects.count(), 6)
         self.assertEqual(
-            self.transaction_id_1._meta.get_field('date').verbose_name,
+            self.transaction_id_5._meta.get_field('date').verbose_name,
             _("Transaction date"))
         self.assertEqual(
-            self.transaction_id_1._meta.get_field('quantity').verbose_name,
+            self.transaction_id_5._meta.get_field('quantity').verbose_name,
             _("Transaction quantity"))
         self.assertEqual(
-            self.transaction_id_1._meta.get_field('creation_date').verbose_name,
+            self.transaction_id_5._meta.get_field('creation_date').verbose_name,
             _("Creation date"))
 
     def test_price_validation_fail_1(self):

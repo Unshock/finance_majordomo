@@ -8,48 +8,6 @@ from ..utils import get_quantity, get_purchase_price, get_average_purchase_price
 
 class TestTransactionsUtils(SettingsTransactions):
 
-    def setUp(self):
-
-        self.transacton_id_2 = Transaction.objects.create(
-            transaction_type='BUY',
-            asset_type='STOCK',
-            user=self.user_authenticated,
-            ticker=self.stock_id_3,
-            date='2018-01-01',
-            price='100',
-            quantity=4
-        )
-
-        self.transacton_id_3 = Transaction.objects.create(
-            transaction_type='SELL',
-            asset_type='STOCK',
-            user=self.user_authenticated,
-            ticker=self.stock_id_3,
-            date='2019-01-01',
-            price='120',
-            quantity=3
-        )
-
-        self.transacton_id_4 = Transaction.objects.create(
-            transaction_type='BUY',
-            asset_type='STOCK',
-            user=self.user_authenticated,
-            ticker=self.stock_id_3,
-            date='2020-01-01',
-            price='80',
-            quantity=2
-        )
-
-        self.transacton_id_5 = Transaction.objects.create(
-            transaction_type='SELL',
-            asset_type='STOCK',
-            user=self.user_authenticated,
-            ticker=self.stock_id_3,
-            date='2021-01-01',
-            price='200',
-            quantity=1
-        )
-
     def test_get_quantity(self):
 
         with requests_mock.Mocker() as r:
@@ -122,7 +80,7 @@ class TestTransactionsUtils(SettingsTransactions):
 
     def test_get_purchase_price_2(self):
 
-        Transaction.objects.last().delete()
+        Transaction.objects.get(id=5).delete()
 
         with requests_mock.Mocker() as r:
 
@@ -135,7 +93,7 @@ class TestTransactionsUtils(SettingsTransactions):
 
     def test_get_average_purchase_price(self):
 
-        Transaction.objects.last().delete()
+        Transaction.objects.get(id=5).delete()
 
         with requests_mock.Mocker() as r:
 
@@ -151,4 +109,3 @@ class TestTransactionsUtils(SettingsTransactions):
 
             self.assertTrue(isinstance(result, Decimal))
             self.assertEqual(result, Decimal(100))
- 

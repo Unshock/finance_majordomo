@@ -1,0 +1,21 @@
+{
+  "SECID": "TATN",
+  "NAME": "ПАО \"Татнефть\" ао",
+  "SHORTNAME": "Татнфт 3ао",
+  "ISIN": "RU0009033591",
+  "REGNUMBER": "1-03-00161-A",
+  "ISSUESIZE": "2178690700",
+  "FACEVALUE": "1",
+  "FACEUNIT": "SUR",
+  "ISSUEDATE": "2005-01-11",
+  "LATNAME": "Tatneft-3",
+  "LISTLEVEL": "1",
+  "ISQUALIFIEDINVESTORS": "0",
+  "MORNINGSESSION": "1",
+  "EVENINGSESSION": "1",
+  "TYPENAME": "Акция обыкновенная",
+  "GROUP": "stock_shares",
+  "TYPE": "common_share",
+  "GROUPNAME": "Акции",
+  "EMITTER_ID": "1297"
+}

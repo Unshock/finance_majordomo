@@ -1,0 +1,21 @@
+{
+  "SECID": "TATNP",
+  "NAME": "ПАО \"Татнефть\" ап 3 вып.",
+  "SHORTNAME": "Татнфт 3ап",
+  "ISIN": "RU0006944147",
+  "REGNUMBER": "2-03-00161-A",
+  "ISSUESIZE": "147508500",
+  "FACEVALUE": "1",
+  "FACEUNIT": "SUR",
+  "ISSUEDATE": "2005-01-11",
+  "LATNAME": "Tatneft (pref)",
+  "LISTLEVEL": "1",
+  "ISQUALIFIEDINVESTORS": "0",
+  "MORNINGSESSION": "1",
+  "EVENINGSESSION": "1",
+  "TYPENAME": "Акция привилегированная ",
+  "GROUP": "stock_shares",
+  "TYPE": "preferred_share",
+  "GROUPNAME": "Акции",
+  "EMITTER_ID": "1297"
+}

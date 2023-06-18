@@ -1,0 +1,19 @@
+{
+  "SECID": "LSNG",
+  "NAME": "Россети Ленэнерго ПАО-ао",
+  "SHORTNAME": "РСетиЛЭ",
+  "ISIN": "RU0009034490",
+  "REGNUMBER": "1-01-00073-A",
+  "ISSUESIZE": "8523785320",
+  "FACEVALUE": "1",
+  "FACEUNIT": "SUR",
+  "ISSUEDATE": "2003-07-16",
+  "LATNAME": "Rosseti LenEnrg",
+  "LISTLEVEL": "3",
+  "ISQUALIFIEDINVESTORS": "0",
+  "TYPENAME": "Акция обыкновенная",
+  "GROUP": "stock_shares",
+  "TYPE": "common_share",
+  "GROUPNAME": "Акции",
+  "EMITTER_ID": "1456"
+}

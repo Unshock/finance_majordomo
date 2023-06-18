@@ -1,0 +1,19 @@
+{
+  "SECID": "LSNGP",
+  "NAME": "Россети Ленэнерго ПАО-ап",
+  "SHORTNAME": "РСетиЛЭ-п",
+  "ISIN": "RU0009092134",
+  "REGNUMBER": "2-01-00073-A",
+  "ISSUESIZE": "93264311",
+  "FACEVALUE": "1",
+  "FACEUNIT": "SUR",
+  "ISSUEDATE": "2003-07-16",
+  "LATNAME": "Rosseti LenEnrg (pref)",
+  "LISTLEVEL": "3",
+  "ISQUALIFIEDINVESTORS": "0",
+  "TYPENAME": "Акция привилегированная ",
+  "GROUP": "stock_shares",
+  "TYPE": "preferred_share",
+  "GROUPNAME": "Акции",
+  "EMITTER_ID": "1456"
+}

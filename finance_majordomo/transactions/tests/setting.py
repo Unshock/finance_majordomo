@@ -69,6 +69,7 @@ class SettingsTransactions(TestCase):
             ticker="TATN",
             type="common_share",
             isin="isin_id_3",
+            latname='tatneft',
             issuedate=datetime.date(2000, 1, 1),
             isqualifiedinvestors=False,
             morningsession=False,
@@ -100,17 +101,6 @@ class SettingsTransactions(TestCase):
             amount="100000.00",
         )
 
-        cls.transaction_id_1 = Transaction.objects.create(
-            transaction_type='BUY',
-            asset_type='STOCK',
-            user=cls.user_authenticated,
-            ticker=cls.stock_id_1,
-            date='1999-12-31',
-            price='10',
-            quantity=1
-        )
-
-
         cls.dividend_of_user_id_1 = DividendsOfUser.objects.create(
             user=cls.user_authenticated,
             dividend=cls.dividend_id_1,
@@ -123,3 +113,63 @@ class SettingsTransactions(TestCase):
 
         cls.dividend_of_user_id_2.is_received = True
         cls.dividend_of_user_id_2.save()
+
+        cls.transaction_id_1 = Transaction.objects.create(
+            transaction_type='BUY',
+            asset_type='STOCK',
+            user=cls.user_authenticated,
+            ticker=cls.stock_id_1,
+            date='1999-12-31',
+            price='10',
+            quantity=1
+        )
+
+        cls.transaction_id_2 = Transaction.objects.create(
+            transaction_type='BUY',
+            asset_type='STOCK',
+            user=cls.user_authenticated,
+            ticker=cls.stock_id_3,
+            date='2018-01-01',
+            price='100',
+            quantity=4
+        )
+
+        cls.transaction_id_3 = Transaction.objects.create(
+            transaction_type='SELL',
+            asset_type='STOCK',
+            user=cls.user_authenticated,
+            ticker=cls.stock_id_3,
+            date='2019-01-01',
+            price='120',
+            quantity=3
+        )
+
+        cls.transaction_id_4 = Transaction.objects.create(
+            transaction_type='BUY',
+            asset_type='STOCK',
+            user=cls.user_authenticated,
+            ticker=cls.stock_id_3,
+            date='2020-01-01',
+            price='80',
+            quantity=2
+        )
+
+        cls.transaction_id_5 = Transaction.objects.create(
+            transaction_type='SELL',
+            asset_type='STOCK',
+            user=cls.user_authenticated,
+            ticker=cls.stock_id_3,
+            date='2021-01-01',
+            price='200',
+            quantity=1
+        )
+
+        cls.transaction_id_6 = Transaction.objects.create(
+            transaction_type='BUY',
+            asset_type='STOCK',
+            user=cls.user_authenticated_another,
+            ticker=cls.stock_id_2,
+            date='2021-01-01',
+            price='200',
+            quantity=1
+        )
