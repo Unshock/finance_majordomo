@@ -104,7 +104,7 @@ def get_stock_description(ticker: str):
         data = apimoex.find_security_description(session, ticker.upper())
         #print(data)
         result_data = {}
-        print(111)
+        #print(111)
         for elem in data:
             result_data[elem['name']] = elem['value']
         return result_data

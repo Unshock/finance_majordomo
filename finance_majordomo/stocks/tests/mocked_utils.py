@@ -13,7 +13,7 @@ def mocked_get_stock_description(ticker: str):
     }
 
     print(222)
-
+    print(ticker)
     json_result_path = json_result_dict.get(ticker.upper())()
     json_result = open(json_result_path)
     result = json.load(json_result)

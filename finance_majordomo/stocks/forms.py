@@ -8,6 +8,7 @@ from common.utils.stocks import validate_ticker, get_stock_description
 
 
 class StockForm(ModelForm):
+
     ticker = forms.CharField(
         label='Тикер', widget=forms.TextInput(
             attrs={"class": "form-control"})
