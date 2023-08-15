@@ -10,7 +10,7 @@ class Asset(models.Model):
         ('stocks', 'stocks'),
         ('bonds', 'bonds'),
         ('currencies', 'currencies'),
-        ('fonds', 'fonds')
+        ('funds', 'funds')
     ]
 
     creation_date = models.DateTimeField(
