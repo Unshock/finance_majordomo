@@ -1,6 +1,8 @@
 test:
 	poetry run pytest
 	
+test-coverage:
+	poetry run pytest --cov=finance_majordomo --cov-report xml
 
 run:
 	poetry run python manage.py runserver
