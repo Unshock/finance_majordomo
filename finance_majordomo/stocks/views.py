@@ -442,6 +442,14 @@ class StockData(object):
         return minutes
 
 
+def get_normalized_asset_type(type: str) -> str:
+    types_dict = {
+        'preferred_share': 'stocks',
+        'common_share': 'stocks'
+    }
+
+    return types_dict.get(type)
+
 
 class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     login_url = 'login'
@@ -489,6 +497,8 @@ class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
             group = stock_description.get('GROUP')
             groupname = stock_description.get('GROUPNAME')
 
+            asset_type = get_normalized_asset_type(type)
+
             check_list = [ticker, name, isin,
                           currency, latname, isqualifiedinvestors,
                           issuedate, morningsession, eveningsession,
@@ -503,6 +513,8 @@ class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
                 stock_board_history)
 
             stock_obj = Stock.objects.create(
+                asset_type=asset_type,
+
                 ticker=ticker,
                 name=name,
                 isin=isin,

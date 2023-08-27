@@ -25,6 +25,8 @@ def get_stock_dividends(stock_obj):
         ticker = stock_obj.ticker
     else:
         raise Exception('stock_type не опознан')
+    
+    
 
     url = f'https://' \
           f'{"закрытияреестров.рф".encode("idna").decode()}' \
@@ -163,7 +165,7 @@ def get_dividend_result(request, stock_obj):
     return sum_dividends_received * Decimal(0.87)
 
 
-def update_dividends_of_user(request, stock_obj, date=None):
+def update_dividends_of_user(request, stock_obj, date=None, transaction=None):
 
     stock_dividends = Dividend.objects.filter(stock=stock_obj.id)
 
@@ -177,7 +179,8 @@ def update_dividends_of_user(request, stock_obj, date=None):
 
     for div in stock_dividends:
 
-        quantity = get_quantity(request, stock_obj, div.date)
+        quantity = get_quantity(request, stock_obj, div.date)\
+                   - transaction.quantity
 
         try:
             dividend_of_user = DividendsOfUser.objects.get(
@@ -193,5 +196,5 @@ def update_dividends_of_user(request, stock_obj, date=None):
                 dividend=div,
                 is_received=False
             )
-
+        print(dividend_of_user)
         dividend_of_user.save()

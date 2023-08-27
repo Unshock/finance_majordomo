@@ -63,6 +63,7 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         return context
 
     def get(self, request, *args, **kwargs):
+
         transaction_form = TransactionForm()
 
         asset_id = kwargs.get('asset_id')
@@ -84,6 +85,7 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         )
 
     def post(self, request, *args, **kwargs):
+
         form = TransactionForm(request.POST, request=request)
 
         if form.is_valid():
@@ -111,9 +113,9 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
             obj.save()
 
-            if obj.ticker.asset_type == 'stocks':
+            if obj.asset_type == 'STOCK':
                 stock_obj = Stock.objects.get(id=obj.ticker.id)
-                update_dividends_of_user(request, stock_obj, date)
+                update_dividends_of_user(request, stock_obj, date, obj)
 
             messages.success(request, self.success_message)
             return redirect(self.success_url)
@@ -148,7 +150,9 @@ class DeleteTransaction(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
     def post(self, request, *args, **kwargs):
 
         transaction = self.get_object()
-        asset_obj = transaction.ticker
+
+        # править если в транзакциях будут не только стоки
+        asset_obj = Stock.objects.get(latname=transaction.ticker)
 
         validation_dict = {
             'validator': 'delete_validator',
@@ -159,8 +163,14 @@ class DeleteTransaction(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
         }
 
         if validate_transaction(self.request, validation_dict):
+            print(asset_obj)
+            print(''
+                  'fffffffffffff')
+            print(asset_obj.asset_type)
             if asset_obj.asset_type == 'stocks':
-                update_dividends_of_user(request, asset_obj, transaction.date)
+                print('update start')
+                update_dividends_of_user(
+                    request, asset_obj, transaction.date, transaction)
 
             return super().post(request, *args, **kwargs)
 

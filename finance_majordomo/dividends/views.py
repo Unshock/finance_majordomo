@@ -34,6 +34,8 @@ class Dividends(LoginRequiredMixin, ListView):
             id__in=user.dividendsofuser_set.values_list('dividend'))\
             .order_by('-date')
 
+        print(dividends_of_user)
+
         for div_obj in dividends_of_user:
             stock = div_obj.stock
             amount = div_obj.amount
@@ -84,6 +86,7 @@ class Dividends(LoginRequiredMixin, ListView):
 
 class UsersDividends(LoginRequiredMixin, ListView):
     pass
+
 
 class AddDivToUser(SuccessMessageMixin, LoginRequiredMixin, View):
     model = Dividend

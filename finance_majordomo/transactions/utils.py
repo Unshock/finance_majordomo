@@ -126,8 +126,6 @@ def validate_transaction(request, transaction: dict) -> bool:
     day_end_balance = get_quantity(
         request, asset_obj, date=date) - quantity
 
-    print(day_end_balance, 1)
-
     if day_end_balance < 0:
         return False
 
@@ -142,11 +140,7 @@ def validate_transaction(request, transaction: dict) -> bool:
 
     cur_date = date
 
-    print(users_transactions)
-
     for transaction in users_transactions:
-
-        print(day_end_balance)
 
         prev_date = cur_date
         cur_date = transaction.date
@@ -164,9 +158,3 @@ def validate_transaction(request, transaction: dict) -> bool:
 
     return False if day_end_balance < 0 else True
 
-    
-    
-    
-    
-    
-    
