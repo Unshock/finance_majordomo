@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+    <div class="container wrapper flex-grow-1">
+        <h1 class="my-4">{{ page_title }}</h1>
+
+        <table class="table table-sm table-striped">
+           <thead>
+                <tr>
+                    <th>{% translate "SECID" %}</th>
+                    <th>{% translate "Short name" %}</th>
+                    <th>{% translate "Regnumber" %}</th>
+                    <th>{% translate "Name" %}</th>
+                    <th>{% translate "ISIN" %}</th>
+                    <th>{% translate "Type" %}</th>
+                    <th>{% translate "Group" %}</th>
+                    <th></th>
+
+                </tr>
+            </thead>
+        
+            <tbody method="get">
+                {% for search_result in search_result_list %}
+                <tr>
+                    <td>{{ search_result.secid }}</td>
+                    <td>{{ search_result.shortname }}</td>
+                    <td>{{ search_result.regnumber }}</td>
+                    <td>{{ search_result.name }}</td>
+                    <td>{{ search_result.isin }}</td>
+                    <td>{{ search_result.type }}</td>
+                    <td>{{ search_result.group }}</td>
+                    <td>
+                        <div class="d-flex justify-content-left">
+                            <a class="btn btn-primary btn-sm" href="{% url "add_transaction" 1 %}" role="button">{% translate "Add transaction" %}</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock content %}

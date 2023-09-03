@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'finance_majordomo.currencies',
     'finance_majordomo.dividends',
     'finance_majordomo.assets',
+    'finance_majordomo.search'
 
 ]
 

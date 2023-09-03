@@ -27,6 +27,7 @@ urlpatterns = [
     path("stocks/", include("finance_majordomo.stocks.urls")),
     path("transactions/", include("finance_majordomo.transactions.urls")),
     path("dividends/", include("finance_majordomo.dividends.urls")),
+    path("search/", include("finance_majordomo.search.urls")),
 
     path("login/", LoginUser.as_view(), name="login"),
     path("logout/", logout_user, name="logout")

@@ -122,14 +122,17 @@ def get_security(security_info: str):
         data = apimoex.find_securities(
             session,
             security_info.upper(),
-            columns=('secid', 'regnumber', 'name', 'type', 'group')
+            columns=None#('secid', 'shortname', 'regnumber', 'name', 'isin', 'is_traded', 'type', 'group')
         )
 
         return data
 
 
-# a = get_security('SU26222RMFS8, RU000A0JXQF2')
-# print(len(a))
+#a = get_security('SU26222RMFS8, RU000A0JXQF2')
+# a = get_security('нижнекам')
+# b = filter(lambda x: x['is_traded'], a)
+# for el in b:
+#     print(el)
 # for el in a[:10]:
 #    print(el['secid'], el['name'], el.get('type'), el.get('group'))
 #
