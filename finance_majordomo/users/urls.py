@@ -8,6 +8,9 @@ urlpatterns = [
     #path("<int:pk>/update/", views.UpdateUser.as_view(), name="update_user"),
     path("set_fields/", views.SetFieldsToDisplay.as_view(), name="set_fields"),
     path("create/", views.CreateUser.as_view(), name="create_user"),
-    path("add_stock/<int:pk_stock>/", views.AddStockToUser.as_view(), name="add_stock_to_user"),
+    path("add_stock/<int:pk_stock>/", views.AddStockToUser.as_view(),
+         name="add_stock_to_user"),
+    path("add_asset/<int:pk_asset>/", views.AddAssetToPortfolio.as_view(),
+         name="add_asset_to_portfolio"),
     #path("<int:user_id>/add_transaction/<int:stock_id>", views.AddTransaction.as_view(), name="add_transaction"),
 ]

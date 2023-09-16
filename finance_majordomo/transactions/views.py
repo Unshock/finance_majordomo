@@ -5,13 +5,14 @@ from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, DeleteView
 
-from finance_majordomo.stocks.models import Stock
+from finance_majordomo.stocks.models import Stock, StocksOfUser
 
 from django.utils.translation import gettext_lazy as _
 
 from finance_majordomo.transactions.forms import TransactionForm
 from finance_majordomo.users.models import User
 from finance_majordomo.transactions.models import Transaction
+from ..stocks.views import AddStock, add_asset
 from ..transactions.utils import validate_transaction
 from ..dividends.utils import update_dividends_of_user
 
@@ -46,7 +47,7 @@ class UsersTransactionList(LoginRequiredMixin, ListView):
 
 class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     login_url = 'login'
-    form_class = TransactionForm
+    #form_class = TransactionForm()
     template_name = 'base_create_and_update.html'
     #alter for beauty for tests:
     #template_name = 'transactions/transaction_form.html'
@@ -64,16 +65,70 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
     def get(self, request, *args, **kwargs):
 
-        transaction_form = TransactionForm()
+        asset_id = request.GET.get('asset_id')
+        asset_secid = request.GET.get('asset_secid')
+        asset_group = request.GET.get('asset_group')
 
-        asset_id = kwargs.get('asset_id')
-        asset_type = kwargs.get('asset_type')
+        initial_ticker = None
 
-        if asset_id:
-            transaction_form.initial['ticker'] = asset_id
+        if asset_secid:
 
-        if asset_type:
-            transaction_form.initial['asset_type'] = asset_type
+            try:
+                asset = Stock.objects.get(ticker=asset_secid)
+
+            except Stock.DoesNotExist:
+                # ADD ASSET TO DB
+                asset = add_asset(asset_secid)
+
+            transaction_form = TransactionForm(
+                request=request,
+                asset=Stock.objects.filter(id=asset.id))
+            transaction_form.initial['ticker'] = asset.id
+
+            return render(
+                request,
+                self.template_name,
+                {'form': transaction_form,
+                 'page_title': _("Add new transaction"),
+                 'button_text': _('Add')
+                 }
+            )
+
+        elif asset_id:
+            initial_ticker = asset_id
+
+        transaction_form = TransactionForm(request=request)
+        transaction_form.initial['ticker'] = initial_ticker
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        # if asset_id:
+        #     #transaction_form.initial['ticker'] = asset_id
+        #     initial_ticker = asset_id
+        # 
+        # elif asset_secid:
+        # 
+        #     try:
+        #         asset = Stock.objects.get(ticker=asset_secid)
+        # 
+        #     except Stock.DoesNotExist:
+        #         asset = add_asset(asset_secid)
+        # 
+        #     #transaction_form.initial['ticker'] = asset.id
+        #     initial_ticker = asset.id
+        # 
+        # transaction_form = TransactionForm(asset=Stock.objects.filter(id=asset.id))
+        # transaction_form.initial['ticker'] = initial_ticker
 
         return render(
             request,
@@ -99,6 +154,12 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
             quantity = form.cleaned_data.get('quantity')
 
             user = request.user
+
+            # Если в ходе поиска добавляем первую транзакцию для актива, 
+            # то добавляем актив в StocksOfUser
+            if ticker.id not in user.stocksofuser_set.values_list('stock'):
+                ticker.users.add(user)
+                ticker.save()
 
             obj = Transaction.objects.create(
                 asset_type=asset_type,

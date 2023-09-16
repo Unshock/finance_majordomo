@@ -9,7 +9,8 @@ from .utils.fields_to_display import get_default_display_options
 
 class User(AbstractUser):
     creation_date = models.DateTimeField(
-        auto_now_add=True, verbose_name=_("Creation_date"))
+        auto_now_add=True, verbose_name=_("Creation_date")
+    )
 
     fields_to_display = models.JSONField(
         verbose_name='Поля для отображения',
@@ -25,3 +26,25 @@ class User(AbstractUser):
 
     def get_delete_url(self):
         return reverse("delete_user", kwargs={'pk': self.pk})
+
+
+class Portfolio(models.Model):
+    creation_date = models.DateTimeField(
+        auto_now_add=True, verbose_name=_("Creation_date")
+    )
+
+    name = models.CharField(
+        max_length=100,
+        verbose_name=_("Portfolio name")
+    )
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name="Portfolio owner"
+    )
+
+    is_current = models.BooleanField(
+        verbose_name=_("If the portfolio is current for the owner. The "
+                       "current portfolio is used to work with transactions")
+    )

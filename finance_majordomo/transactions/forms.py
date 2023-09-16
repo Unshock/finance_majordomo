@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.forms import ModelForm
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from finance_majordomo.stocks.models import Stock
+from finance_majordomo.stocks.models import Stock, StocksOfUser
 from finance_majordomo.transactions.models import Transaction
 from finance_majordomo.stocks.views import UsersStocks
 from .utils import validate_transaction
@@ -20,16 +20,47 @@ from crispy_forms.layout import Submit
 
 class TransactionForm(ModelForm):
 
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_id = 'id-exampleForm'
-        self.helper.form_class = 'blueForms'
-        self.helper.form_method = 'post'
-        self.helper.form_action = 'submit_survey'
+    # def __init__(self, user, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    # 
+    #     self.fields['ticker'].queryset = Stock.objects.filter(
+    #         id__in=user.stocksofuser_set.values_list('stock'))
 
-        self.helper.add_input(Submit('submit', 'Submit'))
+        #print(user, user.stocksofuser_set.values_list('stock'))
+        #print(Stock.objects.filter(id__in=user.stocksofuser_set.values_list('stock')))
+
+        #     StocksOfUser.objects.filter(user=user)
+        # print(StocksOfUser.objects.filter(user=user))
+        # if ticker.id not in user.stocksofuser_set.values_list('stock')
+
+
+    def __init__(self, *args, **kwargs):
+
+        self.request = kwargs.pop('request', None)
+        self.asset = kwargs.pop('asset', None)
+        super().__init__(*args, **kwargs)
+
+        self.fields['ticker'].label = _('Share')
+        self.fields['ticker'].empty_label = _('Choose stock from the list')
+
+        if self.request.method == "GET":
+            self.fields['ticker'].queryset = Stock.objects.filter(
+                id__in=self.request.user.stocksofuser_set.values_list('stock'))
+
+            if self.asset:
+                self.fields['ticker'].queryset |= self.asset
+
+        if self.request.method == "POST":
+            self.fields['ticker'].queryset = Stock.objects.all()
+
+
+        # self.helper = FormHelper()
+        # self.helper.form_id = 'id-exampleForm'
+        # self.helper.form_class = 'blueForms'
+        # self.helper.form_method = 'post'
+        # self.helper.form_action = 'submit_survey'
+        # 
+        # self.helper.add_input(Submit('submit', 'Submit'))
 
     asset_type = forms.ChoiceField(
         label=_('Asset type'),
@@ -53,12 +84,13 @@ class TransactionForm(ModelForm):
         ),
     )
 
-    ticker = forms.ModelChoiceField(
-        label=_('Share'),
-        queryset=Stock.objects.all(),
-        empty_label=_('Choose stock from the list'),
-
-        )
+    # ticker = forms.ModelChoiceField(
+    #     label=_('Share'),
+    #     #queryset=Stock.objects.all(),
+    #     #queryset=Stock.objects.filter(user=self.user),
+    #     empty_label=_('Choose stock from the list'),
+    # 
+    #     )
 
     # ticker_new = forms.CharField(
     #     label=_("Ticker"),
@@ -120,7 +152,7 @@ class TransactionForm(ModelForm):
 
             validate_dict = {
                 'validator': 'add_validator',
-                'asset_obj': Stock.objects.get(latname=ticker),
+                'asset_obj': Stock.objects.get(latname=ticker.latname),
                 'transaction_type': transaction_type,
                 'date': date,
                 'quantity': quantity
@@ -155,6 +187,7 @@ class TransactionForm(ModelForm):
     def clean_date(self):
         date = self.cleaned_data.get('date')
         asset = self.cleaned_data.get('ticker')
+
         issuedate = Stock.objects.get(latname=asset).issuedate
         issuedate = datetime.datetime.strftime(issuedate, '%Y-%m-%d')
         if date < issuedate:

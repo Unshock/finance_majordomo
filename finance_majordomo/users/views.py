@@ -13,12 +13,14 @@ from django.utils.translation import gettext_lazy as _
 
 from finance_majordomo.stocks.models import Stock
 from finance_majordomo.users.forms import RegisterUserForm, LoginUserForm, FieldsUserForm
-from finance_majordomo.users.models import User
+from finance_majordomo.users.models import User, Portfolio
 from .utils.utils import set_fields_to_user
 from .utils.fields_to_display import FIELDS_TO_DISPLAY
 
 
 # Create your views here.
+from ..assets.models import Asset
+
 
 class UserList(ListView):
     model = User
@@ -47,6 +49,13 @@ class CreateUser(SuccessMessageMixin, CreateView):
         # form.instance.creator = self.request.user
         user = form.save()
         set_fields_to_user(user)
+
+        #craete one and only for now portfolio for user
+        Portfolio.objects.create(name='Portfolio No. 1',
+                                 user=user,
+                                 is_current=True
+                                 )
+
         return super().form_valid(form)
 
     # def post(self, request):
@@ -110,7 +119,7 @@ class AddStockToUser(SuccessMessageMixin, LoginRequiredMixin, View):
     success_message = _("Stock has been successfully added to user's stock list")
 
     def get(self, request, *args, **kwargs):
-        stock = Stock.objects.get(id=kwargs['pk_stock'])
+        stock = Stock.objects.get(id=kwargs['pk_stock'])        
         stock.users.add(request.user)
         stock.save()
 
@@ -150,6 +159,22 @@ class AddStockToUser(SuccessMessageMixin, LoginRequiredMixin, View):
     #     context['page_title'] = _("Update users")
     #     context['button_text'] = _("Update")
     #     return context
+
+
+class AddAssetToPortfolio(SuccessMessageMixin, LoginRequiredMixin, View):
+    model = Portfolio
+    login_url = 'login'
+    success_message = _("Asset has been successfully added to portfolio")
+
+    def get(self, request, *args, **kwargs):
+        asset = Asset.objects.get(id=kwargs['pk_asset'])
+        current_portfolio = Portfolio.objects.filter(
+            user=request.user,
+            is_current=True)
+        asset.portfolios.add(current_portfolio)
+        asset.save()
+
+        return redirect('stocks')
 
 
 class SetFieldsToDisplay(SuccessMessageMixin, LoginRequiredMixin, View):

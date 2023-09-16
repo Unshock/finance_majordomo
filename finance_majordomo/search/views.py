@@ -56,13 +56,16 @@ class Search(LoginRequiredMixin, View):
             search_data = form.cleaned_data.get('search_data')
 
             search_result = get_security(search_data)
-            search_result_list = filter(
+            search_result_list = list(filter(
                 lambda d: d['is_traded'] and d['group'] in allowed_groups,
-                search_result)
+                search_result))
+
 
             context = {
                 'page_title': _("Search results"),
-                'search_result_list': search_result_list
+                'search_result_list':
+                    search_result_list if search_result_list else None
+
             }
 
             return render(

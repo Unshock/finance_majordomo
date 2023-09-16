@@ -3,6 +3,8 @@
 {% block content %}
     <div class="container wrapper flex-grow-1">
         <h1 class="my-4">{{ page_title }}</h1>
+        
+        {% if search_result_list %}
 
         <table class="table table-sm table-striped">
            <thead>
@@ -31,12 +33,18 @@
                     <td>{{ search_result.group }}</td>
                     <td>
                         <div class="d-flex justify-content-left">
-                            <a class="btn btn-primary btn-sm" href="{% url "add_transaction" 1 %}" role="button">{% translate "Add transaction" %}</a>
+                            <a class="btn btn-primary btn-sm" href="{% url "add_transaction" %}?asset_secid={{ search_result.secid }}&asset_group={{ search_result.group }}" role="button">{% translate "Add transaction" %}</a>
                         </div>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+            
+        {% else %}
+            
+        <h1 class="my-4">Nothing has been found</h1>    
+            
+        {% endif %}
     </div>
 {% endblock content %}

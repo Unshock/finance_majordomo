@@ -112,10 +112,20 @@ def get_stock_description(ticker: str):
 
 
 
-
+# 
 # import pprint
-# pp = pprint.pformat(get_stock_board_history('tech'), indent=2)
-# print(pp)
+# p1 = pprint.pformat(get_stock_description('LQDT'), indent=2)
+# p2 = pprint.pformat(get_stock_description('sber'), indent=2)
+# p5 = pprint.pformat(get_stock_description('sberp'), indent=2)
+# p3 = pprint.pformat(get_stock_description('lqdt'), indent=2)
+# p4 = pprint.pformat(get_stock_description('SU26221RMFS0'), indent=2)
+# p6 = pprint.pformat(get_stock_description('RU000A0JTW83'), indent=2)
+# print(p1)
+# print(p2)
+# print(p3)
+# print(p4)
+# print(p5)
+# print(p6)
 
 def get_security(security_info: str):
     with requests.Session() as session:

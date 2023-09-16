@@ -113,7 +113,7 @@
                 
                     <td>
                         <div class="d-flex justify-content-left">
-                            <a class="btn btn-primary btn-sm" href="{% url "add_transaction" stock.id %}" role="button">{% translate "Add transaction" %}</a>
+                            <a class="btn btn-primary btn-sm" href="{% url "add_transaction" %}?asset_id={{ stock.id }}" role="button">{% translate "Add transaction" %}</a>
                         </div>
                     </td>
                 </tr>

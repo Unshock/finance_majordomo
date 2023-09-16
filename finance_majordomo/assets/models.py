@@ -3,6 +3,8 @@ from django.urls import reverse
 
 from django.utils.translation import gettext_lazy as _
 
+from finance_majordomo.users.models import Portfolio
+
 
 class Asset(models.Model):
 
@@ -19,3 +21,28 @@ class Asset(models.Model):
     asset_type = models.CharField(max_length=20,
                                   choices=asset_types,
                                   verbose_name='Тип актива')
+
+    portfolios = models.ManyToManyField(
+        Portfolio,
+        through='AssetOfPortfolio',
+        through_fields=('asset', 'portfolio'),
+        #blank=True,
+        related_name='asset',
+    )
+
+
+class AssetOfPortfolio(models.Model):
+    asset = models.ForeignKey(
+        Asset,
+        on_delete=models.CASCADE
+    )
+
+    portfolio = models.ForeignKey(
+        Portfolio,
+        on_delete=models.CASCADE
+    )
+
+    class Meta:
+        verbose_name = "Объекты портфеля"
+        verbose_name_plural = "Объекты портфеля"
+        ordering = ['portfolio']

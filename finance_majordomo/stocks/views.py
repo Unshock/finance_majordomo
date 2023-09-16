@@ -17,12 +17,15 @@ from finance_majordomo.transactions.models import Transaction
 
 from django.utils.translation import gettext_lazy as _
 
-from common.utils.stocks import get_stock_board_history, make_json_trade_info_dict, get_date_status, \
-    get_stock_current_price, make_json_last_price_dict
+from common.utils.stocks import get_stock_board_history, \
+    make_json_trade_info_dict, get_date_status, \
+    get_stock_current_price, make_json_last_price_dict, get_stock_description
 from finance_majordomo.dividends.utils import get_stock_dividends, add_dividends_to_model
+from ..assets.models import Asset, AssetOfPortfolio
 from ..transactions.utils import get_quantity, get_purchase_price
 from .utils import get_money_result
 from ..dividends.utils import get_dividend_result
+from ..users.models import Portfolio
 
 
 class Stocks(LoginRequiredMixin, ListView):
@@ -65,6 +68,8 @@ class UsersStocks(LoginRequiredMixin, ListView):
 
         context['fields_to_display'] = json.loads(
             self.request.user.fields_to_display)
+        context['current_portfolio'] = \
+            Portfolio.objects.filter(user=self.request.user, is_current=True)
         context['stock_list'] = user_stock_data['stock_list']
         context['total_results'] = user_stock_data['total_results']
         return context
@@ -81,6 +86,20 @@ class UsersStocks(LoginRequiredMixin, ListView):
         request = self.request
         users_stocks = Stock.objects.filter(
             id__in=request.user.stocksofuser_set.values_list('stock'))
+
+        current_portfolio = Portfolio.objects.filter(
+            user=self.request.user, is_current=True)
+
+        print('==========$=====================')
+        print(request.user.stocksofuser_set.values_list('stock'))
+        print('==========$=====================')
+
+        #users_assets = Asset.objects.filter(
+        #    id__in=current_portfolio.assetofportfolio_set.values_list('asset'))
+
+        print('===============================')
+        #print(users_assets)
+        print('===============================')
 
         #print(request.user.stocksofuser_set.values_list('stock'))
 
@@ -451,6 +470,79 @@ def get_normalized_asset_type(type: str) -> str:
     return types_dict.get(type)
 
 
+def add_asset(isin: str) -> int:
+
+    stock_description = get_stock_description(isin)
+
+    ticker = stock_description.get('SECID')
+    isin = stock_description.get('ISIN')
+
+    name = stock_description.get('SHORTNAME')
+    latname = stock_description.get('LATNAME')
+
+    currency = 'RUR' if stock_description.get(
+        'FACEUNIT') == 'SUR' else stock_description.get('FACEUNIT')
+    issuedate = stock_description.get('ISSUEDATE')
+
+    isqualifiedinvestors = True if \
+        stock_description.get('ISQUALIFIEDINVESTORS') == '1' else False
+    morningsession = True if \
+        stock_description.get('MORNINGSESSION') == '1' else False
+    eveningsession = True if \
+        stock_description.get('EVENINGSESSION') == '1' else False
+
+    type = stock_description.get('TYPE')
+    typename = stock_description.get('TYPENAME')
+
+    group = stock_description.get('GROUP')
+    groupname = stock_description.get('GROUPNAME')
+
+    asset_type = get_normalized_asset_type(type)
+
+    check_list = [ticker, name, isin,
+                  currency, latname, isqualifiedinvestors,
+                  issuedate, morningsession, eveningsession,
+                  typename, group, type, groupname]
+
+    if None in check_list:
+        print("SOMETHING HAVE NOT BEEN LOADED - GOT NONE")
+
+    # Ищем инфу о ценах акции за весь период чтобы записать в JSONField
+    print(ticker)
+    stock_board_history = get_stock_board_history(ticker)
+    json_stock_board_data = make_json_trade_info_dict(
+        stock_board_history)
+
+    stock_obj = Stock.objects.create(
+        asset_type=asset_type,
+
+        ticker=ticker,
+        name=name,
+        isin=isin,
+        currency=currency,
+        latname=latname,
+        isqualifiedinvestors=isqualifiedinvestors,
+        issuedate=issuedate,
+        morningsession=morningsession,
+        eveningsession=eveningsession,
+        typename=typename,
+        group=group,
+        type=type,
+        groupname=groupname,
+        stock_data=json_stock_board_data,
+    )
+
+    # add dividend for stock
+    try:
+        dividends_dict = get_stock_dividends(stock_obj)
+        add_dividends_to_model(stock_obj, dividends_dict)
+
+    except Exception('something went wrong while download divs'):
+        pass
+
+    return stock_obj
+
+
 class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     login_url = 'login'
     form_class = StockForm
@@ -468,7 +560,17 @@ class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         return context
 
     def post(self, request, *args, **kwargs):
+
         form = StockForm(request.POST)
+        # 
+        # if kwargs.get('isin'):
+        #     form.initial['ticker'] = kwargs.get('isin')
+        # 
+        # print(request)
+        # print(request.POST)
+        # print(args)
+        # print(kwargs)
+        # #print(type(form))
 
         if form.is_valid():
 
