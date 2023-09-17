@@ -16,7 +16,7 @@ class TestTransactionsUtils(SettingsTransactions):
 
             result = get_quantity(r, self.stock_id_3)
 
-            self.assertEqual(result, 2)
+            self.assertEqual(result, 0)
             self.assertTrue(isinstance(result, int))
 
             result = get_quantity(r, self.stock_id_3, date='2019-01-01')
@@ -69,6 +69,8 @@ class TestTransactionsUtils(SettingsTransactions):
     #             get_quantity(r, self.stock_id_3, date='2020-01-01')
 
     def test_get_purchase_price_1(self):
+        Transaction.objects.get(id=7).delete()
+
         with requests_mock.Mocker() as r:
 
             r.user = self.user_authenticated
@@ -89,7 +91,7 @@ class TestTransactionsUtils(SettingsTransactions):
             result = get_purchase_price(r, self.stock_id_3)
 
             self.assertTrue(isinstance(result, Decimal))
-            self.assertEqual(result, Decimal(260))
+            self.assertEqual(result, Decimal(80))
 
     def test_get_average_purchase_price(self):
 
@@ -102,7 +104,7 @@ class TestTransactionsUtils(SettingsTransactions):
             result = get_average_purchase_price(r, self.stock_id_3)
 
             self.assertTrue(isinstance(result, Decimal))
-            self.assertEqual(result, Decimal(Decimal(260) / 3))
+            self.assertEqual(result, Decimal(Decimal(80)))
 
             result = get_average_purchase_price(
                 r, self.stock_id_3, date='2018-06-01')

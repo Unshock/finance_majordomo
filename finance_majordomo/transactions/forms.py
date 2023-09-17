@@ -152,7 +152,8 @@ class TransactionForm(ModelForm):
 
             validate_dict = {
                 'validator': 'add_validator',
-                'asset_obj': Stock.objects.get(latname=ticker.latname),
+                #'asset_obj': Stock.objects.get(latname=ticker.latname),
+                'asset_obj': ticker,
                 'transaction_type': transaction_type,
                 'date': date,
                 'quantity': quantity
@@ -188,7 +189,11 @@ class TransactionForm(ModelForm):
         date = self.cleaned_data.get('date')
         asset = self.cleaned_data.get('ticker')
 
-        issuedate = Stock.objects.get(latname=asset).issuedate
+        # print(self.cleaned_data)
+        # print('asset', type(asset), asset)
+        # print(Stock.objects.get(latname=asset.latname))
+        #issuedate = Stock.objects.get(latname=asset).issuedate
+        issuedate = asset.issuedate
         issuedate = datetime.datetime.strftime(issuedate, '%Y-%m-%d')
         if date < issuedate:
             raise ValidationError(

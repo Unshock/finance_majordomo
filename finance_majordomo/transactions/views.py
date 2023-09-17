@@ -66,6 +66,7 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     def get(self, request, *args, **kwargs):
 
         asset_id = request.GET.get('asset_id')
+        print(asset_id)
         asset_secid = request.GET.get('asset_secid')
         asset_group = request.GET.get('asset_group')
 
@@ -99,6 +100,8 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
         transaction_form = TransactionForm(request=request)
         transaction_form.initial['ticker'] = initial_ticker
+        print(transaction_form.initial['ticker'])
+        print(type(transaction_form.initial['ticker']))
         
         
         

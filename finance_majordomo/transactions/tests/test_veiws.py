@@ -17,22 +17,26 @@ class TestTransactionsViews(SettingsTransactions):
         self.list_all_transactions = reverse('transactions')
         self.list_user_transactions = reverse('user_transactions')
         self.add_transaction = reverse('add_transaction')
-        self.add_transaction_with_asset = reverse(
-            'add_transaction', kwargs={'asset_id': 3})
         self.delete_transaction = reverse(
-            'delete_transaction', kwargs={'pk': 3})
+            'delete_transaction', kwargs={'pk': 1})
         self.login = reverse('login')
+        self.add_transaction_with_id = \
+            reverse('add_transaction') + '?asset_id=1'
+        self.add_transaction_with_asset_secid_existed = \
+            reverse('add_transaction') + '?asset_secid=LSNGP'
+        self.add_transaction_with_asset_secid_nonexisted = \
+            reverse('add_transaction') + '?asset_secid=GAZP'
 
     def test_urls_to_views(self):
+        #print(self.add_transaction_with_id)
         self.assertEqual(resolve(self.list_all_transactions).func.view_class,
                          views.TransactionList)
         self.assertEqual(resolve(self.list_user_transactions).func.view_class,
                          views.UsersTransactionList)
         self.assertEqual(resolve(self.add_transaction).func.view_class,
                          views.AddTransaction)
-        self.assertEqual(
-            resolve(self.add_transaction_with_asset).func.view_class,
-            views.AddTransaction)
+        # self.assertEqual(resolve(self.add_transaction_with_id).func.view_class,
+        #                  views.AddTransaction)
         self.assertEqual(resolve(self.delete_transaction).func.view_class,
                          views.DeleteTransaction)
 
@@ -42,7 +46,7 @@ class TestTransactionsViews(SettingsTransactions):
         transactions = response.context.get('transaction_list')
 
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertEqual(len(transactions), 6)
+        self.assertEqual(len(transactions), 7)
 
         # it should be div_id_2 because of order_by -date:
         self.assertEqual(transactions[0].date,
@@ -61,7 +65,7 @@ class TestTransactionsViews(SettingsTransactions):
         transactions = response.context.get('transaction_list')
 
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertEqual(len(transactions), 5)
+        self.assertEqual(len(transactions), 6)
 
         # it should be div_id_2 because of order_by -date:
         self.assertEqual(transactions[0].date,
@@ -114,12 +118,24 @@ class TestTransactionsViews(SettingsTransactions):
         self.assertTemplateUsed(response, 'base_create_and_update.html')
 
 
-    def test_add_transaction_with_data_GET(self):
+    def test_add_transaction_GET_with_asset_id(self):
         response = self.client_authenticated.get(
-            self.add_transaction_with_asset)
+            self.add_transaction_with_id)
 
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertEqual(response.context['form'].initial, {'ticker': 3})
+        self.assertEqual(response.context['form'].initial, {'ticker': '1'})
+        self.assertEqual(
+            response.context.get('page_title'), _("Add new transaction"))
+        self.assertEqual(
+            response.context.get('button_text'), _("Add"))
+        self.assertTemplateUsed(response, 'base_create_and_update.html')
+
+    def test_add_transaction_GET_with_SECID(self):
+        response = self.client_authenticated.get(
+            self.add_transaction_with_asset_secid_existed)
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertEqual(response.context['form'].initial, {'ticker': 2})
         self.assertEqual(
             response.context.get('page_title'), _("Add new transaction"))
         self.assertEqual(
@@ -145,7 +161,7 @@ class TestTransactionsViews(SettingsTransactions):
         print(last_transaction.ticker)
 
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
-        self.assertEqual(transactions.count(), 7)
+        self.assertEqual(transactions.count(), 8)
         self.assertEqual(last_transaction.date, datetime.date(2023, 1, 1))
         self.assertEqual(last_transaction.price, Decimal(555))
         self.assertEqual(last_transaction.user, self.user_authenticated)
@@ -168,7 +184,7 @@ class TestTransactionsViews(SettingsTransactions):
         transactions = Transaction.objects.all()
 
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
-        self.assertEqual(transactions.count(), 6)
+        self.assertEqual(transactions.count(), 7)
 
     def test_delete_transaction_GET(self):
 
@@ -184,7 +200,7 @@ class TestTransactionsViews(SettingsTransactions):
     def test_delete_transaction_authenticated_POST(self):
 
         transactions = Transaction.objects.all()
-        self.assertEqual(transactions.count(), 6)
+        self.assertEqual(transactions.count(), 7)
         self.assertTrue(Transaction.objects.get(id=3).date,
                         datetime.date(2019, 1, 1))
 
@@ -193,9 +209,9 @@ class TestTransactionsViews(SettingsTransactions):
         transactions = Transaction.objects.all()
 
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
-        self.assertEqual(transactions.count(), 5)
+        self.assertEqual(transactions.count(), 6)
         with self.assertRaises(Transaction.DoesNotExist):
-            Transaction.objects.get(id=3)
+            Transaction.objects.get(id=1)
         self.assertRedirects(response, self.list_all_transactions)
 
 # dividends update have not been tested

@@ -14,7 +14,7 @@ class TransactionsModelsTest(SettingsTransactions):
         self.assertEqual(self.transaction_id_1.date, "1999-12-31")
         self.assertEqual(self.transaction_id_1.price, "10")
         self.assertEqual(self.transaction_id_1.fee, '0.00')
-        self.assertEqual(Transaction.objects.count(), 6)
+        self.assertEqual(Transaction.objects.count(), 7)
         self.assertEqual(
             self.transaction_id_5._meta.get_field('date').verbose_name,
             _("Transaction date"))
