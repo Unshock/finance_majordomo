@@ -4,6 +4,7 @@ dist/
 *.pyc
 .venv/
 .coverage
+.coveragerc
 coverage.xml
 .pytest_cache/
 .idea

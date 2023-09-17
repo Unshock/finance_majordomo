@@ -22,6 +22,12 @@ class Asset(models.Model):
                                   choices=asset_types,
                                   verbose_name='Тип актива')
 
+    # ticker = models.CharField(
+    #     max_length=10,
+    #     verbose_name="Тикер акции",
+    #     unique=True
+    # )
+
     portfolios = models.ManyToManyField(
         Portfolio,
         through='AssetOfPortfolio',
