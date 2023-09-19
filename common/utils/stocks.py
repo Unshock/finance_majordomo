@@ -7,6 +7,7 @@ from urllib3.util.retry import Retry
 
 import apimoex
 
+from finance_majordomo.stocks.models import Stock
 
 
 def validate_ticker(ticker: str):

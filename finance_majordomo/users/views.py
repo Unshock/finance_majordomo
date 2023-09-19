@@ -5,6 +5,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.contrib.messages.views import SuccessMessageMixin
+from django.forms import modelform_factory
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views import View
@@ -12,8 +13,9 @@ from django.views.generic import CreateView, ListView
 from django.utils.translation import gettext_lazy as _
 
 from finance_majordomo.stocks.models import Stock
-from finance_majordomo.users.forms import RegisterUserForm, LoginUserForm, FieldsUserForm
-from finance_majordomo.users.models import User, Portfolio
+from finance_majordomo.users.forms import RegisterUserForm, LoginUserForm, \
+    FieldsUserForm
+from finance_majordomo.users.models import User, Portfolio, UserSettings
 from .utils.utils import set_fields_to_user
 from .utils.fields_to_display import FIELDS_TO_DISPLAY
 
@@ -49,6 +51,7 @@ class CreateUser(SuccessMessageMixin, CreateView):
         # form.instance.creator = self.request.user
         user = form.save()
         set_fields_to_user(user)
+        UserSettings.objects.create(user=user)
 
         #craete one and only for now portfolio for user
         Portfolio.objects.create(name='Portfolio No. 1',
@@ -178,61 +181,48 @@ class AddAssetToPortfolio(SuccessMessageMixin, LoginRequiredMixin, View):
 
 
 class SetFieldsToDisplay(SuccessMessageMixin, LoginRequiredMixin, View):
-    model = User
-    form_class = FieldsUserForm
     template_name = 'users/display_options.html'
     success_message = _("Display options have been successfully set")
     success_url = reverse_lazy('users_stocks')
 
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['page_title'] = _("Fields to display")
-        context['button_text'] = _("Save")
-        return context
+    user_settings_form = modelform_factory(
+        UserSettings,
+        fields='__all__',
+        exclude=('user',)
+    )
 
     def get(self, request, *args, **kwargs):
-        display_form = FieldsUserForm()
+        user_settings = UserSettings.objects.get(user=request.user)
 
-        user_fields_to_display = json.loads(request.user.fields_to_display)
+        form = self.user_settings_form()
 
+        for field in user_settings._meta.fields:
+            field_name = field.name
 
-        for key, value in user_fields_to_display.items():
-            display_form.initial[key] = value
+            if field_name not in ['id', 'user']:
+                field_value = getattr(user_settings, field_name)
+                form.initial[field_name] = field_value
 
         return render(
-            request,
-            self.template_name,
-            {'form': display_form,
-             'page_title': _("Fields to display"),
-             'button_text': _("Save")
-             }
-        )
+                request,
+                self.template_name,
+                {'form': form,
+                 'page_title': _("Fields to display"),
+                 'button_text': _("Save")
+                 }
+            )
 
     def post(self, request, *args, **kwargs):
 
-        form = FieldsUserForm(request.POST)
+        form = self.user_settings_form(request.POST)
 
         if form.is_valid():
 
-            fields_to_display = FIELDS_TO_DISPLAY
-            user_fields_to_display = dict()
+            user_settings = UserSettings.objects.get(user=request.user)
 
-            for key, value in form.cleaned_data.items():
-                if key in fields_to_display:
-
-                    user_fields_to_display[key] = value
-
-            set_fields_to_user(request.user, user_fields_to_display)
+            for field_name, field_value in form.cleaned_data.items():
+                setattr(user_settings, field_name, field_value)
+                user_settings.save()
 
             messages.success(request, self.success_message)
             return redirect(self.success_url)
-
-        #should not be raised
-        return render(
-            request,
-            self.template_name,
-            {'form': form,
-             'page_title': _("Fields to display"),
-             'button_text': _("Save")
-             }
-        )

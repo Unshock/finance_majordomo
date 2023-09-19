@@ -25,14 +25,14 @@ class Asset(models.Model):
     # ticker = models.CharField(
     #     max_length=10,
     #     verbose_name="Тикер акции",
-    #     unique=True
+    #     unique=True,
+    #     null=True
     # )
 
     portfolios = models.ManyToManyField(
         Portfolio,
         through='AssetOfPortfolio',
         through_fields=('asset', 'portfolio'),
-        #blank=True,
         related_name='asset',
     )
 

@@ -11,7 +11,7 @@ class Stock(Asset):
 
     ticker = models.CharField(
         max_length=10,
-        verbose_name="Тикер акции", 
+        verbose_name="Тикер акции",
         unique=True
     )
 

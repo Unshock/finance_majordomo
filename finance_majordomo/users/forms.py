@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.utils.translation import gettext_lazy as _
 from finance_majordomo.users.utils.fields_to_display import FIELDS_TO_DISPLAY
-from .models import User
+from .models import User, UserSettings
 
 
 class RegisterUserForm(UserCreationForm):
@@ -55,4 +55,19 @@ class FieldsUserForm(forms.Form):
 
     class Meta:
         fields = FIELDS_TO_DISPLAY
+        
+#         
+# class UserSettingsForm(forms.Form):
+#     show_ticker = forms.BooleanField(required=False)
+# 
+#     def __init__(self, *args, **kwargs):
+#         self.user = kwargs.pop('user', None)
+#         super(UserSettingsForm, self).__init__(*args, **kwargs)
+# 
+#         if self.user:
+#             try:
+#                 user_settings = UserSettings.objects.get(user=self.user)
+#                 self.fields['show_ticker'].initial = user_settings.show_ticker
+#             except UserSettings.DoesNotExist:
+#                 pass
 

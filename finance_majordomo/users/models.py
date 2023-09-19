@@ -48,3 +48,20 @@ class Portfolio(models.Model):
         verbose_name=_("If the portfolio is current for the owner. The "
                        "current portfolio is used to work with transactions")
     )
+
+
+class UserSettings(models.Model):
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    show_ticker = models.BooleanField(default=True)
+    show_name = models.BooleanField(default=True)
+    show_currency = models.BooleanField(default=True)
+    show_quantity = models.BooleanField(default=True)
+    show_purchase_price = models.BooleanField(default=True)
+    show_current_price = models.BooleanField(default=True)
+    show_dividends_received = models.BooleanField(default=True)
+    show_money_result_without_divs = models.BooleanField(default=True)
+    show_money_result_with_divs = models.BooleanField(default=True)
+    show_percent_result = models.BooleanField(default=True)
+    show_rate_of_return = models.BooleanField(default=True)

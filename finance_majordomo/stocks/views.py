@@ -25,7 +25,7 @@ from ..assets.models import Asset, AssetOfPortfolio
 from ..transactions.utils import get_quantity, get_purchase_price
 from .utils import get_money_result
 from ..dividends.utils import get_dividend_result
-from ..users.models import Portfolio
+from ..users.models import Portfolio, UserSettings
 
 
 class Stocks(LoginRequiredMixin, ListView):
@@ -49,14 +49,12 @@ class UsersStocks(LoginRequiredMixin, ListView):
     context_object_name = 'stock'
 
     def get_context_data(self, *, object_list=None, **kwargs):
-        #print(self.request.user.id)
+
         context = super().get_context_data(**kwargs)
 
         context['page_title'] = self.request.user.username + " " + _(
             "stock list")
         user_stock_data = self.get_user_stock_data()
-
-        #print(user_stock_data)
 
         # total_price = {'total_purchase_price': self.get_total_purchase_price(user_stock_data),
         #                'total_current_price': self.get_total_current_price(user_stock_data),
@@ -66,8 +64,7 @@ class UsersStocks(LoginRequiredMixin, ListView):
         #                )
         #                }
 
-        context['fields_to_display'] = json.loads(
-            self.request.user.fields_to_display)
+        context['fields_to_display'] = self.request.user.usersettings
         context['current_portfolio'] = \
             Portfolio.objects.filter(user=self.request.user, is_current=True)
         context['stock_list'] = user_stock_data['stock_list']
@@ -75,11 +72,15 @@ class UsersStocks(LoginRequiredMixin, ListView):
         return context
 
     def get_total_purchase_price(self, stock_list):
-        total_purchase_price = sum([stock['purchase_price'] for stock in stock_list])
+        total_purchase_price = sum(
+            [stock['purchase_price'] for stock in stock_list]
+        )
         return "{:.2f}".format(total_purchase_price)
 
     def get_total_current_price(self, stock_list):
-        total_current_price = sum([float(stock['current_price']) for stock in stock_list])
+        total_current_price = sum(
+            [float(stock['current_price']) for stock in stock_list]
+        )
         return "{:.2f}".format(total_current_price)
 
     def get_user_stock_data(self):
@@ -90,16 +91,16 @@ class UsersStocks(LoginRequiredMixin, ListView):
         current_portfolio = Portfolio.objects.filter(
             user=self.request.user, is_current=True)
 
-        print('==========$=====================')
-        print(request.user.stocksofuser_set.values_list('stock'))
-        print('==========$=====================')
-
-        #users_assets = Asset.objects.filter(
-        #    id__in=current_portfolio.assetofportfolio_set.values_list('asset'))
-
-        print('===============================')
-        #print(users_assets)
-        print('===============================')
+        # print('==========$=====================')
+        # print(request.user.stocksofuser_set.values_list('stock'))
+        # print('==========$=====================')
+        # 
+        # #users_assets = Asset.objects.filter(
+        # #    id__in=current_portfolio.assetofportfolio_set.values_list('asset'))
+        # 
+        # print('===============================')
+        # #print(users_assets)
+        # print('===============================')
 
         #print(request.user.stocksofuser_set.values_list('stock'))
 
