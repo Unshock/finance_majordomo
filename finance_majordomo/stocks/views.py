@@ -67,8 +67,8 @@ class UsersStocks(LoginRequiredMixin, ListView):
         context['fields_to_display'] = self.request.user.usersettings
         context['current_portfolio'] = \
             Portfolio.objects.filter(user=self.request.user, is_current=True)
-        context['stock_list'] = user_stock_data['stock_list']
-        context['total_results'] = user_stock_data['total_results']
+        context['stock_list'] = user_stock_data.get('stock_list')
+        context['total_results'] = user_stock_data.get('total_results')
         return context
 
     def get_total_purchase_price(self, stock_list):
@@ -87,99 +87,101 @@ class UsersStocks(LoginRequiredMixin, ListView):
         request = self.request
         users_stocks = Stock.objects.filter(
             id__in=request.user.stocksofuser_set.values_list('stock'))
-
-        current_portfolio = Portfolio.objects.filter(
-            user=self.request.user, is_current=True)
-
-        # print('==========$=====================')
-        # print(request.user.stocksofuser_set.values_list('stock'))
-        # print('==========$=====================')
-        # 
-        # #users_assets = Asset.objects.filter(
-        # #    id__in=current_portfolio.assetofportfolio_set.values_list('asset'))
-        # 
-        # print('===============================')
-        # #print(users_assets)
-        # print('===============================')
-
-        #print(request.user.stocksofuser_set.values_list('stock'))
-
-        total_purchase_price = 0
-        total_current_price = 0
-        total_divs = 0
-
-        user_stock_data = {'total_results': {},
-                           'stock_list': []
-                           }
-        for stock in users_stocks:
-
-            current_quantity = get_quantity(request, stock)
-
-            if current_quantity == 0:
-                continue
-
-            purchase_price = get_purchase_price(request, stock)
-            total_purchase_price += purchase_price
-
-            current_price = self.get_current_price(stock)
-            total_current_price += current_price
-
-            percent_result = self.get_percent_result(
-                purchase_price, current_price)
-
-            money_result_without_divs = moneyfmt(
-                get_money_result(current_price, purchase_price), sep=' ')
-
-
-            dividends_received = get_dividend_result(request, stock)
-            total_divs += dividends_received
-
-            money_result_with_divs = moneyfmt(
-                get_money_result(
-                    current_price + dividends_received,
-                    purchase_price),
-                sep=' ')
-
-            rate_of_return = self.get_percent_result(
-                purchase_price, current_price + dividends_received)
-
-            user_stock_data['stock_list'].append(
-                {'id': stock.id,
-                 'ticker': stock.ticker,
-                 'name': stock.name,
-                 'currency': stock.currency,
-                 'quantity': moneyfmt(
-                     Decimal(current_quantity), sep=' ', places=0),
-                 'purchase_price': moneyfmt(purchase_price, sep=' '),
-                 'current_price': moneyfmt(current_price, sep=' '),
-                 'percent_result': percent_result,
-                 'dividends_received': moneyfmt(dividends_received, sep=' '),
-                 'money_result_without_divs': money_result_without_divs,
-                 'money_result_with_divs': money_result_with_divs,
-                 'rate_of_return': rate_of_return,
-                 })
-
-        total_financial_result_no_divs = total_current_price - total_purchase_price
-        total_financial_result_with_divs = total_current_price + total_divs - total_purchase_price
-        total_percent_result = self.get_percent_result(
-            total_purchase_price, total_current_price)
-        total_rate_of_return = self.get_percent_result(
-            total_purchase_price, (total_financial_result_with_divs + total_purchase_price))
-
-        user_stock_data['total_results'] = {
-            'total_purchase_price': moneyfmt(total_purchase_price, sep=' '),
-            'total_current_price': moneyfmt(total_current_price, sep=' '),
-            'total_percent_result': total_percent_result,
-            'total_divs': moneyfmt(total_divs, sep=' '),
-            'total_financial_result_no_divs': moneyfmt(
-                total_financial_result_no_divs, sep=' '),
-            'total_financial_result_with_divs': moneyfmt(
-                total_financial_result_with_divs, sep=' '),
-            'total_rate_of_return': total_rate_of_return,
-        }
-
-        return user_stock_data
-
+        if users_stocks:
+            print(users_stocks)
+    
+            current_portfolio = Portfolio.objects.filter(
+                user=self.request.user, is_current=True)
+    
+            # print('==========$=====================')
+            # print(request.user.stocksofuser_set.values_list('stock'))
+            # print('==========$=====================')
+            # 
+            # #users_assets = Asset.objects.filter(
+            # #    id__in=current_portfolio.assetofportfolio_set.values_list('asset'))
+            # 
+            # print('===============================')
+            # #print(users_assets)
+            # print('===============================')
+    
+            #print(request.user.stocksofuser_set.values_list('stock'))
+    
+            total_purchase_price = 0
+            total_current_price = 0
+            total_divs = 0
+    
+            user_stock_data = {'total_results': {},
+                               'stock_list': []
+                               }
+            for stock in users_stocks:
+    
+                current_quantity = get_quantity(request, stock)
+    
+                if current_quantity == 0:
+                    continue
+    
+                purchase_price = get_purchase_price(request, stock)
+                total_purchase_price += purchase_price
+    
+                current_price = self.get_current_price(stock)
+                total_current_price += current_price
+    
+                percent_result = self.get_percent_result(
+                    purchase_price, current_price)
+    
+                money_result_without_divs = moneyfmt(
+                    get_money_result(current_price, purchase_price), sep=' ')
+    
+    
+                dividends_received = get_dividend_result(request, stock)
+                total_divs += dividends_received
+    
+                money_result_with_divs = moneyfmt(
+                    get_money_result(
+                        current_price + dividends_received,
+                        purchase_price),
+                    sep=' ')
+    
+                rate_of_return = self.get_percent_result(
+                    purchase_price, current_price + dividends_received)
+    
+                user_stock_data['stock_list'].append(
+                    {'id': stock.id,
+                     'ticker': stock.ticker,
+                     'name': stock.name,
+                     'currency': stock.currency,
+                     'quantity': moneyfmt(
+                         Decimal(current_quantity), sep=' ', places=0),
+                     'purchase_price': moneyfmt(purchase_price, sep=' '),
+                     'current_price': moneyfmt(current_price, sep=' '),
+                     'percent_result': percent_result,
+                     'dividends_received': moneyfmt(dividends_received, sep=' '),
+                     'money_result_without_divs': money_result_without_divs,
+                     'money_result_with_divs': money_result_with_divs,
+                     'rate_of_return': rate_of_return,
+                     })
+    
+            total_financial_result_no_divs = total_current_price - total_purchase_price
+            total_financial_result_with_divs = total_current_price + total_divs - total_purchase_price
+            total_percent_result = self.get_percent_result(
+                total_purchase_price, total_current_price)
+            total_rate_of_return = self.get_percent_result(
+                total_purchase_price, (total_financial_result_with_divs + total_purchase_price))
+    
+            user_stock_data['total_results'] = {
+                'total_purchase_price': moneyfmt(total_purchase_price, sep=' '),
+                'total_current_price': moneyfmt(total_current_price, sep=' '),
+                'total_percent_result': total_percent_result,
+                'total_divs': moneyfmt(total_divs, sep=' '),
+                'total_financial_result_no_divs': moneyfmt(
+                    total_financial_result_no_divs, sep=' '),
+                'total_financial_result_with_divs': moneyfmt(
+                    total_financial_result_with_divs, sep=' '),
+                'total_rate_of_return': total_rate_of_return,
+            }
+    
+            return user_stock_data
+        return dict()
 
     def get_current_price(self, stock):
 

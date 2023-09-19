@@ -3,6 +3,7 @@ import datetime
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
 
+from ..models import UserSettings
 from ...dividends.models import Dividend, DividendsOfUser
 from ...stocks.models import Stock
 from ...transactions.models import Transaction
@@ -122,3 +123,7 @@ class SettingsUsers(TestCase):
 
         cls.dividend_of_user_id_2.is_received = True
         cls.dividend_of_user_id_2.save()
+
+        UserSettings.objects.create(user=cls.user_authenticated)
+        UserSettings.objects.create(user=cls.user_authenticated_another)
+        UserSettings.objects.create(user=cls.user_unauthenticated)

@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 
 from .setting import SettingsUsers
 from .. import views
-from ..models import User
+from ..models import User, UserSettings
 from ..utils.fields_to_display import FIELDS_TO_DISPLAY
 from ...stocks.models import StocksOfUser
 
@@ -13,6 +13,7 @@ from ...stocks.models import StocksOfUser
 class TestUsersViews(SettingsUsers):
 
     def setUp(self):
+        self.usersstocks = reverse('users_stocks')
         self.list_url = reverse('users')
         self.create_url = reverse('create_user')
         self.login_url = reverse('login')
@@ -118,6 +119,8 @@ class TestUsersViews(SettingsUsers):
         response = self.client_authenticated.get(
             self.set_fields)
 
+        fields_to_display = [field.name for field in UserSettings._meta.fields]
+
         form = response.context.get('form')
 
         self.assertEqual(response.status_code, HTTPStatus.OK)
@@ -127,29 +130,39 @@ class TestUsersViews(SettingsUsers):
         self.assertEqual(
             response.context.get('button_text'), _('Save'))
         self.assertTemplateUsed(response, 'users/display_options.html')
+        self.assertEqual(len(fields_to_display) - 2, len(form.fields))
 
         for field in form.fields:
-            self.assertTrue(field in FIELDS_TO_DISPLAY)
+            self.assertTrue(field in fields_to_display)
             self.assertTrue(form.fields[field])
 
     def test_set_fields_to_display_POST(self):
-
         fields_display_data = {
-            'quantity': False,
-            'ticker': True
+            'show_quantity': True,
+            'show_ticker': True,
+            'show_percent_result': True,
+            'show_current_price': False
         }
 
         response = self.client_authenticated.post(
             self.set_fields, fields_display_data)
 
-        user_affected = User.objects.get(id=1)
+        updated_user_settings = UserSettings.objects.get(
+            user=self.user_authenticated)
 
+        self.assertRedirects(response, self.usersstocks)
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
-        for key, value in json.loads(user_affected.fields_to_display).items():
-            if key == 'ticker':
-                self.assertTrue(value)
-            else:
-                self.assertFalse(value)
+        for field in updated_user_settings._meta.fields:
+            field_name = field.name
+            if field_name not in ['id', 'user']:
+                field_value = getattr(
+                    updated_user_settings, field_name)
+                if field_name in ['show_ticker',
+                                  'show_percent_result',
+                                  'show_quantity']:
+                    self.assertTrue(field_value)
+                else:
+                    self.assertFalse(field_value)
 
 
 
