@@ -7,7 +7,7 @@ from urllib3.util.retry import Retry
 
 import apimoex
 
-from finance_majordomo.stocks.models import Stock
+#from finance_majordomo.stocks.models import Stock
 
 
 def validate_ticker(ticker: str):
@@ -40,7 +40,7 @@ def validate_ticker(ticker: str):
 
 
 
-def get_stock_board_history(ticker: str, start_date:str=None):
+def get_stock_board_history(ticker: str, start_date:str=None, board='TQBR'):
     """
     :param ticker: ticker for MOEX API
     :param start_date: the earliest trading date from which information will be
@@ -50,19 +50,27 @@ def get_stock_board_history(ticker: str, start_date:str=None):
     """
 
     with requests.Session() as session:
-        print(f"Start request of data for ticker: {ticker.upper()}"
-              f" from date: {start_date}")
+        #print(f"Start request of data for ticker: {ticker.upper()}"
+        #      f" from date: {start_date}")
 
         data = apimoex.get_board_history(
-            session, ticker.upper(), start=start_date)
+            session,
+            ticker,
+            start=start_date,
+            columns=None,
+            board=board
+        )
         if data:
             return data
         else:
             print('ДАННЫЕ НЕ ПОЛУЧЕНЫ!!!!!!!!!')
-            
-#print(get_stock_board_history('gazp'))
 
-
+# print(get_stock_board_history('gazp')[-1])
+# print(get_stock_board_history('posi')[-1])
+# print(get_stock_board_history('lsrg')[-1])
+# print(get_stock_board_history('lqdt', board='TQTF')[-1])
+#print(get_stock_board_history('RU000A0JXFM1')[-1])
+# print('1')
 
 def get_stock_current_price(ticker: str):
 
@@ -81,8 +89,9 @@ def get_stock_current_price(ticker: str):
         data = apimoex.get_board_candles(
             session, ticker.upper(), start=str(request_time), interval=1)
         #data = apimoex.find_security_description(session, ticker.upper())
-        #print('data', '\n'.join(str(d) for d in data))
+        print('data', '\n'.join(str(d) for d in data))
         if data:
+            
             lastest_data = data[-1]
             last_price = lastest_data.get('close')
             actual_time = lastest_data.get('begin')
@@ -99,11 +108,12 @@ def get_stock_current_price(ticker: str):
         raise ValueError(f'Could not get data for {ticker}'
                          f' in {get_stock_current_price}')
 
+#get_stock_current_price('gazp')
 
 def get_stock_description(ticker: str):
     with requests.Session() as session:
         data = apimoex.find_security_description(session, ticker.upper())
-        #print(data)
+        print(data)
         result_data = {}
         #print(111)
         for elem in data:
@@ -117,15 +127,15 @@ def get_stock_description(ticker: str):
 # import pprint
 # p1 = pprint.pformat(get_stock_description('LQDT'), indent=2)
 # p2 = pprint.pformat(get_stock_description('sber'), indent=2)
-# p5 = pprint.pformat(get_stock_description('sberp'), indent=2)
-# p3 = pprint.pformat(get_stock_description('lqdt'), indent=2)
-# p4 = pprint.pformat(get_stock_description('SU26221RMFS0'), indent=2)
+# p3 = pprint.pformat(get_stock_description('sberp'), indent=2)
+# p4 = pprint.pformat(get_stock_description('lqdt'), indent=2)
+# p5 = pprint.pformat(get_stock_description('SU26221RMFS0'), indent=2)
 # p6 = pprint.pformat(get_stock_description('RU000A0JTW83'), indent=2)
-# print(p1)
-# print(p2)
-# print(p3)
+# # print(p1)
+# # print(p2)
+# # print(p3)
 # print(p4)
-# print(p5)
+# # print(p5)
 # print(p6)
 
 def get_security(security_info: str):

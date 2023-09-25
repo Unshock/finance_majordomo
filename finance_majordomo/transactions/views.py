@@ -5,6 +5,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, DeleteView
 
+from common.utils.stocks import get_stock_description
 from finance_majordomo.stocks.models import Stock, StocksOfUser
 
 from django.utils.translation import gettext_lazy as _
@@ -75,16 +76,17 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         if asset_secid:
 
             try:
-                asset = Stock.objects.get(ticker=asset_secid)
+                asset_obj = Stock.objects.get(ticker=asset_secid)
 
             except Stock.DoesNotExist:
                 # ADD ASSET TO DB
-                asset = add_asset(asset_secid)
+                asset_description = get_stock_description(asset_secid)
+                asset_obj = add_asset(asset_description)
 
             transaction_form = TransactionForm(
                 request=request,
-                asset=Stock.objects.filter(id=asset.id))
-            transaction_form.initial['ticker'] = asset.id
+                asset=Stock.objects.filter(id=asset_obj.id))  # query is needed
+            transaction_form.initial['ticker'] = asset_obj.id
 
             return render(
                 request,

@@ -12,7 +12,8 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, DeleteView
 
 from finance_majordomo.stocks.forms import StockForm
-from finance_majordomo.stocks.models import Stock, ProdCalendar
+from finance_majordomo.stocks.models import Stock, ProdCalendar, \
+    SharesHistoricalData
 from finance_majordomo.transactions.models import Transaction
 
 from django.utils.translation import gettext_lazy as _
@@ -23,7 +24,8 @@ from common.utils.stocks import get_stock_board_history, \
 from finance_majordomo.dividends.utils import get_stock_dividends, add_dividends_to_model
 from ..assets.models import Asset, AssetOfPortfolio
 from ..transactions.utils import get_quantity, get_purchase_price
-from .utils import get_money_result
+from .utils import get_money_result, add_share_history_data_to_model, \
+    update_historical_data, update_today_data, update_history_data
 from ..dividends.utils import get_dividend_result
 from ..users.models import Portfolio, UserSettings
 
@@ -114,6 +116,10 @@ class UsersStocks(LoginRequiredMixin, ListView):
                                'stock_list': []
                                }
             for stock in users_stocks:
+
+                # update_history_data(stock)
+                # update_today_data(stock)
+                update_historical_data(stock)
     
                 current_quantity = get_quantity(request, stock)
     
@@ -182,7 +188,10 @@ class UsersStocks(LoginRequiredMixin, ListView):
     
             return user_stock_data
         return dict()
-
+    
+    def get_current_price_alt(self, stock):
+        last_date_price = SharesHistoricalData.objects.filter(share=stock, is_closed=True).order_by('-tradedate')[0]
+    
     def get_current_price(self, stock):
 
         stock_obj = StockData(stock)
@@ -258,7 +267,7 @@ class StockData(object):
         if self.stock:
             self.stock_data = json.loads(stock.stock_data)
 
-    def get_data_last_date(self, trade_date_index=-1):
+    def get_data_last_date(self, trade_date_index=-1) -> tuple:
         """
         :return: returns the last date for the stock that is written in the DB
         """
@@ -285,14 +294,16 @@ class StockData(object):
 
     def actualize_stock_data(self):
 
-        today_status = self.get_and_update_date_status(datetime.datetime.strftime(self.today, '%Y-%m-%d')).date_status
+        today_status = self.get_and_update_date_status(
+            datetime.datetime.strftime(self.today, '%Y-%m-%d')).date_status
         #print('TODAY STATUS:', today_status.date, today_status.date_status)
 
         if self.stock_data:
             last_date_dt, status, update_time = self.get_data_last_date()
 
             if status == 'LAST' and today_status == 'Nonworking':
-                last_date_dt, status, update_time = self.get_data_last_date(trade_date_index=-2)
+                last_date_dt, status, update_time = self.get_data_last_date(
+                    trade_date_index=-2)
 
 
             last_date_str = datetime.datetime.strftime(last_date_dt, '%Y-%m-%d')
@@ -473,9 +484,7 @@ def get_normalized_asset_type(type: str) -> str:
     return types_dict.get(type)
 
 
-def add_asset(isin: str) -> int:
-
-    stock_description = get_stock_description(isin)
+def add_asset(stock_description: dict) -> object:
 
     ticker = stock_description.get('SECID')
     isin = stock_description.get('ISIN')
@@ -513,6 +522,7 @@ def add_asset(isin: str) -> int:
     # Ищем инфу о ценах акции за весь период чтобы записать в JSONField
     print(ticker)
     stock_board_history = get_stock_board_history(ticker)
+    print(stock_board_history[-4:])
     json_stock_board_data = make_json_trade_info_dict(
         stock_board_history)
 
@@ -534,6 +544,13 @@ def add_asset(isin: str) -> int:
         groupname=groupname,
         stock_data=json_stock_board_data,
     )
+
+
+    try:
+        add_share_history_data_to_model(stock_obj, stock_board_history)
+
+    except Exception('HISTORY PROBLEM'):
+        pass
 
     # add dividend for stock
     try:
@@ -565,84 +582,12 @@ class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     def post(self, request, *args, **kwargs):
 
         form = StockForm(request.POST)
-        # 
-        # if kwargs.get('isin'):
-        #     form.initial['ticker'] = kwargs.get('isin')
-        # 
-        # print(request)
-        # print(request.POST)
-        # print(args)
-        # print(kwargs)
-        # #print(type(form))
 
         if form.is_valid():
 
             stock_description = form.cleaned_data.get('stock_description')
 
-            ticker = stock_description.get('SECID')
-            isin = stock_description.get('ISIN')
-
-            name = stock_description.get('SHORTNAME')
-            latname = stock_description.get('LATNAME')
-
-            currency = 'RUR' if stock_description.get(
-                'FACEUNIT') == 'SUR' else stock_description.get('FACEUNIT')
-            issuedate = stock_description.get('ISSUEDATE')
-
-            isqualifiedinvestors = True if\
-                stock_description.get('ISQUALIFIEDINVESTORS') == '1' else False
-            morningsession = True if\
-                stock_description.get('MORNINGSESSION') == '1' else False
-            eveningsession = True if\
-                stock_description.get('EVENINGSESSION') == '1' else False
-
-            type = stock_description.get('TYPE')
-            typename = stock_description.get('TYPENAME')
-
-            group = stock_description.get('GROUP')
-            groupname = stock_description.get('GROUPNAME')
-
-            asset_type = get_normalized_asset_type(type)
-
-            check_list = [ticker, name, isin,
-                          currency, latname, isqualifiedinvestors,
-                          issuedate, morningsession, eveningsession,
-                          typename, group, type, groupname]
-
-            if None in check_list:
-                print("SOMETHING HAVE NOT BEEN LOADED - GOT NONE")
-
-            #Ищем инфу о ценах акции за весь период чтобы записать в JSONField
-            stock_board_history = get_stock_board_history(ticker)
-            json_stock_board_data = make_json_trade_info_dict(
-                stock_board_history)
-
-            stock_obj = Stock.objects.create(
-                asset_type=asset_type,
-
-                ticker=ticker,
-                name=name,
-                isin=isin,
-                currency=currency,
-                latname=latname,
-                isqualifiedinvestors=isqualifiedinvestors,
-                issuedate=issuedate,
-                morningsession=morningsession,
-                eveningsession=eveningsession,
-                typename=typename,
-                group=group,
-                type=type,
-                groupname=groupname,
-                stock_data=json_stock_board_data,
-            )
-
-            # add dividend for stock
-            try:
-                dividends_dict = get_stock_dividends(stock_obj)
-                add_dividends_to_model(stock_obj, dividends_dict)
-
-            except Exception('something went wrong while download divs'):
-                pass
+            add_asset(stock_description)
 
             messages.success(request, self.success_message)
             return redirect(self.success_url)
@@ -685,23 +630,6 @@ class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         stock.save()
 
         return stock
-
-
-
-
-    def form_valid(self, form):
-    #
-        form.instance.creator = self.request.user
-    #
-    #     # print('aaaaaaa', form.cleaned_data['ticker'])
-    #     # obj = Stock()
-    #     # obj.name = validate_ticker(form.cleaned_data['ticker'])
-    #     # obj.save
-    #
-    #     # data = form.cleaned_data
-    #     # print(data)
-    #     # print(validate_ticker(data['ticker']))
-        return super().form_valid(form)
 
 
 class DeleteStock(LoginRequiredMixin, SuccessMessageMixin, DeleteView):

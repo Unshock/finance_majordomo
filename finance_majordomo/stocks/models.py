@@ -151,3 +151,27 @@ class ProdCalendar(models.Model):
         ordering = ['date', 'date_status']
 
 
+class SharesHistoricalData(models.Model):
+    share = models.ForeignKey(Stock, on_delete=models.CASCADE)
+
+    tradedate = models.DateField()
+    numtrades = models.IntegerField(null=True)
+    value = models.DecimalField(max_digits=15, decimal_places=2, null=True)
+    open = models.DecimalField(max_digits=13, decimal_places=5, null=True)
+    low = models.DecimalField(max_digits=13, decimal_places=5, null=True)
+    high = models.DecimalField(max_digits=13, decimal_places=5, null=True)
+    legalcloseprice = models.DecimalField(max_digits=13, decimal_places=5)
+    waprice = models.DecimalField(max_digits=13, decimal_places=5, null=True)
+    close = models.DecimalField(max_digits=13, decimal_places=5, null=True)
+    volume = models.IntegerField(null=True)
+
+    waval = models.DecimalField(max_digits=13, decimal_places=5, null=True)
+    trendclspr = models.DecimalField(max_digits=7, decimal_places=3, null=True)
+
+    is_closed = models.BooleanField(blank=False)
+    update_time = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        unique_together = ['share', 'tradedate']
+
+
