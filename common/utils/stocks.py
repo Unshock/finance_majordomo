@@ -89,7 +89,7 @@ def get_stock_current_price(ticker: str):
         data = apimoex.get_board_candles(
             session, ticker.upper(), start=str(request_time), interval=1)
         #data = apimoex.find_security_description(session, ticker.upper())
-        print('data', '\n'.join(str(d) for d in data))
+        #print('data', '\n'.join(str(d) for d in data))
         if data:
             
             lastest_data = data[-1]

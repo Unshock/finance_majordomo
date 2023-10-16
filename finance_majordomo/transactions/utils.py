@@ -13,7 +13,7 @@ def get_quantity(request, asset_obj, date=None) -> int:
         user=request.user, ticker=stock_id).order_by('date')
 
     #users_transactions = Transaction.objects.filter(
-    #    user=User.objects.get(id=request.user.id))
+    #    user=User.objects.get(id=request.user.iget_quantityd))
     #users_specific_asset_transactions = users_transactions.filter(
     #    ticker=Stock.objects.get(id=stock_id)).order_by('date')
     # print(users_specific_asset_transactions, '1')

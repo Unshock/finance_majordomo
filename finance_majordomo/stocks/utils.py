@@ -80,8 +80,11 @@ def update_historical_data(stock_obj: object, date=None):
     elif latest_day.is_closed and gap_for_latest_day > 1:
 
         for gap in range(1, gap_for_latest_day):
-            date_str = datetime.datetime.strftime(
-                (today_date - datetime.timedelta(gap)), '%Y-%m-%d')
+            delta_date_dt = (today_date - timedelta(gap))
+            date_str = datetime.strftime(
+                datetime(delta_date_dt.year,
+                         delta_date_dt.month,
+                         delta_date_dt.day), '%Y-%m-%d')
 
             day_status = get_prod_date(date_str).date_status
 
@@ -104,7 +107,10 @@ def update_history_data(stock_obj: object, date=None):
         date_dt = datetime.strptime(day_data.get('TRADEDATE'), "%Y-%m-%d")
 
         stock_historical_data, created = SharesHistoricalData.objects.get_or_create(
-            tradedate=date_dt, share=stock_obj)
+            tradedate=date_dt, share=stock_obj, defaults={
+                'legalcloseprice': 1,
+                'is_closed': False
+            })
 
         stock_historical_data.numtrades = day_data.get('NUMTRADES')
         stock_historical_data.value = day_data.get('VALUE')
@@ -120,8 +126,6 @@ def update_history_data(stock_obj: object, date=None):
 
         stock_historical_data.is_closed = True
         stock_historical_data.save()
-
-        print(stock_historical_data, stock_historical_data.volume, created)
 
 
 def update_today_data(stock_obj: object) -> object:
@@ -149,7 +153,7 @@ def update_today_data(stock_obj: object) -> object:
 
         # IF UPDATED RECENTLY => NO NEED TO UPDATE
         time_gap = get_time_gap(update_time_dt)
-        print('time_gap', time_gap, stock_obj)
+
         if time_gap <= UPDATE_TIME_MINUTES:
             return stock_obj
 
