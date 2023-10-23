@@ -21,13 +21,17 @@ from django.utils.translation import gettext_lazy as _
 from common.utils.stocks import get_stock_board_history, \
     make_json_trade_info_dict, get_date_status, \
     get_stock_current_price, make_json_last_price_dict, get_stock_description
-from finance_majordomo.dividends.utils import get_stock_dividends, add_dividends_to_model
+from finance_majordomo.dividends.utils import get_stock_dividends, \
+    add_dividends_to_model, get_dividend_result_usd
 from ..assets.models import Asset, AssetOfPortfolio
-from ..transactions.utils import get_quantity, get_purchase_price
+from ..currencies.models import CurrencyRate
+from ..transactions.utils import get_quantity, get_purchase_price, \
+    get_purchase_price_usd
 from .utils import get_money_result, add_share_history_data_to_model, \
     update_historical_data, update_today_data, update_history_data
 from ..dividends.utils import get_dividend_result
 from ..users.models import Portfolio, UserSettings
+from finance_majordomo.currencies.utils import update_currency_rates, update_usd
 
 
 class Stocks(LoginRequiredMixin, ListView):
@@ -111,7 +115,11 @@ class UsersStocks(LoginRequiredMixin, ListView):
             total_purchase_price = 0
             total_current_price = 0
             total_divs = 0
-    
+
+            total_purchase_price_usd = 0
+            total_current_price_usd = 0
+            total_divs_usd = 0
+
             user_stock_data = {'total_results': {},
                                'stock_list': []
                                }
@@ -120,6 +128,10 @@ class UsersStocks(LoginRequiredMixin, ListView):
                 # update_history_data(stock)
                 # update_today_data(stock)
                 update_historical_data(stock)
+
+
+                #
+                update_usd()
     
                 current_quantity = get_quantity(request, stock)
     
@@ -127,11 +139,16 @@ class UsersStocks(LoginRequiredMixin, ListView):
                     continue
     
                 purchase_price = get_purchase_price(request, stock)
+                purchase_price_usd = get_purchase_price_usd(request, stock)
+
                 total_purchase_price += purchase_price
+                total_purchase_price_usd += purchase_price_usd
     
                 current_price = self.get_current_price_alt(stock)
+                current_price_usd = self.get_current_price_usd(stock)
 
                 total_current_price += current_price
+                total_current_price_usd += current_price_usd
     
                 percent_result = self.get_percent_result(
                     purchase_price, current_price)
@@ -142,6 +159,9 @@ class UsersStocks(LoginRequiredMixin, ListView):
     
                 dividends_received = get_dividend_result(request, stock)
                 total_divs += dividends_received
+
+                dividends_received_usd = get_dividend_result_usd(request, stock)
+                total_divs_usd += dividends_received_usd
     
                 money_result_with_divs = moneyfmt(
                     get_money_result(
@@ -167,14 +187,18 @@ class UsersStocks(LoginRequiredMixin, ListView):
                      'money_result_with_divs': money_result_with_divs,
                      'rate_of_return': rate_of_return,
                      })
-    
+
             total_financial_result_no_divs = total_current_price - total_purchase_price
             total_financial_result_with_divs = total_current_price + total_divs - total_purchase_price
+            
+            print(total_current_price_usd, total_divs_usd, total_purchase_price_usd)
+            total_financial_result_with_divs_usd = total_current_price_usd + total_divs_usd - total_purchase_price_usd
+            
             total_percent_result = self.get_percent_result(
                 total_purchase_price, total_current_price)
             total_rate_of_return = self.get_percent_result(
                 total_purchase_price, (total_financial_result_with_divs + total_purchase_price))
-    
+
             user_stock_data['total_results'] = {
                 'total_purchase_price': moneyfmt(total_purchase_price, sep=' '),
                 'total_current_price': moneyfmt(total_current_price, sep=' '),
@@ -185,11 +209,16 @@ class UsersStocks(LoginRequiredMixin, ListView):
                 'total_financial_result_with_divs': moneyfmt(
                     total_financial_result_with_divs, sep=' '),
                 'total_rate_of_return': total_rate_of_return,
+
+                'total_current_price_usd': moneyfmt(
+                    total_current_price_usd, sep=' '),
+                'total_financial_result_with_divs_usd': moneyfmt(
+                    total_financial_result_with_divs_usd, sep=' ')
             }
-    
+
             return user_stock_data
         return dict()
-    
+
     def get_current_price_alt(self, stock):
         last_date_price = SharesHistoricalData.objects.filter(
             share=stock).order_by('-tradedate')[0].legalcloseprice
@@ -197,6 +226,17 @@ class UsersStocks(LoginRequiredMixin, ListView):
         current_quantity = get_quantity(self.request, stock)
 
         current_price = current_quantity * last_date_price
+        return Decimal(current_price)
+
+
+    def get_current_price_usd(self, stock):
+        last_date_price = SharesHistoricalData.objects.filter(
+            share=stock).order_by('-tradedate')[0].legalcloseprice
+
+        current_quantity = get_quantity(self.request, stock)
+        current_usd_rate = CurrencyRate.objects.last().price_usd
+
+        current_price = current_quantity * last_date_price / current_usd_rate
         return Decimal(current_price)
 
     # не исп get_current_price

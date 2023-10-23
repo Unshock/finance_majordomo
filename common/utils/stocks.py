@@ -203,3 +203,5 @@ def get_date_status(date):
     if result == '1':
         return 'Nonworking'
     raise ConnectionError('Response is not valid')
+
+

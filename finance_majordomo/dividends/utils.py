@@ -8,6 +8,7 @@ import django
 import os
 from datetime import datetime
 
+from ..currencies.utils import get_usd_rate
 from ..transactions.utils import get_quantity
 
 
@@ -161,6 +162,24 @@ def get_dividend_result(request, stock_obj):
 
         quantity = get_quantity(request, stock_obj, date=div.date)
         sum_dividends_received += quantity * div.amount
+
+    return sum_dividends_received * Decimal(0.87)
+
+
+def get_dividend_result_usd(request, stock_obj):
+
+    users_dividends_received = Dividend.objects.filter(
+        stock=stock_obj.id,
+        id__in=request.user.dividendsofuser_set.filter(
+            is_received=True).values_list('dividend'))
+
+    sum_dividends_received = 0
+
+    for div in users_dividends_received:
+
+        quantity = get_quantity(request, stock_obj, date=div.date)
+        usd_rate = get_usd_rate(div.date)
+        sum_dividends_received += quantity * div.amount / usd_rate
 
     return sum_dividends_received * Decimal(0.87)
 

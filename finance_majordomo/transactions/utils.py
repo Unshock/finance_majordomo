@@ -2,7 +2,9 @@ from decimal import Decimal
 from collections import deque
 
 from .models import Transaction
+from ..currencies.utils import get_usd_rate
 from ..users.models import User
+from finance_majordomo.currencies.models import CurrencyRate
 
 
 def get_quantity(request, asset_obj, date=None) -> int:
@@ -56,9 +58,52 @@ def get_purchase_price(request, stock_obj) -> Decimal:
 
     for transaction in users_specific_asset_transactions:
         if transaction.transaction_type == "BUY":
+
+
             purchase_list.append({
                 'quantity': transaction.quantity,
                 'price': transaction.price
+            })
+        elif transaction.transaction_type == "SELL":
+            total_sold += transaction.quantity
+        else:
+            raise Exception('not buy nor sell')
+
+    for elem in purchase_list:
+        #print('total_sold', total_sold)
+        if elem['quantity'] >= total_sold:
+            elem['quantity'] -= total_sold
+            total_sold = 0
+
+        else:
+            sold = elem['quantity']
+            elem['quantity'] = 0
+            total_sold -= sold
+
+        purchase_price += elem['quantity'] * elem['price']
+
+        if total_sold < 0:
+            raise Exception('тотал меньше 0')
+
+    return Decimal(purchase_price)
+
+
+def get_purchase_price_usd(request, stock_obj) -> Decimal:
+    # С учетом метода FIFO
+    users_specific_asset_transactions = Transaction.objects.filter(
+        user=request.user,
+        ticker=stock_obj).order_by('date')
+
+    purchase_list = []
+    total_sold = 0
+    purchase_price = 0
+
+    for transaction in users_specific_asset_transactions:
+        if transaction.transaction_type == "BUY":
+            usd_rate = get_usd_rate(transaction.date)
+            purchase_list.append({
+                'quantity': transaction.quantity,
+                'price': transaction.price / usd_rate
             })
         elif transaction.transaction_type == "SELL":
             total_sold += transaction.quantity
