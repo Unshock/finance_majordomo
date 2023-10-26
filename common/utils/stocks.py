@@ -40,7 +40,7 @@ def validate_ticker(ticker: str):
 
 
 
-def get_stock_board_history(ticker: str, start_date:str=None, board='TQBR'):
+def get_stock_board_history(ticker: str, start_date:str=None, market='shares', board='TQBR'):
     """
     :param ticker: ticker for MOEX API
     :param start_date: the earliest trading date from which information will be
@@ -58,7 +58,8 @@ def get_stock_board_history(ticker: str, start_date:str=None, board='TQBR'):
             ticker,
             start=start_date,
             columns=None,
-            board=board
+            board=board,
+            market=market
         )
         if data:
             return data
@@ -69,7 +70,7 @@ def get_stock_board_history(ticker: str, start_date:str=None, board='TQBR'):
 # print(get_stock_board_history('posi')[-1])
 # print(get_stock_board_history('lsrg')[-1])
 # print(get_stock_board_history('lqdt', board='TQTF')[-1])
-#print(get_stock_board_history('RU000A0JXFM1')[-1])
+#print(get_stock_board_history('RU000A101QM3', board="TQCB", market='bonds')[-1])
 # print('1')
 
 def get_stock_current_price(ticker: str):
@@ -113,7 +114,7 @@ def get_stock_current_price(ticker: str):
 def get_stock_description(ticker: str):
     with requests.Session() as session:
         data = apimoex.find_security_description(session, ticker.upper())
-        print(data)
+        #print(data)
         result_data = {}
         #print(111)
         for elem in data:
@@ -123,20 +124,20 @@ def get_stock_description(ticker: str):
 
 
 
-# 
-# import pprint
+
+import pprint
 # p1 = pprint.pformat(get_stock_description('LQDT'), indent=2)
 # p2 = pprint.pformat(get_stock_description('sber'), indent=2)
 # p3 = pprint.pformat(get_stock_description('sberp'), indent=2)
 # p4 = pprint.pformat(get_stock_description('lqdt'), indent=2)
 # p5 = pprint.pformat(get_stock_description('SU26221RMFS0'), indent=2)
-# p6 = pprint.pformat(get_stock_description('RU000A0JTW83'), indent=2)
-# # print(p1)
-# # print(p2)
-# # print(p3)
+#p6 = pprint.pformat(get_stock_description('RU000A0JTW83'), indent=2)
+# print(p1)
+# print(p2)
+# print(p3)
 # print(p4)
-# # print(p5)
-# print(p6)
+# print(p5)
+#print(p6)
 
 def get_security(security_info: str):
     with requests.Session() as session:
@@ -149,12 +150,12 @@ def get_security(security_info: str):
         return data
 
 
-#a = get_security('SU26222RMFS8, RU000A0JXQF2')
+#a = get_security('RU000A0JXFM1')
 # a = get_security('нижнекам')
 # b = filter(lambda x: x['is_traded'], a)
 # for el in b:
 #     print(el)
-# for el in a[:10]:
+#for el in a[:10]:
 #    print(el['secid'], el['name'], el.get('type'), el.get('group'))
 #
 # b = get_stock_description('SBER')

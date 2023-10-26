@@ -13,7 +13,7 @@ from django.views.generic import ListView, CreateView, DeleteView
 
 from finance_majordomo.stocks.forms import StockForm
 from finance_majordomo.stocks.models import Stock, ProdCalendar, \
-    SharesHistoricalData
+    SharesHistoricalData, Bond
 from finance_majordomo.transactions.models import Transaction
 
 from django.utils.translation import gettext_lazy as _
@@ -28,7 +28,8 @@ from ..currencies.models import CurrencyRate
 from ..transactions.utils import get_quantity, get_purchase_price, \
     get_purchase_price_usd
 from .utils import get_money_result, add_share_history_data_to_model, \
-    update_historical_data, update_today_data, update_history_data
+    update_historical_data, update_today_data, update_history_data, \
+    add_bond_history_data_to_model
 from ..dividends.utils import get_dividend_result
 from ..users.models import Portfolio, UserSettings
 from finance_majordomo.currencies.utils import update_currency_rates, update_usd
@@ -527,7 +528,11 @@ class UsersStocks(LoginRequiredMixin, ListView):
 def get_normalized_asset_type(type: str) -> str:
     types_dict = {
         'preferred_share': 'stocks',
-        'common_share': 'stocks'
+        'common_share': 'stocks',
+        'ofz_bond': 'bonds',
+        'corporate_bond': 'bonds',
+        'exchange_bond': 'bonds'
+        
     }
 
     return types_dict.get(type)
@@ -574,7 +579,6 @@ def add_asset(stock_description: dict) -> object:
     print(stock_board_history[-4:])
     json_stock_board_data = make_json_trade_info_dict(
         stock_board_history)
-
     stock_obj = Stock.objects.create(
         asset_type=asset_type,
 
@@ -612,6 +616,113 @@ def add_asset(stock_description: dict) -> object:
     return stock_obj
 
 
+def add_bond(stock_description: dict) -> object:
+
+    secid = stock_description.get('SECID')
+    isin = stock_description.get('ISIN')
+
+    name = stock_description.get('SHORTNAME')
+    latname = stock_description.get('LATNAME')
+
+    currency = 'RUR' if stock_description.get(
+        'FACEUNIT') == 'SUR' else stock_description.get('FACEUNIT')
+    issuedate = stock_description.get('ISSUEDATE')
+
+    isqualifiedinvestors = True if \
+        stock_description.get('ISQUALIFIEDINVESTORS') == '1' else False
+    morningsession = True if \
+        stock_description.get('MORNINGSESSION') == '1' else False
+    eveningsession = True if \
+        stock_description.get('EVENINGSESSION') == '1' else False
+
+    type = stock_description.get('TYPE')
+    typename = stock_description.get('TYPENAME')
+
+    group = stock_description.get('GROUP')
+    groupname = stock_description.get('GROUPNAME')
+
+    asset_type = get_normalized_asset_type(type)
+
+    startdatemoex = stock_description.get('STARTDATEMOEX')
+    buybackdate = stock_description.get('BUYBACKDATE')
+    matdate = stock_description.get('MATDATE')
+    couponfrequency = stock_description.get('COUPONFREQUENCY')
+    couponpercent = stock_description.get('COUPONPERCENT')
+    couponvalue = stock_description.get('COUPONVALUE')
+    days_to_redemption = stock_description.get('DAYSTOREDEMPTION')
+    
+    print(couponfrequency, '================================')
+    
+    
+    check_list = [secid, name, isin,
+                  currency, latname, isqualifiedinvestors,
+                  issuedate, morningsession, eveningsession,
+                  typename, group, type, groupname]
+
+    boards_dict = {
+        'ofz_bond': 'TQOB',
+        'corporate_bond': 'TQCB',
+        'exchange_bond': 'TQCB'
+    }
+
+    board = boards_dict.get(type)
+
+    if None in check_list:
+        print("SOMETHING HAVE NOT BEEN LOADED - GOT NONE")
+
+    # Ищем инфу о ценах акции за весь период чтобы записать в JSONField
+    print(secid)
+    print(type, board)
+    stock_board_history = get_stock_board_history(secid, market='bonds', board=board)
+    #print(stock_board_history[-4:])
+    
+    print('111111111111111111111111111111')
+    bond_obj = Bond.objects.create(
+        asset_type=asset_type,
+
+        secid=secid,
+        name=name,
+        isin=isin,
+        currency=currency,
+        latname=latname,
+        isqualifiedinvestors=isqualifiedinvestors,
+        issuedate=issuedate,
+        morningsession=morningsession,
+        eveningsession=eveningsession,
+        typename=typename,
+        group=group,
+        type=type,
+        groupname=groupname,
+
+        startdatemoex=startdatemoex,
+        buybackdate=buybackdate,
+        matdate=matdate,
+        couponfrequency=2,
+        couponpercent=couponpercent,
+        couponvalue=couponvalue,
+        days_to_redemption=days_to_redemption
+
+    )
+    print('222222222222222222222222222')
+    print(bond_obj.couponfrequency)
+
+    try:
+        add_bond_history_data_to_model(bond_obj, stock_board_history)
+
+    except Exception('HISTORY PROBLEM'):
+        pass
+
+    # # add dividend for stock
+    # try:
+    #     dividends_dict = get_stock_dividends(stock_obj)
+    #     add_dividends_to_model(stock_obj, dividends_dict)
+    # 
+    # except Exception('something went wrong while download divs'):
+    #     pass
+
+    return bond_obj
+
+
 class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     login_url = 'login'
     form_class = StockForm
@@ -636,7 +747,12 @@ class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
             stock_description = form.cleaned_data.get('stock_description')
 
-            add_asset(stock_description)
+            stock_group = stock_description.get('Group')
+
+            if stock_group == 'stock_shares':
+                add_asset(stock_description)
+
+
 
             messages.success(request, self.success_message)
             return redirect(self.success_url)

@@ -24,14 +24,13 @@ class StockForm(ModelForm):
         if Stock.objects.filter(ticker=ticker).count() == 1:
             raise ValidationError(_(f"Тикер {ticker} уже добавлен"))
 
-        stock_description = get_stock_description(
-            self.cleaned_data.get('ticker'))
+        stock_description = get_stock_description(ticker)
 
         if not stock_description:
             raise ValidationError(_(f"Ticker {ticker} hasn't been found"))
 
-        if stock_description.get("GROUP") != "stock_shares":
-            raise ValidationError(_(f"Only shares accepted"))
+        if stock_description.get("GROUP") not in ["stock_shares", "stock_bonds"]:
+            raise ValidationError(_(f"Only shares and bonds accepted"))
 
         self.cleaned_data['stock_description'] = stock_description
         return ticker

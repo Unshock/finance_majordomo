@@ -35,6 +35,35 @@ def add_share_history_data_to_model(stock_obj, stock_board_history):
         )
 
 
+def add_bond_history_data_to_model(bond_obj, stock_board_history):
+
+    for day_data in stock_board_history:
+
+        SharesHistoricalData.objects.create(
+            bond=bond_obj,
+
+            tradedate=day_data.get('TRADEDATE'),
+            numtrades=day_data.get('NUMTRADES'),
+            value=day_data.get('VALUE'),
+            open=day_data.get('OPEN'),
+            low=day_data.get('LOW'),
+            high=day_data.get('HIGH'),
+            legalcloseprice=day_data.get('LEGALCLOSEPRICE'),
+            waprice=day_data.get('WAPRICE'),
+            close=day_data.get('CLOSE'),
+            volume=day_data.get('VOLUME'),
+            #waval=day_data.get('WAVAL'),
+            #trendclspr=day_data.get('TRENDCLSPR'),
+            
+            yieldclose=day_data.get("YIELDCLOSE"),
+            couponpercent=day_data.get("COUPONPERCENT"),
+            couponvalue=day_data.get("COUPONVALUE"),
+            
+
+            is_closed=True
+        )
+
+
 def get_prod_date(date: str):
 
     try:

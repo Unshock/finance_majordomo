@@ -48,7 +48,7 @@ class Search(LoginRequiredMixin, View):
         form = SearchForm(request.POST)
 
         allowed_groups = ['stock_shares',
-                          #'stock_bonds',
+                          'stock_bonds',
                           #'stock_ppif'
                           ]
 

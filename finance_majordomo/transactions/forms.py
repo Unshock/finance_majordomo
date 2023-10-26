@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.forms import ModelForm
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from finance_majordomo.stocks.models import Stock, StocksOfUser
+from finance_majordomo.stocks.models import Stock, StocksOfUser, Bond
 from finance_majordomo.transactions.models import Transaction
 from finance_majordomo.stocks.views import UsersStocks
 from .utils import validate_transaction
@@ -35,25 +35,32 @@ class TransactionForm(ModelForm):
 
 
     def __init__(self, *args, **kwargs):
-
+        print(kwargs)
         self.request = kwargs.pop('request', None)
         self.asset = kwargs.pop('asset', None)
-        super().__init__(*args, **kwargs)
-
+        super(TransactionForm, self).__init__(*args, **kwargs)
+        print(self.fields)
         self.fields['ticker'].label = _('Share')
         self.fields['ticker'].empty_label = _('Choose stock from the list')
+        print('3', self.fields['ticker'].queryset)
 
         if self.request.method == "GET":
-            self.fields['ticker'].queryset = Stock.objects.filter(
+            
+            print('1', Stock.objects.filter(
+                id__in=self.request.user.stocksofuser_set.values_list('stock')))
+            
+            self.fields['ticker'].qeuryset = Stock.objects.filter(
                 id__in=self.request.user.stocksofuser_set.values_list('stock'))
+            
+            print('2', self.fields['ticker'].queryset)
 
             if self.asset:
                 self.fields['ticker'].queryset |= self.asset
 
         if self.request.method == "POST":
-            self.fields['ticker'].queryset = Stock.objects.all()
+            self.fields['ticker'].queryset = Bond.objects.all()
 
-
+        #super(TransactionForm, self).__init__(*args, **kwargs)
         # self.helper = FormHelper()
         # self.helper.form_id = 'id-exampleForm'
         # self.helper.form_class = 'blueForms'
