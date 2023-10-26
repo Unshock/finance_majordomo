@@ -21,9 +21,9 @@ from .models import Dividend, DividendsOfUser
 def get_stock_dividends(stock_obj):
     stock_type = stock_obj.type
     if stock_type == 'preferred_share':
-        ticker = stock_obj.ticker[:-1]
+        secid = stock_obj.secid[:-1]
     elif stock_type == 'common_share':
-        ticker = stock_obj.ticker
+        secid = stock_obj.secid
     else:
         raise Exception('stock_type не опознан')
     
@@ -31,7 +31,7 @@ def get_stock_dividends(stock_obj):
 
     url = f'https://' \
           f'{"закрытияреестров.рф".encode("idna").decode()}' \
-          f'/{ticker.upper()}/'
+          f'/{secid.upper()}/'
 
     dividend_page_code = requests.get(url)
     dividend_page_code.encoding = 'utf-8'

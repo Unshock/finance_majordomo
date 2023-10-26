@@ -42,6 +42,7 @@ def update_currency_rates(date=None):
 
 def update_usd():
     last_date = CurrencyRate.objects.last()
+    print(last_date)
     last_date_str = datetime.strftime(last_date.tradedate, '%d/%m/%Y')
     update_currency_rates(date=last_date_str)
     

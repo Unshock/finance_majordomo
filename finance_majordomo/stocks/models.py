@@ -1,17 +1,31 @@
 from django.db import models
 from django.core.validators import MinLengthValidator
 from django.urls import reverse
-from ..assets.models import Asset
+
 from django.utils.translation import gettext_lazy as _
-from finance_majordomo.users.models import Portfolio
-from ..users.models import User
+
+from ..users.models import User, Portfolio
 
 
-class Stock(Asset):
+class Asset(models.Model):
 
-    ticker = models.CharField(
-        max_length=10,
-        verbose_name="Тикер акции",
+    asset_types = [
+        ('stocks', 'stocks'),
+        ('bonds', 'bonds'),
+        ('currencies', 'currencies'),
+        ('funds', 'funds')
+    ]
+
+    creation_date = models.DateTimeField(
+        auto_now_add=True, verbose_name="Дата создания")
+
+    asset_type = models.CharField(max_length=20,
+                                  choices=asset_types,
+                                  verbose_name='Тип актива')
+
+    secid = models.CharField(
+        max_length=30,
+        verbose_name="ID инструмента",
         unique=True
     )
 
@@ -26,8 +40,7 @@ class Stock(Asset):
         blank=True,
         unique=True
     )
-        
-from finance_majordomo.users.models import Portfolio
+
     currency = models.CharField(
         max_length=10,
         verbose_name="Валюта номинала",
@@ -84,21 +97,31 @@ from finance_majordomo.users.models import Portfolio
         blank=True
     )
 
-    stock_data = models.JSONField(
-        verbose_name="Данные об акции")
+    portfolios = models.ManyToManyField(
+        Portfolio,
+        through='AssetOfPortfolio',
+        through_fields=('asset', 'portfolio'),
+        related_name='asset',
+    )
+
+    users = models.ManyToManyField(
+        User,
+        through='AssetsOfUser',
+        through_fields=('asset', 'user'),
+        related_name='asset1'
+    )
+
+    def __str__(self):
+        return self.latname
+    
+    
+
+class Stock(Asset):
 
     latest_dividend_update = models.DateField(
         verbose_name='Дата последнего обновления информации о дивидендах',
         blank=True,
         null=True
-    )
-
-    users = models.ManyToManyField(
-        User,
-        through='StocksOfUser',
-        through_fields=('stock', 'user'),
-        blank=True,
-        related_name='stock',
     )
 
     def __str__(self):
@@ -110,7 +133,7 @@ from finance_majordomo.users.models import Portfolio
     class Meta:
         verbose_name = "Акция"
         verbose_name_plural = "Акции"
-        ordering = ['creation_date', 'ticker', 'name']
+        ordering = ['creation_date', 'secid', 'name']
 
 
 class StocksOfUser(models.Model):
@@ -131,35 +154,6 @@ class StocksOfUser(models.Model):
 
 
 class Bond(Asset):
-
-    secid = models.CharField(
-        max_length=30,
-        verbose_name="ID инструмента",
-        unique=True
-    )
-
-    name = models.CharField(
-        max_length=100,
-        verbose_name="Имя акции"
-    )
-
-    isin = models.CharField(
-        max_length=100,
-        verbose_name="ISIN",
-        blank=True,
-        unique=True
-    )
-
-    currency = models.CharField(
-        max_length=10,
-        verbose_name="Валюта номинала",
-        blank=True
-    )
-
-    issuedate = models.DateField(
-        verbose_name="Дата начала торгов",
-        blank=True
-    )
 
     startdatemoex = models.DateField(
         verbose_name="Дата начала торгов на MOEX",
@@ -201,64 +195,10 @@ class Bond(Asset):
         blank=True
     )
 
-    latname = models.CharField(
-        max_length=100,
-        verbose_name="Английское наименование",
-        blank=True
-    )
-
-    isqualifiedinvestors = models.BooleanField(
-        verbose_name="Бумаги для квалифицированных инвесторов",
-        blank=True
-    )
-
-    morningsession = models.BooleanField(
-        verbose_name="Допуск к утренней дополнительной торговой сессии",
-        blank=True
-    )
-
-    eveningsession = models.BooleanField(
-        verbose_name="Допуск к вечерней дополнительной торговой сессии",
-        blank=True
-    )
-
-    typename = models.CharField(
-        max_length=100,
-        verbose_name="Вид/категория ценной бумаги",
-        blank=True
-    )
-
-    group = models.CharField(
-        max_length=100,
-        verbose_name="Код типа инструмента",
-        blank=True
-    )
-
-    type = models.CharField(
-        max_length=100,
-        verbose_name="Тип бумаги",
-        blank=True
-    )
-
-    groupname = models.CharField(
-        max_length=100,
-        verbose_name="Тип инструмента",
-        blank=True
-    )
-
-
     latest_coupon_update = models.DateField(
         verbose_name='Дата последнего обновления информации о купонах',
         blank=True,
         null=True
-    )
-
-    users = models.ManyToManyField(
-        User,
-        through='BondOfUser',
-        through_fields=('bond', 'user'),
-        blank=True,
-        related_name='bond',
     )
 
     def __str__(self):
@@ -365,35 +305,7 @@ class BondsHistoricalData(models.Model):
         unique_together = ['bond', 'tradedate']
 
 
-class Asset(models.Model):
 
-    asset_types = [
-        ('stocks', 'stocks'),
-        ('bonds', 'bonds'),
-        ('currencies', 'currencies'),
-        ('funds', 'funds')
-    ]
-
-    creation_date = models.DateTimeField(
-        auto_now_add=True, verbose_name="Дата создания")
-
-    asset_type = models.CharField(max_length=20,
-                                  choices=asset_types,
-                                  verbose_name='Тип актива')
-
-    # ticker = models.CharField(
-    #     max_length=10,
-    #     verbose_name="Тикер акции",
-    #     unique=True,
-    #     null=True
-    # )
-
-    portfolios = models.ManyToManyField(
-        Portfolio,
-        through='AssetOfPortfolio',
-        through_fields=('asset', 'portfolio'),
-        related_name='asset',
-    )
 
 
 class AssetOfPortfolio(models.Model):
@@ -412,3 +324,20 @@ class AssetOfPortfolio(models.Model):
         verbose_name_plural = "Объекты портфеля"
         ordering = ['portfolio']
 
+
+class AssetsOfUser(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+
+    asset = models.ForeignKey(
+        Asset,
+        on_delete=models.CASCADE
+    )
+
+    class Meta:
+        verbose_name = "Активы пользователя"
+        verbose_name_plural = "Активы пользователей"
+        ordering = ['user']
+        

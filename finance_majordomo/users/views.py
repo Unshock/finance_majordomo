@@ -18,10 +18,10 @@ from finance_majordomo.users.forms import RegisterUserForm, LoginUserForm, \
 from finance_majordomo.users.models import User, Portfolio, UserSettings
 from .utils.utils import set_fields_to_user
 from .utils.fields_to_display import FIELDS_TO_DISPLAY
-
+from finance_majordomo.stocks.models import Asset
 
 # Create your views here.
-from ..assets.models import Asset
+
 
 
 class UserList(ListView):

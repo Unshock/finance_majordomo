@@ -4,7 +4,8 @@ from django.db.models import Max
 
 from common.utils.stocks import get_date_status, get_stock_current_price, \
     get_stock_board_history
-from finance_majordomo.stocks.models import SharesHistoricalData, ProdCalendar
+from finance_majordomo.stocks.models import SharesHistoricalData, ProdCalendar, \
+    BondsHistoricalData
 
 
 def get_money_result(current_price, purchace_price):
@@ -39,7 +40,7 @@ def add_bond_history_data_to_model(bond_obj, stock_board_history):
 
     for day_data in stock_board_history:
 
-        SharesHistoricalData.objects.create(
+        BondsHistoricalData.objects.create(
             bond=bond_obj,
 
             tradedate=day_data.get('TRADEDATE'),
@@ -127,7 +128,7 @@ def update_historical_data(stock_obj: object, date=None):
 def update_history_data(stock_obj: object, date=None):
 
     stock_board_history = get_stock_board_history(
-        stock_obj.ticker,
+        stock_obj.secid,
         start_date=date
     )
 
@@ -157,7 +158,9 @@ def update_history_data(stock_obj: object, date=None):
         stock_historical_data.save()
 
 
-def update_today_data(stock_obj: object) -> object:
+def update_today_data(asset_obj: object) -> object:
+    
+    share_obj = asset_obj.stock
 
     # In minutes
     STANDARD_MOEX_LAG = 16
@@ -166,7 +169,7 @@ def update_today_data(stock_obj: object) -> object:
         datetime.today(), '%Y-%m-%d 18:30:00'), '%Y-%m-%d %H:%M:%S')
 
     latest_day = SharesHistoricalData.objects.filter(
-        share=stock_obj).order_by('-tradedate')[0]
+        share=share_obj).order_by('-tradedate')[0]
 
     if latest_day.update_time:
 
@@ -176,22 +179,22 @@ def update_today_data(stock_obj: object) -> object:
 
         # IF STOCK IS NOT ON EVENING SESSION AND UPDATE TIME LATER THAN
         # 18:30:00 TODAY => NO NEED TO UPDATE
-        if not stock_obj.eveningsession and\
+        if not share_obj.eveningsession and\
                 update_time_dt > EVENING_CUT_OFF:
-            return stock_obj
+            return share_obj
 
         # IF UPDATED RECENTLY => NO NEED TO UPDATE
         time_gap = get_time_gap(update_time_dt)
 
         if time_gap <= UPDATE_TIME_MINUTES:
-            return stock_obj
+            return share_obj
 
-    last_price_data = get_stock_current_price(stock_obj.ticker)
+    last_price_data = get_stock_current_price(share_obj.secid)
 
     today_dt = datetime.today().date()
 
     stock_today_price_data, _ = SharesHistoricalData.objects.get_or_create(
-        tradedate=today_dt, share=stock_obj, defaults={
+        tradedate=today_dt, share=share_obj, defaults={
             'legalcloseprice': last_price_data[0],
             'is_closed': False,
             'update_time': last_price_data[1]
@@ -203,7 +206,7 @@ def update_today_data(stock_obj: object) -> object:
 
     stock_today_price_data.save()
 
-    return stock_obj
+    return share_obj
 
 
 def get_time_gap(update_time_dt):

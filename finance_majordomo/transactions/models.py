@@ -3,7 +3,7 @@ from django.core.validators import MinLengthValidator
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from finance_majordomo.stocks.models import Stock
+from finance_majordomo.stocks.models import Stock, Asset
 from finance_majordomo.users.models import User
 
 # Create your models here.
@@ -46,9 +46,9 @@ class Transaction(models.Model):
 
     #тут править когда будут облигации
     ticker = models.ForeignKey(
-        Stock,
+        Asset,
         on_delete=models.CASCADE,
-        verbose_name=_('Share'),
+        verbose_name=_('Asset'),
     )
 
     date = models.DateField(
@@ -80,7 +80,7 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f'{self.transaction_type} ' \
-               f'x{self.quantity} {self.ticker.ticker} ' \
+               f'x{self.quantity} {self.ticker.secid} ' \
                f'for {self.price}'
 
     class Meta:

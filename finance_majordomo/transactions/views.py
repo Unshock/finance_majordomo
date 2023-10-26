@@ -78,7 +78,7 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
             if asset_group == 'stock_shares':
                 try:
-                    asset_obj = Stock.objects.get(ticker=asset_secid)
+                    asset_obj = Stock.objects.get(secid=asset_secid)
 
                 except Stock.DoesNotExist:
                     # ADD ASSET TO DB
@@ -163,7 +163,7 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
             asset_type = form.cleaned_data.get('asset_type')
             transaction_type = form.cleaned_data.get('transaction_type')
-            ticker = form.cleaned_data.get('ticker')
+            asset = form.cleaned_data.get('ticker')
             date = form.cleaned_data.get('date')
             price = form.cleaned_data.get('price')
             fee = form.cleaned_data.get('fee')
@@ -173,15 +173,15 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
             # Если в ходе поиска добавляем первую транзакцию для актива, 
             # то добавляем актив в StocksOfUser
-            if ticker.id not in user.stocksofuser_set.values_list('stock'):
-                ticker.users.add(user)
-                ticker.save()
+            if asset.id not in user.stocksofuser_set.values_list('stock'):
+                asset.users.add(user)
+                asset.save()
 
             obj = Transaction.objects.create(
                 asset_type=asset_type,
                 transaction_type=transaction_type,
                 user=user,
-                ticker=ticker,
+                ticker=asset,
                 date=date,
                 price=price,
                 fee=fee,
@@ -190,6 +190,7 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
             obj.save()
 
+            print(obj, type(obj), obj.ticker, obj.ticker.id)
             if obj.asset_type == 'STOCK':
                 stock_obj = Stock.objects.get(id=obj.ticker.id)
                 update_dividends_of_user(request, stock_obj, date, obj)

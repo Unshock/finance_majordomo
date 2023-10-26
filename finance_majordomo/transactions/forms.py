@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.forms import ModelForm
 from django import forms
 from django.utils.translation import gettext_lazy as _
-from finance_majordomo.stocks.models import Stock, StocksOfUser, Bond
+from finance_majordomo.stocks.models import Stock, StocksOfUser, Bond, Asset
 from finance_majordomo.transactions.models import Transaction
 from finance_majordomo.stocks.views import UsersStocks
 from .utils import validate_transaction
@@ -44,21 +44,21 @@ class TransactionForm(ModelForm):
         self.fields['ticker'].empty_label = _('Choose stock from the list')
         print('3', self.fields['ticker'].queryset)
 
-        if self.request.method == "GET":
-            
-            print('1', Stock.objects.filter(
-                id__in=self.request.user.stocksofuser_set.values_list('stock')))
-            
-            self.fields['ticker'].qeuryset = Stock.objects.filter(
-                id__in=self.request.user.stocksofuser_set.values_list('stock'))
-            
-            print('2', self.fields['ticker'].queryset)
-
-            if self.asset:
-                self.fields['ticker'].queryset |= self.asset
+        # if self.request.method == "GET":
+        #     
+        #     print('1', Stock.objects.filter(
+        #         id__in=self.request.user.stocksofuser_set.values_list('stock')))
+        #     
+        #     self.fields['ticker'].qeuryset = Asset.objects.filter(
+        #         id__in=self.request.user.assetsofuser_set.values_list('asset'))
+        #     
+        #     print('2', self.fields['ticker'].queryset)
+        # 
+        #     if self.asset:
+        #         self.fields['ticker'].queryset |= self.asset
 
         if self.request.method == "POST":
-            self.fields['ticker'].queryset = Bond.objects.all()
+            self.fields['ticker'].queryset = Asset.objects.all()
 
         #super(TransactionForm, self).__init__(*args, **kwargs)
         # self.helper = FormHelper()
@@ -84,7 +84,7 @@ class TransactionForm(ModelForm):
         choices=Transaction.transaction_type_choices,
 
         widget=RadioSelectButtonGroup(
-            # тут опции для каждой радио кнопки - хотелось бы расположить их все отцентрованно
+            # тут опassetции для каждой радио кнопки - хотелось бы расположить их все отцентрованно
             attrs={'class': 'form-check-inline d-inline-flex justify-content-center',
 
                    }
@@ -149,18 +149,18 @@ class TransactionForm(ModelForm):
     def clean(self):
 
         cleaned_data = super().clean()
-
-        ticker = cleaned_data.get('ticker')
+        print(cleaned_data.items())
+        asset_obj = cleaned_data.get('ticker')
         transaction_type = cleaned_data.get('transaction_type')
         date = cleaned_data.get('date')
         quantity = cleaned_data.get('quantity')
 
-        if ticker and transaction_type and date and quantity:
+        if asset_obj and transaction_type and date and quantity:
 
             validate_dict = {
                 'validator': 'add_validator',
                 #'asset_obj': Stock.objects.get(latname=ticker.latname),
-                'asset_obj': ticker,
+                'asset_obj': asset_obj,
                 'transaction_type': transaction_type,
                 'date': date,
                 'quantity': quantity
@@ -200,6 +200,7 @@ class TransactionForm(ModelForm):
         # print('asset', type(asset), asset)
         # print(Stock.objects.get(latname=asset.latname))
         #issuedate = Stock.objects.get(latname=asset).issuedate
+        print(self.cleaned_data.items())
         issuedate = asset.issuedate
         issuedate = datetime.datetime.strftime(issuedate, '%Y-%m-%d')
         if date < issuedate:

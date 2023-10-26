@@ -23,7 +23,7 @@ from common.utils.stocks import get_stock_board_history, \
     get_stock_current_price, make_json_last_price_dict, get_stock_description
 from finance_majordomo.dividends.utils import get_stock_dividends, \
     add_dividends_to_model, get_dividend_result_usd
-from ..assets.models import Asset, AssetOfPortfolio
+from .models import Asset, AssetOfPortfolio
 from ..currencies.models import CurrencyRate
 from ..transactions.utils import get_quantity, get_purchase_price, \
     get_purchase_price_usd
@@ -92,10 +92,13 @@ class UsersStocks(LoginRequiredMixin, ListView):
 
     def get_user_stock_data(self):
         request = self.request
-        users_stocks = Stock.objects.filter(
-            id__in=request.user.stocksofuser_set.values_list('stock'))
-        if users_stocks:
-            print(users_stocks)
+        user_assets = Asset.objects.filter(
+            id__in=request.user.assetsofuser_set.values_list('asset'))
+        
+        print('QQQQQQQQQQQQQQQQQQQQQQ', user_assets)
+        
+        if user_assets:
+            print(user_assets)
     
             current_portfolio = Portfolio.objects.filter(
                 user=self.request.user, is_current=True)
@@ -124,29 +127,30 @@ class UsersStocks(LoginRequiredMixin, ListView):
             user_stock_data = {'total_results': {},
                                'stock_list': []
                                }
-            for stock in users_stocks:
+            for asset in user_assets:
 
                 # update_history_data(stock)
                 # update_today_data(stock)
-                update_historical_data(stock)
+                update_historical_data(asset)
 
 
                 #
+                update_currency_rates()
                 update_usd()
     
-                current_quantity = get_quantity(request, stock)
+                current_quantity = get_quantity(request, asset)
     
                 if current_quantity == 0:
                     continue
     
-                purchase_price = get_purchase_price(request, stock)
-                purchase_price_usd = get_purchase_price_usd(request, stock)
+                purchase_price = get_purchase_price(request, asset)
+                purchase_price_usd = get_purchase_price_usd(request, asset)
 
                 total_purchase_price += purchase_price
                 total_purchase_price_usd += purchase_price_usd
     
-                current_price = self.get_current_price_alt(stock)
-                current_price_usd = self.get_current_price_usd(stock)
+                current_price = self.get_current_price_alt(asset)
+                current_price_usd = self.get_current_price_usd(asset)
 
                 total_current_price += current_price
                 total_current_price_usd += current_price_usd
@@ -158,10 +162,10 @@ class UsersStocks(LoginRequiredMixin, ListView):
                     get_money_result(current_price, purchase_price), sep=' ')
     
     
-                dividends_received = get_dividend_result(request, stock)
+                dividends_received = get_dividend_result(request, asset)
                 total_divs += dividends_received
 
-                dividends_received_usd = get_dividend_result_usd(request, stock)
+                dividends_received_usd = get_dividend_result_usd(request, asset)
                 total_divs_usd += dividends_received_usd
     
                 money_result_with_divs = moneyfmt(
@@ -174,10 +178,10 @@ class UsersStocks(LoginRequiredMixin, ListView):
                     purchase_price, current_price + dividends_received)
     
                 user_stock_data['stock_list'].append(
-                    {'id': stock.id,
-                     'ticker': stock.ticker,
-                     'name': stock.name,
-                     'currency': stock.currency,
+                    {'id': asset.id,
+                     'ticker': asset.secid,
+                     'name': asset.name,
+                     'currency': asset.currency,
                      'quantity': moneyfmt(
                          Decimal(current_quantity), sep=' ', places=0),
                      'purchase_price': moneyfmt(purchase_price, sep=' '),
@@ -540,7 +544,7 @@ def get_normalized_asset_type(type: str) -> str:
 
 def add_asset(stock_description: dict) -> object:
 
-    ticker = stock_description.get('SECID')
+    secid = stock_description.get('SECID')
     isin = stock_description.get('ISIN')
 
     name = stock_description.get('SHORTNAME')
@@ -565,7 +569,7 @@ def add_asset(stock_description: dict) -> object:
 
     asset_type = get_normalized_asset_type(type)
 
-    check_list = [ticker, name, isin,
+    check_list = [secid, name, isin,
                   currency, latname, isqualifiedinvestors,
                   issuedate, morningsession, eveningsession,
                   typename, group, type, groupname]
@@ -574,15 +578,15 @@ def add_asset(stock_description: dict) -> object:
         print("SOMETHING HAVE NOT BEEN LOADED - GOT NONE")
 
     # Ищем инфу о ценах акции за весь период чтобы записать в JSONField
-    print(ticker)
-    stock_board_history = get_stock_board_history(ticker)
+    print(secid)
+    stock_board_history = get_stock_board_history(secid)
     print(stock_board_history[-4:])
     json_stock_board_data = make_json_trade_info_dict(
         stock_board_history)
     stock_obj = Stock.objects.create(
         asset_type=asset_type,
 
-        ticker=ticker,
+        secid=secid,
         name=name,
         isin=isin,
         currency=currency,
@@ -595,7 +599,7 @@ def add_asset(stock_description: dict) -> object:
         group=group,
         type=type,
         groupname=groupname,
-        stock_data=json_stock_board_data,
+        #stock_data=json_stock_board_data,
     )
 
 
@@ -770,7 +774,7 @@ class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         json_current_stock_data = json.loads(stock.stock_data)
 
         stock_board_history = get_stock_board_history(
-            stock.ticker, start_date)
+            stock.secid, start_date)
         json_stock_board_data = json.loads(
             make_json_trade_info_dict(stock_board_history))
 
@@ -791,8 +795,8 @@ class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         #print('2', json_stock_data['TRADEINFO'].keys())
 
         stock_data = json.dumps(json_current_stock_data)
-        stock.stock_data = stock_data
-        stock.save()
+        #stock.stock_data = stock_data
+        #stock.save()
 
         return stock
 
