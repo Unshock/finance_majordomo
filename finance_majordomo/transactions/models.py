@@ -9,10 +9,6 @@ from finance_majordomo.users.models import User
 # Create your models here.
 class Transaction(models.Model):
 
-    asset_type_choices = [
-        ('STOCK', 'Stock'),
-    ]
-
     transaction_type_choices = [
         ('BUY', 'Buy'),
         ('SELL', 'Sell'),
@@ -28,13 +24,6 @@ class Transaction(models.Model):
         max_length=4,
         choices=transaction_type_choices,
         verbose_name=_('Transaction type'),
-        validators=[MinLengthValidator(1)]
-    )
-
-    asset_type = models.CharField(
-        max_length=10,
-        choices=asset_type_choices,
-        verbose_name=_('Asset type'),
         validators=[MinLengthValidator(1)]
     )
 

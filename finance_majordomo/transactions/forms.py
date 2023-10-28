@@ -35,29 +35,36 @@ class TransactionForm(ModelForm):
 
 
     def __init__(self, *args, **kwargs):
-        print(kwargs)
+
         self.request = kwargs.pop('request', None)
-        self.asset = kwargs.pop('asset', None)
+        self.assets_to_display = kwargs.pop('assets_to_display', None)
         super(TransactionForm, self).__init__(*args, **kwargs)
-        print(self.fields)
+
         self.fields['ticker'].label = _('Share')
         self.fields['ticker'].empty_label = _('Choose stock from the list')
-        print('3', self.fields['ticker'].queryset)
+        self.fields['ticker'].queryset = self.assets_to_display
 
+        # print('3', self.fields['ticker'].queryset)
+        # print('4', self.assets_to_display, type(self.assets_to_display))
         # if self.request.method == "GET":
-        #     
-        #     print('1', Stock.objects.filter(
-        #         id__in=self.request.user.stocksofuser_set.values_list('stock')))
-        #     
-        #     self.fields['ticker'].qeuryset = Asset.objects.filter(
-        #         id__in=self.request.user.assetsofuser_set.values_list('asset'))
-        #     
-        #     print('2', self.fields['ticker'].queryset)
+        #     print('get')
+        #     # print('1', Stock.objects.filter(
+        #     #     id__in=self.request.user.stocksofuser_set.values_list('stock')))
+        #     # 
+        #     # self.fields['ticker'].qeuryset = Asset.objects.filter(
+        #     #     id__in=self.request.user.assetsofuser_set.values_list('asset'))
+        #     print('5', self.fields['ticker'].queryset)
         # 
-        #     if self.asset:
-        #         self.fields['ticker'].queryset |= self.asset
-
+        #     self.fields['ticker'].queryset = self.assets_to_display
+        # 
+        #     print('6', self.fields['ticker'].queryset)
+        #     # print('2', self.fields['ticker'].queryset)
+        # 
+        #     # if self.asset:
+        #     #     self.fields['ticker'].queryset |= self.asset
+        # 
         if self.request.method == "POST":
+
             self.fields['ticker'].queryset = Asset.objects.all()
 
         #super(TransactionForm, self).__init__(*args, **kwargs)
@@ -69,20 +76,11 @@ class TransactionForm(ModelForm):
         # 
         # self.helper.add_input(Submit('submit', 'Submit'))
 
-    asset_type = forms.ChoiceField(
-        label=_('Asset type'),
-        choices=Transaction.asset_type_choices,
-        widget=forms.Select(
-            #attrs={"class": "form-control"}
-        ),
-    )
-
     transaction_type = forms.ChoiceField(
         #initial='BUY',
 
         label=_('Transaction type'),
         choices=Transaction.transaction_type_choices,
-
         widget=RadioSelectButtonGroup(
             # тут опassetции для каждой радио кнопки - хотелось бы расположить их все отцентрованно
             attrs={'class': 'form-check-inline d-inline-flex justify-content-center',
@@ -151,6 +149,7 @@ class TransactionForm(ModelForm):
         cleaned_data = super().clean()
         print(cleaned_data.items())
         asset_obj = cleaned_data.get('ticker')
+        print(type(asset_obj), '88989898998989898989')
         transaction_type = cleaned_data.get('transaction_type')
         date = cleaned_data.get('date')
         quantity = cleaned_data.get('quantity')
@@ -214,7 +213,6 @@ class TransactionForm(ModelForm):
         model = Transaction
         fields = [
             'transaction_type',
-            'asset_type',
             'ticker',
             #'ticker_new',
             'date',

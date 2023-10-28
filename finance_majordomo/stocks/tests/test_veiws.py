@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from http import HTTPStatus
 from .setting import SettingsStocks
 from .. import views
-from ..models import Stock, SharesHistoricalData, StocksOfUser
+from ..models import Stock, StocksOfUser
 
 
 class TestStocksViews(SettingsStocks):

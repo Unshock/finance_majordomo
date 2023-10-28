@@ -3,8 +3,6 @@ from collections import deque
 
 from .models import Transaction
 from ..currencies.utils import get_usd_rate
-from ..users.models import User
-from finance_majordomo.currencies.models import CurrencyRate
 
 
 def get_quantity(request, asset_obj, date=None) -> int:

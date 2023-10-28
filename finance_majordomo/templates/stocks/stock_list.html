@@ -10,7 +10,6 @@
         <table id="myDataTable" class="table table-striped">
            <thead>
                 <tr>
-                    <th>ID</th>
                     <th>{% translate "Ticker" %}</th>
                     <th>{% translate "Name" %}</th>
                     <th>{% translate "Creation date" %}</th>
@@ -22,8 +21,7 @@
             <tbody>
                 {% for stock in stock_list %}
                 <tr>
-                    <td>{{ stock.id }}</td>
-                    <td>{{ stock.ticker }}</td>
+                    <td>{{ stock.secid }}</td>
                     <td>{{ stock.name }}</td>
                     <td>{{ stock.creation_date }}</td>
                     <td>

@@ -4,8 +4,9 @@ from django.db.models import Max
 
 from common.utils.stocks import get_date_status, get_stock_current_price, \
     get_stock_board_history
-from finance_majordomo.stocks.models import SharesHistoricalData, ProdCalendar, \
-    BondsHistoricalData
+from finance_majordomo.stocks.models import ProdCalendar, \
+    AssetsHistoricalData, Asset
+
 
 
 def get_money_result(current_price, purchace_price):
@@ -16,8 +17,8 @@ def add_share_history_data_to_model(stock_obj, stock_board_history):
 
     for day_data in stock_board_history:
 
-        SharesHistoricalData.objects.create(
-            share=stock_obj,
+        AssetsHistoricalData.objects.create(
+            asset=Asset.objects.get(id=stock_obj.asset_ptr_id),
 
             tradedate=day_data.get('TRADEDATE'),
             numtrades=day_data.get('NUMTRADES'),
@@ -40,8 +41,8 @@ def add_bond_history_data_to_model(bond_obj, stock_board_history):
 
     for day_data in stock_board_history:
 
-        BondsHistoricalData.objects.create(
-            bond=bond_obj,
+        AssetsHistoricalData.objects.create(
+            asset=Asset.objects.get(id=bond_obj.asset_ptr_id),
 
             tradedate=day_data.get('TRADEDATE'),
             numtrades=day_data.get('NUMTRADES'),
@@ -53,13 +54,10 @@ def add_bond_history_data_to_model(bond_obj, stock_board_history):
             waprice=day_data.get('WAPRICE'),
             close=day_data.get('CLOSE'),
             volume=day_data.get('VOLUME'),
-            #waval=day_data.get('WAVAL'),
-            #trendclspr=day_data.get('TRENDCLSPR'),
-            
+
             yieldclose=day_data.get("YIELDCLOSE"),
             couponpercent=day_data.get("COUPONPERCENT"),
             couponvalue=day_data.get("COUPONVALUE"),
-            
 
             is_closed=True
         )
@@ -86,13 +84,18 @@ def get_prod_date(date: str):
 
 def update_historical_data(stock_obj: object, date=None):
 
+    related_obj = stock_obj.get_related_object()
+
     today_status = get_prod_date(
         datetime.strftime(datetime.today(), '%Y-%m-%d')).date_status
 
     today_date = datetime.today().date()
 
-    latest_day = SharesHistoricalData.objects.filter(
-        share=stock_obj).order_by('-tradedate')[0]
+    print(stock_obj, related_obj, type(related_obj))
+
+# ne tolko share no i bond
+    latest_day = AssetsHistoricalData.objects.filter(
+        asset=stock_obj).order_by('-tradedate')[0]
 
     latest_date_str = datetime.strftime(latest_day.tradedate, '%Y-%m-%d')
 
@@ -135,8 +138,10 @@ def update_history_data(stock_obj: object, date=None):
     for day_data in stock_board_history:
 
         date_dt = datetime.strptime(day_data.get('TRADEDATE'), "%Y-%m-%d")
+        
+        asset_obj = Asset.objects.get(stock_obj.ass)
 
-        stock_historical_data, created = SharesHistoricalData.objects.get_or_create(
+        stock_historical_data, created = AssetsHistoricalData.objects.get_or_create(
             tradedate=date_dt, share=stock_obj, defaults={
                 'legalcloseprice': 1,
                 'is_closed': False
@@ -159,7 +164,7 @@ def update_history_data(stock_obj: object, date=None):
 
 
 def update_today_data(asset_obj: object) -> object:
-    
+
     share_obj = asset_obj.stock
 
     # In minutes
@@ -168,8 +173,8 @@ def update_today_data(asset_obj: object) -> object:
     EVENING_CUT_OFF = datetime.strptime(datetime.strftime(
         datetime.today(), '%Y-%m-%d 18:30:00'), '%Y-%m-%d %H:%M:%S')
 
-    latest_day = SharesHistoricalData.objects.filter(
-        share=share_obj).order_by('-tradedate')[0]
+    latest_day = AssetsHistoricalData.objects.filter(
+        share=asset_obj).order_by('-tradedate')[0]
 
     if latest_day.update_time:
 
@@ -193,8 +198,8 @@ def update_today_data(asset_obj: object) -> object:
 
     today_dt = datetime.today().date()
 
-    stock_today_price_data, _ = SharesHistoricalData.objects.get_or_create(
-        tradedate=today_dt, share=share_obj, defaults={
+    stock_today_price_data, _ = AssetsHistoricalData.objects.get_or_create(
+        tradedate=today_dt, asset=asset_obj, defaults={
             'legalcloseprice': last_price_data[0],
             'is_closed': False,
             'update_time': last_price_data[1]
