@@ -180,13 +180,13 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
             print(obj, type(obj), obj.ticker, obj.ticker.id)
 
-            asset_type = asset_obj.type
+            asset_type = asset_obj.group
 
             if asset_type == 'stock_shares':
                 update_dividends_of_user(request, asset_obj, date, obj)
 
             if asset_type == 'stock_bonds':
-                pass
+                update_dividends_of_user(request, asset_obj, date, obj)
 
             messages.success(request, self.success_message)
             return redirect(self.success_url)

@@ -110,25 +110,29 @@ def get_stock_dividends(stock_obj):
                     {'div': preferred_share_div,
                      'value': preferred_share_price}
 
-    #print(dividend_dict)
+    print(dividend_dict)
     return dividend_dict
 
 
-def add_dividends_to_model(stock_obj, dividend_dict):
-
-    stock_type = stock_obj.type
-
+def add_dividends_to_model(asset_obj, dividend_dict):
+    print(dividend_dict)
+    asset_type = asset_obj.type
+    print(asset_type)
     for date, div_value in dividend_dict.items():
 
-        if stock_type in ['preferred_share', 'common_share'] and \
-                div_value[stock_type]['div'] is True:
-            amount = Decimal(div_value[stock_type]['value'])
+        if asset_type in ['preferred_share', 'common_share'] and \
+                div_value[asset_type]['div'] is True:
+            amount = Decimal(div_value[asset_type]['value'])
+
+        elif asset_type in ['ofz_bond', 'corporate_bond'] and \
+                div_value['bond']['div'] is True:
+            amount = Decimal(div_value['bond']['value'])
 
         else:
             continue
 
         try:
-            existing_div = Dividend.objects.get(stock=stock_obj, date=date)
+            existing_div = Dividend.objects.get(asset=asset_obj, date=date)
 
             if not existing_div.amount == amount:
                 print('Dividend has been changed while updating. '
@@ -138,21 +142,21 @@ def add_dividends_to_model(stock_obj, dividend_dict):
         except Dividend.DoesNotExist:
             dividend = Dividend.objects.create(
                 date=datetime.strptime(date, "%Y-%m-%d"),
-                stock=stock_obj,
+                asset=asset_obj,
                 amount=amount
             )
-
+            print(dividend)
             dividend.save()
 
-    stock_obj.latest_dividend_update = datetime.today()
+    asset_obj.latest_dividend_update = datetime.today()
     #print('stock', stock_obj, stock_obj.latest_dividend_update)
-    stock_obj.save()
+    asset_obj.save()
 
 
-def get_dividend_result(request, stock_obj):
+def get_dividend_result(request, asset_obj):
 
     users_dividends_received = Dividend.objects.filter(
-        stock=stock_obj.id,
+        asset=asset_obj.id,
         id__in=request.user.dividendsofuser_set.filter(
             is_received=True).values_list('dividend'))
 
@@ -160,16 +164,16 @@ def get_dividend_result(request, stock_obj):
 
     for div in users_dividends_received:
 
-        quantity = get_quantity(request, stock_obj, date=div.date)
+        quantity = get_quantity(request, asset_obj, date=div.date)
         sum_dividends_received += quantity * div.amount
 
     return sum_dividends_received * Decimal(0.87)
 
 
-def get_dividend_result_usd(request, stock_obj):
+def get_dividend_result_usd(request, asset_obj):
 
     users_dividends_received = Dividend.objects.filter(
-        stock=stock_obj.id,
+        asset=asset_obj.id,
         id__in=request.user.dividendsofuser_set.filter(
             is_received=True).values_list('dividend'))
 
@@ -177,28 +181,30 @@ def get_dividend_result_usd(request, stock_obj):
 
     for div in users_dividends_received:
 
-        quantity = get_quantity(request, stock_obj, date=div.date)
+        quantity = get_quantity(request, asset_obj, date=div.date)
         usd_rate = get_usd_rate(div.date)
         sum_dividends_received += quantity * div.amount / usd_rate
 
     return sum_dividends_received * Decimal(0.87)
 
 
-def update_dividends_of_user(request, stock_obj, date=None, transaction=None):
+def update_dividends_of_user(request, asset_obj, date=None, transaction=None):
 
-    stock_dividends = Dividend.objects.filter(stock=stock_obj.id)
+    asset_dividends = Dividend.objects.filter(asset=asset_obj.id)
+
+    print(asset_dividends, 'tttttttttttttttttttttttttttttttt')
 
     if date:
-        stock_dividends = stock_dividends.filter(date__gte=date)
+        asset_dividends = asset_dividends.filter(date__gte=date)
 
     # users_dividends = Dividend.objects.filter(
     #     stock=stock_obj.id,
     #     id__in=request.user.dividendsofuser_set.values_list(
     #         'dividend'))
 
-    for div in stock_dividends:
+    for div in asset_dividends:
 
-        quantity = get_quantity(request, stock_obj, div.date)\
+        quantity = get_quantity(request, asset_obj, div.date)\
                    - transaction.quantity
 
         try:

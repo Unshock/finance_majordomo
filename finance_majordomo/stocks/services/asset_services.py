@@ -1,6 +1,7 @@
 from django.db.models import QuerySet
 
-from common.utils.stocks import get_stock_board_history, get_stock_description
+from common.utils.stocks import get_stock_board_history, get_stock_description, \
+    get_bond_coupon_history
 from finance_majordomo.dividends.utils import add_dividends_to_model, \
     get_stock_dividends
 from finance_majordomo.stocks.models import Asset, Stock, Bond, AssetOfPortfolio
@@ -8,6 +9,60 @@ from finance_majordomo.stocks.utils import add_share_history_data_to_model, \
     add_bond_history_data_to_model
 from finance_majordomo.stocks.views import get_normalized_asset_type
 from finance_majordomo.users.models import User
+
+
+def create_base_asset(asset_description: dict) -> Asset:
+    secid = asset_description.get('SECID')
+    isin = asset_description.get('ISIN')
+
+    name = asset_description.get('SHORTNAME')
+    latname = asset_description.get('LATNAME')
+
+    currency = 'RUR' if asset_description.get(
+        'FACEUNIT') == 'SUR' else asset_description.get('FACEUNIT')
+    issuedate = asset_description.get('ISSUEDATE')
+
+    isqualifiedinvestors = True if \
+        asset_description.get('ISQUALIFIEDINVESTORS') == '1' else False
+    morningsession = True if \
+        asset_description.get('MORNINGSESSION') == '1' else False
+    eveningsession = True if \
+        asset_description.get('EVENINGSESSION') == '1' else False
+
+    type = asset_description.get('TYPE')
+    typename = asset_description.get('TYPENAME')
+
+    group = asset_description.get('GROUP')
+    groupname = asset_description.get('GROUPNAME')
+
+    asset_type = get_normalized_asset_type(type)
+
+    check_list = [secid, name, isin,
+                  currency, latname, isqualifiedinvestors,
+                  issuedate, morningsession, eveningsession,
+                  typename, group, type, groupname]
+
+    if None in check_list:
+        print("SOMETHING HAVE NOT BEEN LOADED - GOT NONE")
+
+    asset_obj = Asset.objects.create(
+        asset_type=asset_type,
+
+        secid=secid,
+        name=name,
+        isin=isin,
+        currency=currency,
+        latname=latname,
+        isqualifiedinvestors=isqualifiedinvestors,
+        issuedate=issuedate,
+        morningsession=morningsession,
+        eveningsession=eveningsession,
+        typename=typename,
+        group=group,
+        type=type,
+        groupname=groupname,
+        #stock_data=json_stock_board_data,
+    )
 
 
 def add_asset(stock_description: dict) -> Stock:
@@ -143,6 +198,8 @@ def add_bond(stock_description: dict) -> Bond:
     print(type, board)
     stock_board_history = get_stock_board_history(secid, market='bonds',
                                                   board=board)
+    
+    print(stock_description)
 
     bond_obj = Bond.objects.create(
         asset_type=asset_type,
@@ -173,18 +230,18 @@ def add_bond(stock_description: dict) -> Bond:
     )
 
     try:
-        add_bond_history_data_to_model(bond_obj, stock_board_history)
+        add_bond_history_data_to_model(bond_obj, stock_board_history[1:])
 
     except Exception('HISTORY PROBLEM'):
         pass
 
-    # # add dividend for stock
-    # try:
-    #     dividends_dict = get_stock_dividends(stock_obj)
-    #     add_dividends_to_model(stock_obj, dividends_dict)
-    # 
-    # except Exception('something went wrong while download divs'):
-    #     pass
+    # add dividend for stock
+    try:
+        dividends_dict = get_bond_coupon_history(bond_obj.secid)
+        add_dividends_to_model(bond_obj, dividends_dict)
+
+    except Exception:
+        raise Exception('something went wrong while download coupons')
 
     return bond_obj
 

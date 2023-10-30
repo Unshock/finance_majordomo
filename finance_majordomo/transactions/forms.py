@@ -147,9 +147,8 @@ class TransactionForm(ModelForm):
     def clean(self):
 
         cleaned_data = super().clean()
-        print(cleaned_data.items())
+
         asset_obj = cleaned_data.get('ticker')
-        print(type(asset_obj), '88989898998989898989')
         transaction_type = cleaned_data.get('transaction_type')
         date = cleaned_data.get('date')
         quantity = cleaned_data.get('quantity')

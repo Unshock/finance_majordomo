@@ -1,7 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from finance_majordomo.stocks.models import Stock
+from finance_majordomo.stocks.models import Stock, Asset
 from finance_majordomo.users.models import User
 
 
@@ -10,8 +10,8 @@ class Dividend(models.Model):
         auto_now_add=True,
         verbose_name=_("Creation date"))
 
-    stock = models.ForeignKey(
-        Stock,
+    asset = models.ForeignKey(
+        Asset,
         on_delete=models.CASCADE
     )
 
@@ -37,7 +37,7 @@ class Dividend(models.Model):
     class Meta:
         verbose_name = "Дивиденд"
         verbose_name_plural = "Дивиденды"
-        ordering = ['creation_date', 'stock', 'amount']
+        ordering = ['creation_date', 'asset', 'amount']
 
 
 class DividendsOfUser(models.Model):

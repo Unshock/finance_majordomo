@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.db.models import Max
 
 from common.utils.stocks import get_date_status, get_stock_current_price, \
-    get_stock_board_history
+    get_stock_board_history, get_current
 from finance_majordomo.stocks.models import ProdCalendar, \
     AssetsHistoricalData, Asset
 
@@ -38,6 +38,8 @@ def add_share_history_data_to_model(stock_obj, stock_board_history):
 
 
 def add_bond_history_data_to_model(bond_obj, stock_board_history):
+
+    print(stock_board_history)
 
     for day_data in stock_board_history:
 
@@ -139,7 +141,7 @@ def update_history_data(stock_obj: object, date=None):
 
         date_dt = datetime.strptime(day_data.get('TRADEDATE'), "%Y-%m-%d")
         
-        asset_obj = Asset.objects.get(stock_obj.ass)
+        asset_obj = Asset.objects.get(stock_obj.asset)
 
         stock_historical_data, created = AssetsHistoricalData.objects.get_or_create(
             tradedate=date_dt, share=stock_obj, defaults={
@@ -163,9 +165,9 @@ def update_history_data(stock_obj: object, date=None):
         stock_historical_data.save()
 
 
-def update_today_data(asset_obj: object) -> object:
+def update_today_data(asset_obj: Asset) -> object:
 
-    share_obj = asset_obj.stock
+    share_obj = asset_obj.get_related_object()
 
     # In minutes
     STANDARD_MOEX_LAG = 16
@@ -174,7 +176,7 @@ def update_today_data(asset_obj: object) -> object:
         datetime.today(), '%Y-%m-%d 18:30:00'), '%Y-%m-%d %H:%M:%S')
 
     latest_day = AssetsHistoricalData.objects.filter(
-        share=asset_obj).order_by('-tradedate')[0]
+        asset=asset_obj).order_by('-tradedate')[0]
 
     if latest_day.update_time:
 
@@ -193,8 +195,18 @@ def update_today_data(asset_obj: object) -> object:
 
         if time_gap <= UPDATE_TIME_MINUTES:
             return share_obj
+    
+    group = asset_obj.group
 
-    last_price_data = get_stock_current_price(share_obj.secid)
+    boards_dict = {
+        'ofz_bond': 'TQOB',
+        'corporate_bond': 'TQCB',
+        'exchange_bond': 'TQCB'
+    }
+
+    board = boards_dict.get(asset_obj.type)
+
+    last_price_data = get_current(share_obj.secid, board, group)
 
     today_dt = datetime.today().date()
 

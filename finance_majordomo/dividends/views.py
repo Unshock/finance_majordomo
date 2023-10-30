@@ -34,10 +34,10 @@ class Dividends(LoginRequiredMixin, ListView):
             id__in=user.dividendsofuser_set.values_list('dividend'))\
             .order_by('-date')
 
-        print(dividends_of_user)
+        print(dividends_of_user, 'aYAYAYAYAYAYAYAYA')
 
         for div_obj in dividends_of_user:
-            stock = div_obj.stock
+            asset = div_obj.asset
             amount = div_obj.amount
 
             date_dt = div_obj.date
@@ -50,7 +50,7 @@ class Dividends(LoginRequiredMixin, ListView):
                 user=user, dividend=div_obj).is_received
 
             quantity_for_the_date = get_quantity(
-                self.request, stock, date=date_str)
+                self.request, asset, date=date_str)
 
             if quantity_for_the_date > 0:
                 total_div = Decimal(quantity_for_the_date * amount)

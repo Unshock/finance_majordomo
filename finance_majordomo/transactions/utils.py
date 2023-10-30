@@ -99,6 +99,7 @@ def get_purchase_price_usd(request, stock_obj) -> Decimal:
     for transaction in users_specific_asset_transactions:
         if transaction.transaction_type == "BUY":
             usd_rate = get_usd_rate(transaction.date)
+            print(transaction.date, usd_rate)
             purchase_list.append({
                 'quantity': transaction.quantity,
                 'price': transaction.price / usd_rate

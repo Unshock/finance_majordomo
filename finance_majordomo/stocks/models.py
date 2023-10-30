@@ -180,7 +180,8 @@ class Bond(Asset):
         max_digits=10,
         decimal_places=4,
         verbose_name="Текущий процент",
-        blank=True
+        blank=True,
+        null=True
     )
     couponfrequency = models.IntegerField(
         verbose_name="Частота выплаты купона в год",
@@ -190,11 +191,13 @@ class Bond(Asset):
         max_digits=10,
         decimal_places=4,
         verbose_name="Текущий купон",
-        blank=True
+        blank=True,
+        null=True
     )
     days_to_redemption = models.IntegerField(
         verbose_name="Дней до погашения",
-        blank=True
+        blank=True,
+        null=True
     )
     latest_coupon_update = models.DateField(
         verbose_name='Дата последнего обновления информации о купонах',
