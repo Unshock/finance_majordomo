@@ -7,11 +7,11 @@ from urllib3.util.retry import Retry
 
 import apimoex
 
-#from finance_majordomo.stocks.models import Stock
+
+# from finance_majordomo.stocks.models import Stock
 
 
 def validate_ticker(ticker: str):
-
     if not ticker:
         return None
 
@@ -24,33 +24,35 @@ def validate_ticker(ticker: str):
     with requests.Session() as session:
         iss = apimoex.ISSClient(session, request_url, arguments)
         data = iss.get()
-        #print(data)
+        # print(data)
         try:
-            ticker_data = next(x for x in data['securities'] if x["SECID"] == ticker.upper())
+            ticker_data = next(
+                x for x in data['securities'] if x["SECID"] == ticker.upper())
             ticker_data = {'ticker': ticker_data['SECID'],
-                          'shortname': ticker_data['SHORTNAME']}
+                           'shortname': ticker_data['SHORTNAME']}
 
         except StopIteration:
             ticker_data = None
-        #print(ticker_data)
+        # print(ticker_data)
         return ticker_data
 
 
-
-
-
-
-def get_stock_board_history(ticker: str, start_date:str=None, market='shares', board='TQBR'):
+def get_asset_board_history(ticker: str,
+                            start_date: str = None,
+                            market: str = 'shares',
+                            board: str = 'TQBR') -> list[dict]:
     """
     :param ticker: ticker for MOEX API
     :param start_date: the earliest trading date from which information will be
      received till current date
+    :param market: pass
+    :param board: pass
     :return: list of dicts with data for every day from start_day or first
      historic day if start_day is None
     """
 
     with requests.Session() as session:
-        #print(f"Start request of data for ticker: {ticker.upper()}"
+        # print(f"Start request of data for ticker: {ticker.upper()}"
         #      f" from date: {start_date}")
 
         data = apimoex.get_board_history(
@@ -64,13 +66,17 @@ def get_stock_board_history(ticker: str, start_date:str=None, market='shares', b
         if data:
             return data
         else:
-            print('ДАННЫЕ НЕ ПОЛУЧЕНЫ!!!!!!!!!')
+            raise Exception(f'ДАННЫЕ НЕ ПОЛУЧЕНЫ!!!!!!!!! '
+                            f'{ticker}, {start_date}, {board}, {market}')
+
 
 # print(get_stock_board_history('gazp')[-1])
 # print(get_stock_board_history('posi')[-1])
 # print(get_stock_board_history('lsrg')[-1])
 # print(get_stock_board_history('lqdt', board='TQTF')[-1])
-#print(get_stock_board_history('RU000A101QM3', board="TQCB", market='bonds')[-1])
+print(get_asset_board_history('RU000A101QM3', board="TQCB", market='bonds')[-1])
+
+
 # print('1')
 
 def get_current(ticker, board=None, group=None):
@@ -81,8 +87,7 @@ def get_current(ticker, board=None, group=None):
 
 
 def get_stock_current_price(ticker: str):
-
-    #тут нужно поправить для акций не торгующихся в вечернюю сессию
+    # тут нужно поправить для акций не торгующихся в вечернюю сессию
     TIME_GAP_MINUTES = 600
 
     offset = datetime.timezone(datetime.timedelta(hours=3))
@@ -96,7 +101,7 @@ def get_stock_current_price(ticker: str):
         print(f'ZAPROS na poluchenie last_price of {ticker.upper()} poshel')
         data = apimoex.get_board_candles(
             session, ticker.upper(), start=str(request_time), interval=1)
-        #data = apimoex.find_security_description(session, ticker.upper())
+        # data = apimoex.find_security_description(session, ticker.upper())
         print('data', '\n'.join(str(d) for d in data))
         if data:
 
@@ -108,19 +113,17 @@ def get_stock_current_price(ticker: str):
             print('last price:', last_price, 'actual_time:', actual_time)
 
             if last_price and actual_time:
-               return last_price, actual_time
+                return last_price, actual_time
             else:
-               raise ValueError(f'Could not get data for {ticker}'
-                                f' in {get_stock_current_price}')
-
+                raise ValueError(f'Could not get data for {ticker}'
+                                 f' in {get_stock_current_price}')
 
         raise ValueError(f'Could not get data for {ticker}'
                          f' in {get_stock_current_price}')
 
 
 def get_bond_current_price(ticker: str, board):
-
-    #тут нужно поправить для акций не торгующихся в вечернюю сессию
+    # тут нужно поправить для акций не торгующихся в вечернюю сессию
     TIME_GAP_MINUTES = 600
 
     offset = datetime.timezone(datetime.timedelta(hours=3))
@@ -134,9 +137,9 @@ def get_bond_current_price(ticker: str, board):
         print(f'ZAPROS na poluchenie last_price of {ticker.upper()} poshel')
         data = apimoex.get_board_candles(
             session, ticker.upper(), start=str(request_time), interval=1,
-        market='bonds', board=board
+            market='bonds', board=board
         )
-        #data = apimoex.find_security_description(session, ticker.upper())
+        # data = apimoex.find_security_description(session, ticker.upper())
         print('data', '\n'.join(str(d) for d in data))
         if data:
 
@@ -148,44 +151,44 @@ def get_bond_current_price(ticker: str, board):
             print('last price:', last_price, 'actual_time:', actual_time)
 
             if last_price and actual_time:
-               return last_price, actual_time
+                return last_price, actual_time
             else:
-               raise ValueError(f'Could not get data for {ticker}'
-                                f' in {get_stock_current_price}')
-
+                raise ValueError(f'Could not get data for {ticker}'
+                                 f' in {get_stock_current_price}')
 
         raise ValueError(f'Could not get data for {ticker}'
                          f' in {get_stock_current_price}')
 
-#get_stock_current_price('gazp')
+
+# get_stock_current_price('gazp')
 
 def get_stock_description(ticker: str):
     with requests.Session() as session:
         data = apimoex.find_security_description(session, ticker.upper())
-        #print(data)
+        # print(data)
         result_data = {}
-        #print(111)
+        # print(111)
         for elem in data:
             result_data[elem['name']] = elem['value']
         return result_data
 
 
-
-
-
 import pprint
+
 # p1 = pprint.pformat(get_stock_description('LQDT'), indent=2)
 # p2 = pprint.pformat(get_stock_description('sber'), indent=2)
 # p3 = pprint.pformat(get_stock_description('sberp'), indent=2)
 # p4 = pprint.pformat(get_stock_description('lqdt'), indent=2)
 p5 = pprint.pformat(get_stock_description('SU26222RMFS8'), indent=2)
-#p6 = pprint.pformat(get_stock_description('RU000A0JTW83'), indent=2)
+
+
+# p6 = pprint.pformat(get_stock_description('RU000A0JTW83'), indent=2)
 # print(p1)
 # print(p2)
 # print(p3)
 # print(p4)RU000A0JXQF2
-#print(p5)
-#print(p6)
+# print(p5)
+# print(p6)
 
 
 def get_bond_coupon_history(secid):
@@ -201,35 +204,39 @@ def get_bond_coupon_history(secid):
 
     for date in get_all:
         if date.get('value'):
-            result_dict[date.get('coupondate')] = {'bond': {'div': True, 'value': date.get('value_rub'), 'value_prc': date.get('valueprc')}}
+            result_dict[date.get('coupondate')] = {
+                'bond': {'div': True, 'value': date.get('value_rub'),
+                         'value_prc': date.get('valueprc')}}
 
     return result_dict
+
+
 g = get_bond_coupon_history('SU29015RMFS3')
 
 for i in g.items():
     print(i)
 
 
-
-#{'2022-10-11': {'common_share': {'div': True, 'value': '51.03'}, 'preferred_share': {}},
+# {'2022-10-11': {'common_share': {'div': True, 'value': '51.03'}, 'preferred_share': {}},
 
 def get_security(security_info: str):
     with requests.Session() as session:
         data = apimoex.find_securities(
             session,
             security_info.upper(),
-            columns=None#('secid', 'shortname', 'regnumber', 'name', 'isin', 'is_traded', 'type', 'group')
+            columns=None
+            # ('secid', 'shortname', 'regnumber', 'name', 'isin', 'is_traded', 'type', 'group')
         )
 
         return data
 
 
-#a = get_security('RU000A0JXFM1')
+# a = get_security('RU000A0JXFM1')
 # a = get_security('нижнекам')
 # b = filter(lambda x: x['is_traded'], a)
 # for el in b:
 #     print(el)
-#for el in a[:10]:
+# for el in a[:10]:
 #    print(el['secid'], el['name'], el.get('type'), el.get('group'))
 #
 # b = get_stock_description('SBER')
@@ -248,10 +255,11 @@ def make_json_trade_info_dict(data: list):
 
     return json.dumps({"TRADEINFO": trade_info})
 
+
 def make_json_last_price_dict(last_price, actual_time):
     today = datetime.datetime.strftime(datetime.datetime.today(), '%Y-%m-%d')
 
-    #print(actual_time)
+    # print(actual_time)
 
     trade_info = {
         today: {
@@ -278,5 +286,3 @@ def get_date_status(date):
     if result == '1':
         return 'Nonworking'
     raise ConnectionError('Response is not valid')
-
-

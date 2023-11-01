@@ -17,7 +17,7 @@ from finance_majordomo.transactions.models import Transaction
 
 from django.utils.translation import gettext_lazy as _
 
-from common.utils.stocks import get_stock_board_history, \
+from common.utils.stocks import get_asset_board_history, \
     make_json_trade_info_dict
 from finance_majordomo.dividends.utils import get_dividend_result_usd
 from .models import Asset
@@ -122,6 +122,7 @@ class UsersStocks(LoginRequiredMixin, ListView):
             user_stock_data = {'total_results': {},
                                'stock_list': []
                                }
+            print('user asseets', user_assets)
             for asset in user_assets:
 
                 # update_history_data(stock)
@@ -576,42 +577,42 @@ class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         return super().post(request, *args, **kwargs)
 
 
-    # не используется?
-    @staticmethod
-    def actualize_stock_data(stock, start_date=None):
-
-        today = datetime.datetime.today().strftime('%Y-%m-%d')
-        today = datetime.datetime.strptime(today, '%Y-%m-%d')
-        last_day = datetime.datetime.strptime(start_date, '%Y-%m-%d')
-
-        json_current_stock_data = json.loads(stock.stock_data)
-
-        stock_board_history = get_stock_board_history(
-            stock.secid, start_date)
-        json_stock_board_data = json.loads(
-            make_json_trade_info_dict(stock_board_history))
-
-        #print('======')
-        #print(json_stock_data['TRADEINFO'])
-        #print('#======#')
-        #print(json_stock_board_data, type(json_stock_board_data))
-        #print(json_stock_board_data['TRADEINFO'])
-        #print('##======##')
-
-        json_current_stock_data['TRADEINFO'].update(
-            json_stock_board_data['TRADEINFO'])
-
-        #print('##########')
-        #print(json_stock_data)
-        #print('###########')
-        #print('1', json_stock_data.keys())
-        #print('2', json_stock_data['TRADEINFO'].keys())
-
-        stock_data = json.dumps(json_current_stock_data)
-        #stock.stock_data = stock_data
-        #stock.save()
-
-        return stock
+    # # не используется?
+    # @staticmethod
+    # def actualize_stock_data(stock, start_date=None):
+    # 
+    #     today = datetime.datetime.today().strftime('%Y-%m-%d')
+    #     today = datetime.datetime.strptime(today, '%Y-%m-%d')
+    #     last_day = datetime.datetime.strptime(start_date, '%Y-%m-%d')
+    # 
+    #     json_current_stock_data = json.loads(stock.stock_data)
+    # 
+    #     stock_board_history = get_asset_board_history(
+    #         stock.secid, start_date)
+    #     json_stock_board_data = json.loads(
+    #         make_json_trade_info_dict(stock_board_history))
+    # 
+    #     #print('======')
+    #     #print(json_stock_data['TRADEINFO'])
+    #     #print('#======#')
+    #     #print(json_stock_board_data, type(json_stock_board_data))
+    #     #print(json_stock_board_data['TRADEINFO'])
+    #     #print('##======##')
+    # 
+    #     json_current_stock_data['TRADEINFO'].update(
+    #         json_stock_board_data['TRADEINFO'])
+    # 
+    #     #print('##########')
+    #     #print(json_stock_data)
+    #     #print('###########')
+    #     #print('1', json_stock_data.keys())
+    #     #print('2', json_stock_data['TRADEINFO'].keys())
+    # 
+    #     stock_data = json.dumps(json_current_stock_data)
+    #     #stock.stock_data = stock_data
+    #     #stock.save()
+    # 
+    #     return stock
 
 
 class DeleteStock(LoginRequiredMixin, SuccessMessageMixin, DeleteView):

@@ -3,20 +3,46 @@ from decimal import Decimal
 from django.db.models import Max
 
 from common.utils.stocks import get_date_status, get_stock_current_price, \
-    get_stock_board_history, get_current
+    get_asset_board_history, get_current
 from finance_majordomo.stocks.models import ProdCalendar, \
     AssetsHistoricalData, Asset
-
 
 
 def get_money_result(current_price, purchace_price):
     return Decimal(current_price - purchace_price)
 
 
-def add_share_history_data_to_model(stock_obj, stock_board_history):
+def get_asset_board(asset_type):
+    boards_dict = {
+        'ofz_bond': 'TQOB',
+        'corporate_bond': 'TQCB',
+        'exchange_bond': 'TQCB',
+        'preferred_share': 'TQBR',
+        'common_share': 'TQBR',
+    }
 
-    for day_data in stock_board_history:
+    return boards_dict.get(asset_type)
 
+
+def get_asset_market(asset_group):
+    boards_dict = {
+        'stock_shares': 'shares',
+        'stock_bonds': 'bonds',
+    }
+
+    return boards_dict.get(asset_group)
+
+
+def get_asset_history_data(asset, start_date=None):
+    return get_asset_board_history(
+        asset.secid,
+        start_date=start_date,
+        market=get_asset_market(asset.group),
+        board=get_asset_board(asset.type))
+
+
+def add_share_history_data_to_model(stock_obj, asset_history_data):
+    for day_data in asset_history_data:
         AssetsHistoricalData.objects.create(
             asset=Asset.objects.get(id=stock_obj.asset_ptr_id),
 
@@ -37,12 +63,10 @@ def add_share_history_data_to_model(stock_obj, stock_board_history):
         )
 
 
-def add_bond_history_data_to_model(bond_obj, stock_board_history):
+def add_bond_history_data_to_model(bond_obj, asset_history_data):
+    print(asset_history_data)
 
-    print(stock_board_history)
-
-    for day_data in stock_board_history:
-
+    for day_data in asset_history_data:
         AssetsHistoricalData.objects.create(
             asset=Asset.objects.get(id=bond_obj.asset_ptr_id),
 
@@ -65,8 +89,7 @@ def add_bond_history_data_to_model(bond_obj, stock_board_history):
         )
 
 
-def get_prod_date(date: str):
-
+def get_prod_date(date: str) -> ProdCalendar:
     try:
         prod_date = ProdCalendar.objects.get(date=date)
     except ProdCalendar.DoesNotExist:
@@ -84,20 +107,24 @@ def get_prod_date(date: str):
     return prod_date
 
 
-def update_historical_data(stock_obj: object, date=None):
+def update_historical_data(asset_obj: object, date=None):
 
-    related_obj = stock_obj.get_related_object()
+    related_obj = asset_obj.get_related_object()
+
+    print(asset_obj, related_obj)
 
     today_status = get_prod_date(
         datetime.strftime(datetime.today(), '%Y-%m-%d')).date_status
 
     today_date = datetime.today().date()
 
-    print(stock_obj, related_obj, type(related_obj))
+    print(asset_obj, related_obj, type(related_obj))
 
-# ne tolko share no i bond
+    # ne tolko share no i bond
     latest_day = AssetsHistoricalData.objects.filter(
-        asset=stock_obj).order_by('-tradedate')[0]
+        asset=asset_obj).order_by('-tradedate')[0]
+
+    print('latest_day', latest_day)
 
     latest_date_str = datetime.strftime(latest_day.tradedate, '%Y-%m-%d')
 
@@ -110,7 +137,7 @@ def update_historical_data(stock_obj: object, date=None):
     #     update_today_data(stock_obj)
 
     elif not latest_day.is_closed and gap_for_latest_day > 0:
-        update_history_data(stock_obj, date=latest_date_str)
+        update_history_data(asset_obj, date=latest_date_str)
 
     elif latest_day.is_closed and gap_for_latest_day > 1:
 
@@ -124,27 +151,23 @@ def update_historical_data(stock_obj: object, date=None):
             day_status = get_prod_date(date_str).date_status
 
             if day_status == 'Working':
-                update_history_data(stock_obj, date=latest_date_str)
+                update_history_data(asset_obj, date=latest_date_str)
 
     if today_status == 'Working':
-        update_today_data(stock_obj)
+        update_today_data(asset_obj)
 
 
-def update_history_data(stock_obj: object, date=None):
+def update_history_data(asset_obj: Asset, date=None):
+    asset_history_data = get_asset_history_data(asset_obj, date)
 
-    stock_board_history = get_stock_board_history(
-        stock_obj.secid,
-        start_date=date
-    )
-
-    for day_data in stock_board_history:
-
+    print('asset_history_data', asset_history_data)
+    for day_data in asset_history_data:
         date_dt = datetime.strptime(day_data.get('TRADEDATE'), "%Y-%m-%d")
-        
-        asset_obj = Asset.objects.get(stock_obj.asset)
+
+        # asset_obj = Asset.objects.get(asset_obj.asset)
 
         stock_historical_data, created = AssetsHistoricalData.objects.get_or_create(
-            tradedate=date_dt, share=stock_obj, defaults={
+            tradedate=date_dt, asset=asset_obj, defaults={
                 'legalcloseprice': 1,
                 'is_closed': False
             })
@@ -166,7 +189,6 @@ def update_history_data(stock_obj: object, date=None):
 
 
 def update_today_data(asset_obj: Asset) -> object:
-
     share_obj = asset_obj.get_related_object()
 
     # In minutes
@@ -186,7 +208,7 @@ def update_today_data(asset_obj: Asset) -> object:
 
         # IF STOCK IS NOT ON EVENING SESSION AND UPDATE TIME LATER THAN
         # 18:30:00 TODAY => NO NEED TO UPDATE
-        if not share_obj.eveningsession and\
+        if not share_obj.eveningsession and \
                 update_time_dt > EVENING_CUT_OFF:
             return share_obj
 
@@ -195,17 +217,12 @@ def update_today_data(asset_obj: Asset) -> object:
 
         if time_gap <= UPDATE_TIME_MINUTES:
             return share_obj
-    
+
     group = asset_obj.group
 
-    boards_dict = {
-        'ofz_bond': 'TQOB',
-        'corporate_bond': 'TQCB',
-        'exchange_bond': 'TQCB'
-    }
+    board = get_asset_board(asset_obj.type)
 
-    board = boards_dict.get(asset_obj.type)
-
+    print(group, 'group', 'board', board, asset_obj.group, asset_obj.type)
     last_price_data = get_current(share_obj.secid, board, group)
 
     today_dt = datetime.today().date()
@@ -227,7 +244,6 @@ def update_today_data(asset_obj: Asset) -> object:
 
 
 def get_time_gap(update_time_dt):
-
     TIME_ZONE_DELTA = 3
 
     offset = timezone(timedelta(hours=TIME_ZONE_DELTA))

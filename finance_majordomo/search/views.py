@@ -19,7 +19,7 @@ from finance_majordomo.transactions.models import Transaction
 
 from django.utils.translation import gettext_lazy as _
 
-from common.utils.stocks import get_stock_board_history, make_json_trade_info_dict, get_date_status, \
+from common.utils.stocks import get_asset_board_history, make_json_trade_info_dict, get_date_status, \
     get_stock_current_price, make_json_last_price_dict
 from finance_majordomo.dividends.utils import get_stock_dividends, add_dividends_to_model
 from ..transactions.utils import get_quantity, get_purchase_price

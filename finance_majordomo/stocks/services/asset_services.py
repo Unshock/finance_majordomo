@@ -1,12 +1,12 @@
 from django.db.models import QuerySet
 
-from common.utils.stocks import get_stock_board_history, get_stock_description, \
+from common.utils.stocks import get_asset_board_history, get_stock_description, \
     get_bond_coupon_history
 from finance_majordomo.dividends.utils import add_dividends_to_model, \
     get_stock_dividends
 from finance_majordomo.stocks.models import Asset, Stock, Bond, AssetOfPortfolio
 from finance_majordomo.stocks.utils import add_share_history_data_to_model, \
-    add_bond_history_data_to_model
+    add_bond_history_data_to_model, get_asset_history_data, get_asset_board
 from finance_majordomo.stocks.views import get_normalized_asset_type
 from finance_majordomo.users.models import User
 
@@ -64,6 +64,8 @@ def create_base_asset(asset_description: dict) -> Asset:
         #stock_data=json_stock_board_data,
     )
 
+    return asset_obj
+
 
 def add_asset(stock_description: dict) -> Stock:
 
@@ -102,8 +104,6 @@ def add_asset(stock_description: dict) -> Stock:
 
     # Ищем инфу о ценах акции за весь период чтобы записать в JSONField
 
-    stock_board_history = get_stock_board_history(secid)
-
     stock_obj = Stock.objects.create(
         asset_type=asset_type,
 
@@ -123,9 +123,10 @@ def add_asset(stock_description: dict) -> Stock:
         #stock_data=json_stock_board_data,
     )
 
-
+    asset_history_data = get_asset_history_data(stock_obj)
+    
     try:
-        add_share_history_data_to_model(stock_obj, stock_board_history)
+        add_share_history_data_to_model(stock_obj, asset_history_data)
 
     except Exception('HISTORY PROBLEM'):
         pass
@@ -139,6 +140,7 @@ def add_asset(stock_description: dict) -> Stock:
         pass
 
     return stock_obj
+
 
 
 def add_bond(stock_description: dict) -> Bond:
@@ -182,22 +184,13 @@ def add_bond(stock_description: dict) -> Bond:
                   issuedate, morningsession, eveningsession,
                   typename, group, type, groupname]
 
-    boards_dict = {
-        'ofz_bond': 'TQOB',
-        'corporate_bond': 'TQCB',
-        'exchange_bond': 'TQCB'
-    }
-
-    board = boards_dict.get(type)
+    board = get_asset_board(type)
 
     if None in check_list:
         print("SOMETHING HAVE NOT BEEN LOADED - GOT NONE")
 
     # Ищем инфу о ценах акции за весь период чтобы записать в JSONField
-    print(secid)
-    print(type, board)
-    stock_board_history = get_stock_board_history(secid, market='bonds',
-                                                  board=board)
+
     
     print(stock_description)
 
@@ -229,8 +222,12 @@ def add_bond(stock_description: dict) -> Bond:
 
     )
 
+    print(secid)
+    print(type, board)
+    asset_history_data = get_asset_history_data(bond_obj)
+
     try:
-        add_bond_history_data_to_model(bond_obj, stock_board_history[1:])
+        add_bond_history_data_to_model(bond_obj, asset_history_data[1:])
 
     except Exception('HISTORY PROBLEM'):
         pass
