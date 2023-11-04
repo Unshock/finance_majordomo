@@ -4,7 +4,8 @@ from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from finance_majordomo.stocks.models import Stock, Asset
-from finance_majordomo.users.models import User
+from finance_majordomo.users.models import User, Portfolio
+
 
 # Create your models here.
 class Transaction(models.Model):
@@ -27,14 +28,13 @@ class Transaction(models.Model):
         validators=[MinLengthValidator(1)]
     )
 
-    user = models.ForeignKey(
-        User,
+    portfolio = models.ForeignKey(
+        Portfolio,
         on_delete=models.CASCADE,
-        verbose_name=_('Transaction user'),
+        verbose_name=_('Transaction portfolio'),
     )
 
-    #тут править когда будут облигации
-    ticker = models.ForeignKey(
+    asset = models.ForeignKey(
         Asset,
         on_delete=models.CASCADE,
         verbose_name=_('Asset'),
@@ -51,6 +51,14 @@ class Transaction(models.Model):
         verbose_name=_('Transaction price'),
     )
 
+    accrued_interest = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        default='0.00',
+        verbose_name=_('Accrued Interest')
+    )
+
     fee = models.DecimalField(
         max_digits=8,
         decimal_places=2,
@@ -59,7 +67,9 @@ class Transaction(models.Model):
         verbose_name=_('Transaction fee')
     )
 
-    quantity = models.IntegerField(
+    quantity = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
         verbose_name=_('Transaction quantity'),
     )
 
@@ -69,10 +79,10 @@ class Transaction(models.Model):
 
     def __str__(self):
         return f'{self.transaction_type} ' \
-               f'x{self.quantity} {self.ticker.secid} ' \
+               f'x{self.quantity} {self.asset.secid} ' \
                f'for {self.price}'
 
     class Meta:
         verbose_name = "Транзакция"
         verbose_name_plural = "Транзакции"
-        ordering = ['creation_date', 'ticker', 'user']
+        ordering = ['creation_date', 'asset', 'portfolio']

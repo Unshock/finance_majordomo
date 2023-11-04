@@ -9,6 +9,7 @@ import apimoex
 
 
 # from finance_majordomo.stocks.models import Stock
+# from finance_majordomo.stocks.models import Bond
 
 
 def validate_ticker(ticker: str):
@@ -73,8 +74,8 @@ def get_asset_board_history(ticker: str,
 # print(get_stock_board_history('gazp')[-1])
 # print(get_stock_board_history('posi')[-1])
 # print(get_stock_board_history('lsrg')[-1])
-# print(get_stock_board_history('lqdt', board='TQTF')[-1])
-print(get_asset_board_history('RU000A101QM3', board="TQCB", market='bonds')[-1])
+print(get_asset_board_history('lqdt', board='TQTF')[-1])
+#print(get_asset_board_history('RU000A101QM3', board="TQCB", market='bonds')[-1])
 
 
 # print('1')
@@ -102,7 +103,7 @@ def get_stock_current_price(ticker: str):
         data = apimoex.get_board_candles(
             session, ticker.upper(), start=str(request_time), interval=1)
         # data = apimoex.find_security_description(session, ticker.upper())
-        print('data', '\n'.join(str(d) for d in data))
+        #print('data', '\n'.join(str(d) for d in data))
         if data:
 
             lastest_data = data[-1]
@@ -122,7 +123,7 @@ def get_stock_current_price(ticker: str):
                          f' in {get_stock_current_price}')
 
 
-def get_bond_current_price(ticker: str, board):
+def get_bond_current_price(secid: str, board):
     # тут нужно поправить для акций не торгующихся в вечернюю сессию
     TIME_GAP_MINUTES = 600
 
@@ -133,14 +134,18 @@ def get_bond_current_price(ticker: str, board):
 
     print(current_time, request_time)
 
+    #bond = Bond.objects.get(secid=secid)
+    #face_value = bond.face_value
+
     with requests.Session() as session:
-        print(f'ZAPROS na poluchenie last_price of {ticker.upper()} poshel')
+        print(f'ZAPROS na poluchenie last_price of {secid.upper()} poshel')
         data = apimoex.get_board_candles(
-            session, ticker.upper(), start=str(request_time), interval=1,
+            session, secid.upper(), start=str(request_time), interval=1,
             market='bonds', board=board
         )
         # data = apimoex.find_security_description(session, ticker.upper())
         print('data', '\n'.join(str(d) for d in data))
+        print(type(data), '222222222222222222222222222222222222222222222')
         if data:
 
             lastest_data = data[-1]
@@ -151,16 +156,16 @@ def get_bond_current_price(ticker: str, board):
             print('last price:', last_price, 'actual_time:', actual_time)
 
             if last_price and actual_time:
-                return last_price, actual_time
+                return last_price , actual_time
             else:
-                raise ValueError(f'Could not get data for {ticker}'
-                                 f' in {get_stock_current_price}')
+                raise ValueError(f'Could not get data for {secid}'
+                                 f' in {get_bond_current_price}')
 
-        raise ValueError(f'Could not get data for {ticker}'
-                         f' in {get_stock_current_price}')
+        raise ValueError(f'Could not get data for {secid}'
+                         f' in {get_bond_current_price}')
 
 
-# get_stock_current_price('gazp')
+#get_stock_current_price('gazp')
 
 def get_stock_description(ticker: str):
     with requests.Session() as session:
@@ -179,7 +184,7 @@ import pprint
 # p2 = pprint.pformat(get_stock_description('sber'), indent=2)
 # p3 = pprint.pformat(get_stock_description('sberp'), indent=2)
 # p4 = pprint.pformat(get_stock_description('lqdt'), indent=2)
-p5 = pprint.pformat(get_stock_description('SU26222RMFS8'), indent=2)
+#p5 = pprint.pformat(get_stock_description('SU26222RMFS8'), indent=2)
 
 
 # p6 = pprint.pformat(get_stock_description('RU000A0JTW83'), indent=2)
@@ -211,10 +216,11 @@ def get_bond_coupon_history(secid):
     return result_dict
 
 
-g = get_bond_coupon_history('SU29015RMFS3')
+#g = get_bond_coupon_history('SU29015RMFS3')
+#g = get_bond_coupon_history('SU26240RMFS0')
 
-for i in g.items():
-    print(i)
+#for i in g.items():
+#    print(i)
 
 
 # {'2022-10-11': {'common_share': {'div': True, 'value': '51.03'}, 'preferred_share': {}},

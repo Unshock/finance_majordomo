@@ -18,54 +18,48 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 
 
-class TransactionForm(ModelForm):
-
-    # def __init__(self, user, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-    # 
-    #     self.fields['ticker'].queryset = Stock.objects.filter(
-    #         id__in=user.stocksofuser_set.values_list('stock'))
-
-        #print(user, user.stocksofuser_set.values_list('stock'))
-        #print(Stock.objects.filter(id__in=user.stocksofuser_set.values_list('stock')))
-
-        #     StocksOfUser.objects.filter(user=user)
-        # print(StocksOfUser.objects.filter(user=user))
-        # if ticker.id not in user.stocksofuser_set.values_list('stock')
-
+class TransactionForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
 
         self.request = kwargs.pop('request', None)
         self.assets_to_display = kwargs.pop('assets_to_display', None)
+        self.accrued_interest = kwargs.pop('accrued_interest', None)
         super(TransactionForm, self).__init__(*args, **kwargs)
 
-        self.fields['ticker'].label = _('Share')
-        self.fields['ticker'].empty_label = _('Choose stock from the list')
-        self.fields['ticker'].queryset = self.assets_to_display
+        if self.request.method == "GET":
+            self.fields['asset'] = forms.ModelChoiceField(
+                queryset=self.assets_to_display,
+                label=_('Asset'),
+                empty_label=_('Choose stock from the list')
 
-        # print('3', self.fields['ticker'].queryset)
-        # print('4', self.assets_to_display, type(self.assets_to_display))
-        # if self.request.method == "GET":
-        #     print('get')
-        #     # print('1', Stock.objects.filter(
-        #     #     id__in=self.request.user.stocksofuser_set.values_list('stock')))
-        #     # 
-        #     # self.fields['ticker'].qeuryset = Asset.objects.filter(
-        #     #     id__in=self.request.user.assetsofuser_set.values_list('asset'))
-        #     print('5', self.fields['ticker'].queryset)
-        # 
-        #     self.fields['ticker'].queryset = self.assets_to_display
-        # 
-        #     print('6', self.fields['ticker'].queryset)
-        #     # print('2', self.fields['ticker'].queryset)
-        # 
-        #     # if self.asset:
-        #     #     self.fields['ticker'].queryset |= self.asset
-        # 
+            )
+
+            if self.accrued_interest:
+                print(self.accrued_interest)
+                self.fields['accrued_interest'] = forms.DecimalField(
+                    label=_('Accrued Interest'),
+                    max_digits=12,
+                    decimal_places=2,
+                    required=False,
+                    # widget=forms.TextInput(
+                    #     attrs={"class": "form-control",
+                    #        "rows": "10",
+                    #        "cols": "40",
+                    #        }
+                    # )
+                )
+
         if self.request.method == "POST":
+            self.fields['asset'] = forms.ModelChoiceField(
+                queryset=Asset.objects.all(),
+                label=_('Asset'),
+                empty_label=_('Choose stock from the list')
 
-            self.fields['ticker'].queryset = Asset.objects.all()
+            )
+            # self.fields['asset'].queryset = Asset.objects.all()
+
+
 
         #super(TransactionForm, self).__init__(*args, **kwargs)
         # self.helper = FormHelper()
@@ -88,18 +82,6 @@ class TransactionForm(ModelForm):
                    }
         ),
     )
-
-    # ticker = forms.ModelChoiceField(
-    #     label=_('Share'),
-    #     #queryset=Stock.objects.all(),
-    #     #queryset=Stock.objects.filter(user=self.user),
-    #     empty_label=_('Choose stock from the list'),
-    # 
-    #     )
-
-    # ticker_new = forms.CharField(
-    #     label=_("Ticker"),
-    # )
 
     date = forms.CharField(
         label=_('Date'),
@@ -148,7 +130,7 @@ class TransactionForm(ModelForm):
 
         cleaned_data = super().clean()
 
-        asset_obj = cleaned_data.get('ticker')
+        asset_obj = cleaned_data.get('asset')
         transaction_type = cleaned_data.get('transaction_type')
         date = cleaned_data.get('date')
         quantity = cleaned_data.get('quantity')
@@ -157,7 +139,6 @@ class TransactionForm(ModelForm):
 
             validate_dict = {
                 'validator': 'add_validator',
-                #'asset_obj': Stock.objects.get(latname=ticker.latname),
                 'asset_obj': asset_obj,
                 'transaction_type': transaction_type,
                 'date': date,
@@ -192,9 +173,9 @@ class TransactionForm(ModelForm):
 
     def clean_date(self):
         date = self.cleaned_data.get('date')
-        asset = self.cleaned_data.get('ticker')
-
-        # print(self.cleaned_data)
+        asset = self.cleaned_data.get('asset')
+        
+        #print(self.cleaned_data)
         # print('asset', type(asset), asset)
         # print(Stock.objects.get(latname=asset.latname))
         #issuedate = Stock.objects.get(latname=asset).issuedate
@@ -208,15 +189,5 @@ class TransactionForm(ModelForm):
             )
         return date
 
-    class Meta:
-        model = Transaction
-        fields = [
-            'transaction_type',
-            'ticker',
-            #'ticker_new',
-            'date',
-            'price',
-            'fee',
-            'quantity',
-        ]
+    #field_order = ['transaction_type', 'asset', 'date']
 

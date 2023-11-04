@@ -1,7 +1,6 @@
 from django.db.models import QuerySet
 
-from common.utils.stocks import get_asset_board_history, get_stock_description, \
-    get_bond_coupon_history
+from common.utils.stocks import get_stock_description, get_bond_coupon_history
 from finance_majordomo.dividends.utils import add_dividends_to_model, \
     get_stock_dividends
 from finance_majordomo.stocks.models import Asset, Stock, Bond, AssetOfPortfolio
@@ -176,6 +175,9 @@ def add_bond(stock_description: dict) -> Bond:
     couponpercent = stock_description.get('COUPONPERCENT')
     couponvalue = stock_description.get('COUPONVALUE')
     days_to_redemption = stock_description.get('DAYSTOREDEMPTION')
+    face_value = stock_description.get('FACEVALUE')
+    
+    print(face_value, '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
 
 
 
@@ -217,7 +219,8 @@ def add_bond(stock_description: dict) -> Bond:
         couponfrequency=couponfrequency,
         couponpercent=couponpercent,
         couponvalue=couponvalue,
-        days_to_redemption=days_to_redemption
+        days_to_redemption=days_to_redemption,
+        face_value=face_value
 
 
     )
@@ -227,7 +230,7 @@ def add_bond(stock_description: dict) -> Bond:
     asset_history_data = get_asset_history_data(bond_obj)
 
     try:
-        add_bond_history_data_to_model(bond_obj, asset_history_data[1:])
+        add_bond_history_data_to_model(bond_obj, asset_history_data)
 
     except Exception('HISTORY PROBLEM'):
         pass

@@ -1,20 +1,25 @@
+from datetime import datetime
 from decimal import Decimal
 from collections import deque
 
 from .models import Transaction
 from ..currencies.utils import get_usd_rate
+from ..stocks.models import Asset
+from ..users.models import User, Portfolio
 
 
-def get_quantity(request, asset_obj, date=None) -> int:
+def get_quantity(user: User,
+                 asset_obj: Asset,
+                 date: datetime.date = None) -> Decimal:
 
-    stock_id = asset_obj.id
+    asset_id = asset_obj.id
 
     users_specific_asset_transactions = Transaction.objects.filter(
-        user=request.user, ticker=stock_id).order_by('date')
+        user=user, ticker=asset_id).order_by('date')
 
-    #users_transactions = Transaction.objects.filter(
+    # users_transactions = Transaction.objects.filter(
     #    user=User.objects.get(id=request.user.iget_quantityd))
-    #users_specific_asset_transactions = users_transactions.filter(
+    # users_specific_asset_transactions = users_transactions.filter(
     #    ticker=Stock.objects.get(id=stock_id)).order_by('date')
     # print(users_specific_asset_transactions, '1')
 
@@ -22,32 +27,75 @@ def get_quantity(request, asset_obj, date=None) -> int:
         users_specific_asset_transactions = \
             users_specific_asset_transactions.filter(date__lte=date)
 
-    quantity = 0
+    quantity = Decimal('0')
     date = None
-    previous_date = None
+    #previous_date = None
 
     for transaction in users_specific_asset_transactions:
-        #if date != previous_date and quantity < 0:
-        #    raise ValueError('quantity can\'t be lower than 0')
 
         previous_date = date
         date = transaction.date
 
+        if date != previous_date and quantity < 0:
+            raise ValueError('quantity can\'t be lower than 0')
+
         if transaction.transaction_type == "BUY":
             quantity += transaction.quantity
         elif transaction.transaction_type == "SELL":
-            #if previous_date is None:
-            #    raise ValueError('quantity cant be lower than 0')
+            if previous_date is None:
+                raise ValueError('quantity cant be lower than 0')
             quantity -= transaction.quantity
         else:
             raise Exception('not buy or sell found')
+
     return quantity
 
 
-def get_purchase_price(request, stock_obj) -> Decimal:
+def get_quantity2(portfolio: Portfolio,
+                 asset_id: str,
+                 date: datetime.date = None) -> Decimal:
+
+    users_specific_asset_transactions = Transaction.objects.filter(
+        portfolio=portfolio, asset=asset_id).order_by('date')
+
+    # users_transactions = Transaction.objects.filter(
+    #    user=User.objects.get(id=request.user.iget_quantityd))
+    # users_specific_asset_transactions = users_transactions.filter(
+    #    ticker=Stock.objects.get(id=stock_id)).order_by('date')
+    # print(users_specific_asset_transactions, '1')
+
+    if date:
+        users_specific_asset_transactions = \
+            users_specific_asset_transactions.filter(date__lte=date)
+
+    quantity = Decimal('0')
+    date = None
+    #previous_date = None
+
+    for transaction in users_specific_asset_transactions:
+
+        previous_date = date
+        date = transaction.date
+
+        if date != previous_date and quantity < 0:
+            raise ValueError('quantity can\'t be lower than 0')
+
+        if transaction.transaction_type == "BUY":
+            quantity += transaction.quantity
+        elif transaction.transaction_type == "SELL":
+            if previous_date is None:
+                raise ValueError('quantity cant be lower than 0')
+            quantity -= transaction.quantity
+        else:
+            raise Exception('not buy or sell found')
+
+    return quantity
+
+
+def get_purchase_price(user, stock_obj) -> Decimal:
     # С учетом метода FIFO
     users_specific_asset_transactions = Transaction.objects.filter(
-        user=request.user,
+        user=user,
         ticker=stock_obj).order_by('date')
 
     purchase_list = []
@@ -56,7 +104,6 @@ def get_purchase_price(request, stock_obj) -> Decimal:
 
     for transaction in users_specific_asset_transactions:
         if transaction.transaction_type == "BUY":
-
 
             purchase_list.append({
                 'quantity': transaction.quantity,
@@ -68,7 +115,7 @@ def get_purchase_price(request, stock_obj) -> Decimal:
             raise Exception('not buy nor sell')
 
     for elem in purchase_list:
-        #print('total_sold', total_sold)
+        # print('total_sold', total_sold)
         if elem['quantity'] >= total_sold:
             elem['quantity'] -= total_sold
             total_sold = 0
@@ -86,10 +133,10 @@ def get_purchase_price(request, stock_obj) -> Decimal:
     return Decimal(purchase_price)
 
 
-def get_purchase_price_usd(request, stock_obj) -> Decimal:
+def get_purchase_price_usd(user, stock_obj) -> Decimal:
     # С учетом метода FIFO
     users_specific_asset_transactions = Transaction.objects.filter(
-        user=request.user,
+        user=user,
         ticker=stock_obj).order_by('date')
 
     purchase_list = []
@@ -110,7 +157,7 @@ def get_purchase_price_usd(request, stock_obj) -> Decimal:
             raise Exception('not buy nor sell')
 
     for elem in purchase_list:
-        #print('total_sold', total_sold)
+        # print('total_sold', total_sold)
         if elem['quantity'] >= total_sold:
             elem['quantity'] -= total_sold
             total_sold = 0
@@ -130,7 +177,6 @@ def get_purchase_price_usd(request, stock_obj) -> Decimal:
 
 # deque is BAD in this case - made for check should be rewritten
 def get_average_purchase_price(request, asset_obj, date=None) -> Decimal:
-
     users_specific_asset_transactions = Transaction.objects.filter(
         user=request.user,
         ticker=asset_obj).order_by('date')
@@ -156,7 +202,6 @@ def get_average_purchase_price(request, asset_obj, date=None) -> Decimal:
 
 
 def validate_transaction(request, transaction: dict) -> bool:
-
     validator = transaction.get('validator')
     asset_obj = transaction.get('asset_obj')
     transaction_type = transaction.get('transaction_type')
@@ -168,7 +213,7 @@ def validate_transaction(request, transaction: dict) -> bool:
         return True
 
     day_end_balance = get_quantity(
-        request, asset_obj, date=date) - quantity
+        request.user, asset_obj, date=date) - quantity
 
     if day_end_balance < 0:
         return False
@@ -201,4 +246,3 @@ def validate_transaction(request, transaction: dict) -> bool:
             return False
 
     return False if day_end_balance < 0 else True
-

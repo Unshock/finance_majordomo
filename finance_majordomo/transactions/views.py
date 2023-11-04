@@ -14,6 +14,7 @@ from finance_majordomo.transactions.forms import TransactionForm
 from finance_majordomo.transactions.models import Transaction
 from ..stocks.services.asset_services import get_or_create_asset_obj, \
     get_all_assets_of_user
+from ..stocks.services.user_assets_services import get_current_portfolio
 
 from ..transactions.utils import validate_transaction
 from ..dividends.utils import update_dividends_of_user
@@ -42,8 +43,11 @@ class UsersTransactionList(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['page_title'] = self.request.user.username + " " + _(
             "transaction list")
+        print(Transaction.objects.filter(
+            portfolio=get_current_portfolio(self.request.user)))
         context['transaction_list'] = Transaction.objects.filter(
-            user=self.request.user.id)
+            portfolio=get_current_portfolio(self.request.user))
+
         return context
 
 
@@ -71,7 +75,8 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         asset_secid = request.GET.get('asset_secid')
         asset_group = request.GET.get('asset_group')
 
-        initial_ticker = None
+        initial_asset = None
+        accrued_interest = False
 
         if asset_secid and asset_group:
 
@@ -79,7 +84,10 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
             asset_obj_qs = Asset.objects.filter(id=asset_obj.id)
 
             assets_to_display_qs |= asset_obj_qs
-            initial_ticker = asset_obj.id
+            initial_asset = asset_obj.id
+
+            if asset_group == 'stock_bonds':
+                accrued_interest = True
 
             # if asset_group == 'stock_shares':
             #     try:
@@ -120,14 +128,17 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
             # )
 
         elif asset_id:
-            initial_ticker = asset_id
+            initial_asset = asset_id
 
         if not assets_to_display_qs:
             return redirect('search')
 
         transaction_form = TransactionForm(
-            request=request, assets_to_display=assets_to_display_qs)
-        transaction_form.initial['ticker'] = initial_ticker
+            request=request,
+            assets_to_display=assets_to_display_qs,
+            accrued_interest=accrued_interest
+        )
+        transaction_form.initial['asset'] = initial_asset
 
         return render(
             request,
@@ -145,11 +156,12 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         if form.is_valid():
 
             transaction_type = form.cleaned_data.get('transaction_type')
-            asset_obj = form.cleaned_data.get('ticker')
+            asset_obj = form.cleaned_data.get('asset')
             date = form.cleaned_data.get('date')
             price = form.cleaned_data.get('price')
             fee = form.cleaned_data.get('fee')
             quantity = form.cleaned_data.get('quantity')
+            accrued_interest = form.cleaned_data.get('accrued_interest')
 
             user = request.user
 
@@ -169,16 +181,17 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
             obj = Transaction.objects.create(
                 transaction_type=transaction_type,
                 user=user,
-                ticker=asset_obj,
+                asset=asset_obj,
                 date=date,
                 price=price,
+                accrued_interest=accrued_interest,
                 fee=fee,
                 quantity=quantity
             )
 
             obj.save()
 
-            print(obj, type(obj), obj.ticker, obj.ticker.id)
+            print(obj, type(obj), obj.asset, obj.asset.id)
 
             asset_type = asset_obj.group
 
@@ -223,7 +236,7 @@ class DeleteTransaction(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
         transaction = self.get_object()
 
         # править если в транзакциях будут не только стоки
-        asset_obj = transaction.ticker
+        asset_obj = transaction.asset
         
         print(asset_obj, '2121212121')
 

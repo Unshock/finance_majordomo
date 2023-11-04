@@ -34,11 +34,20 @@ def get_asset_market(asset_group):
 
 
 def get_asset_history_data(asset, start_date=None):
-    return get_asset_board_history(
+    asset_history_data = get_asset_board_history(
         asset.secid,
         start_date=start_date,
         market=get_asset_market(asset.group),
         board=get_asset_board(asset.type))
+
+    return asset_history_data[get_first_trade_date_index(asset_history_data):]
+
+
+def get_first_trade_date_index(asset_history_data: list[dict]) -> int:
+    for i, day in enumerate(asset_history_data):
+        if day.get('LEGALCLOSEPRICE'):
+            return i
+    raise Exception('No tradedate found')
 
 
 def add_share_history_data_to_model(stock_obj, asset_history_data):
@@ -108,7 +117,6 @@ def get_prod_date(date: str) -> ProdCalendar:
 
 
 def update_historical_data(asset_obj: object, date=None):
-
     related_obj = asset_obj.get_related_object()
 
     print(asset_obj, related_obj)

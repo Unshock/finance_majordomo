@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -29,20 +29,27 @@ class Dividends(LoginRequiredMixin, ListView):
         total_divs_upcoming = 0
 
         user = self.request.user
+        date_today_dt = datetime.today().date()
+
+        delta = timedelta(days=90)
 
         dividends_of_user = Dividend.objects.filter(
-            id__in=user.dividendsofuser_set.values_list('dividend'))\
+            id__in=user.dividendsofuser_set.values_list('dividend'),
+            date__lte=date_today_dt + delta
+        )\
             .order_by('-date')
 
         print(dividends_of_user, 'aYAYAYAYAYAYAYAYA')
+
+        
 
         for div_obj in dividends_of_user:
             asset = div_obj.asset
             amount = div_obj.amount
 
             date_dt = div_obj.date
-            date_str = datetime.datetime.strftime(date_dt, '%Y-%m-%d')
-            date_today_dt = datetime.datetime.today().date()
+            date_str = datetime.strftime(date_dt, '%Y-%m-%d')
+            
 
             is_upcoming = False if date_dt <= date_today_dt else True
 
@@ -50,7 +57,7 @@ class Dividends(LoginRequiredMixin, ListView):
                 user=user, dividend=div_obj).is_received
 
             quantity_for_the_date = get_quantity(
-                self.request, asset, date=date_str)
+                self.request.user, asset, date=date_str)
 
             if quantity_for_the_date > 0:
                 total_div = Decimal(quantity_for_the_date * amount)

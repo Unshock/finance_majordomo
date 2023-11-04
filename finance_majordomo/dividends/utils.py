@@ -153,35 +153,35 @@ def add_dividends_to_model(asset_obj, dividend_dict):
     asset_obj.save()
 
 
-def get_dividend_result(request, asset_obj):
+def get_dividend_result(user, asset_obj):
 
     users_dividends_received = Dividend.objects.filter(
         asset=asset_obj.id,
-        id__in=request.user.dividendsofuser_set.filter(
+        id__in=user.dividendsofuser_set.filter(
             is_received=True).values_list('dividend'))
 
     sum_dividends_received = 0
 
     for div in users_dividends_received:
-
-        quantity = get_quantity(request, asset_obj, date=div.date)
+        print(div.date, type(div.date), 'DIVDATE')
+        quantity = get_quantity(user, asset_obj, date=div.date)
         sum_dividends_received += quantity * div.amount
 
     return sum_dividends_received * Decimal(0.87)
 
 
-def get_dividend_result_usd(request, asset_obj):
+def get_dividend_result_usd(user, asset_obj):
 
     users_dividends_received = Dividend.objects.filter(
         asset=asset_obj.id,
-        id__in=request.user.dividendsofuser_set.filter(
+        id__in=user.dividendsofuser_set.filter(
             is_received=True).values_list('dividend'))
 
     sum_dividends_received = 0
 
     for div in users_dividends_received:
 
-        quantity = get_quantity(request, asset_obj, date=div.date)
+        quantity = get_quantity(user, asset_obj, date=div.date)
         usd_rate = get_usd_rate(div.date)
         sum_dividends_received += quantity * div.amount / usd_rate
 
@@ -204,7 +204,7 @@ def update_dividends_of_user(request, asset_obj, date=None, transaction=None):
 
     for div in asset_dividends:
 
-        quantity = get_quantity(request, asset_obj, div.date)\
+        quantity = get_quantity(request.user, asset_obj, div.date)\
                    - transaction.quantity
 
         try:

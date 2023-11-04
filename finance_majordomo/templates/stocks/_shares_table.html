@@ -1,0 +1,156 @@
+{% load i18n %}
+    <table id="myDataTable" class="table table-striped">
+    <thead>
+        <tr>
+            {% if fields_to_display.show_ticker %}
+            <th>{% translate "Ticker" %}</th>
+            {% endif %}
+    
+            {% if fields_to_display.show_name %}
+            <th>{% translate "Name" %}</th>
+            {% endif %}
+    
+            {% if fields_to_display.show_currency %}
+            <th>{% translate "Currency" %}</th>
+            {% endif %}
+    
+            {% if fields_to_display.show_quantity %}
+            <th>{% translate "Quantity" %}</th>
+            {% endif %}
+    
+            {% if fields_to_display.show_purchase_price %}
+            <th>{% translate "Purchase price" %}</th>
+            {% endif %}
+    
+            {% if fields_to_display.show_current_price %}
+            <th>{% translate "Current price" %}</th>
+            {% endif %}
+        
+            {% if fields_to_display.show_money_result_without_divs %}
+            <th>{% translate "Result without dividends, RUR" %}</th>
+            {% endif %}
+        
+            {% if fields_to_display.show_percent_result %}
+            <th>{% translate "Result, %" %}</th>
+            {% endif %}
+        
+            {% if fields_to_display.show_dividends_received %}
+            <th>{% translate "Dividends received" %}</th>
+            {% endif %}
+        
+            {% if fields_to_display.show_money_result_with_divs %}
+            <th>{% translate "Result with dividends, RUR" %}</th>
+            {% endif %}
+        
+            {% if fields_to_display.show_rate_of_return %}
+            <th>{% translate "Rate of return, %" %}</th>
+            {% endif %}
+    
+            <th></th>
+    
+        </tr>
+    </thead>
+    
+    <tbody method="get">
+        {% for stock in stock_list %}
+        <tr>
+            {% if fields_to_display.show_ticker %}
+            <td>{{ stock.ticker }}</td>
+            {% endif %}
+    
+            {% if fields_to_display.show_name %}
+            <td>{{ stock.name }}</td>
+            {% endif %}
+    
+            {% if fields_to_display.show_currency %}
+            <td>{{ stock.currency }}</td>
+            {% endif %}
+    
+            {% if fields_to_display.show_quantity %}
+            <td>{{ stock.quantity }}</td>
+            {% endif %}
+    
+            {% if fields_to_display.show_purchase_price %}
+            <td>{{ stock.purchase_price }}</td>
+            {% endif %}
+    
+            {% if fields_to_display.show_current_price %}
+            <td>{{ stock.current_price }}</td>
+            {% endif %}
+                        
+            {% if fields_to_display.show_money_result_without_divs %}
+            <td>{{ stock.money_result_without_divs}}</td>
+            {% endif %}
+        
+            {% if fields_to_display.show_percent_result %}
+            <td>{{ stock.percent_result }}</td>
+            {% endif %}
+        
+            {% if fields_to_display.show_dividends_received %}
+            <td>{{ stock.dividends_received }}</td>
+            {% endif %}
+        
+            {% if fields_to_display.show_money_result_with_divs %}
+            <td>{{ stock.money_result_with_divs }}</td>
+            {% endif %}
+        
+            {% if fields_to_display.show_rate_of_return %}
+            <td>{{ stock.rate_of_return }}</td>
+            {% endif %}
+        
+            <td>
+                <div class="d-flex justify-content-left">
+                    <a class="btn btn-primary btn-sm" href="{% url "add_transaction" %}?asset_id={{ stock.id }}" role="button">{% translate "Add transaction" %}</a>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+{#        <tr>#}
+{#            {% if fields_to_display.show_ticker %}#}
+{#            <td></td>#}
+{#            {% endif %}#}
+{#    #}
+{#            {% if fields_to_display.show_name %}#}
+{#            <td><b>Total</b></td>#}
+{#            {% endif %}#}
+{#    #}
+{#            {% if fields_to_display.show_currency %}#}
+{#            <td></td>#}
+{#            {% endif %}#}
+{#    #}
+{#            {% if fields_to_display.show_quantity %}#}
+{#            <td></td>#}
+{#            {% endif %}#}
+{#    #}
+{#            {% if fields_to_display.show_purchase_price %}#}
+{#            <td><b>{{ total_results.total_purchase_price }}</b></td>#}
+{#            {% endif %}#}
+{#    #}
+{#            {% if fields_to_display.show_current_price %}#}
+{#            <td><b>{{ total_results.total_current_price }}</b></td>#}
+{#            {% endif %}#}
+{#        #}
+{#            {% if fields_to_display.show_money_result_without_divs %}#}
+{#            <td><b>{{ total_results.total_financial_result_no_divs }}</b></td>#}
+{#            {% endif %}               #}
+{#        #}
+{#            {% if fields_to_display.show_percent_result %}#}
+{#            <td><b>{{ total_results.total_percent_result }}</b></td>#}
+{#            {% endif %}#}
+{#        #}
+{#            {% if fields_to_display.show_dividends_received %}#}
+{#            <td><b>{{ total_results.total_divs }}</b></td>#}
+{#            {% endif %}#}
+{#        #}
+{#            {% if fields_to_display.show_money_result_with_divs %}#}
+{#            <td><b>{{ total_results.total_financial_result_with_divs }}</b></td>#}
+{#            {% endif %}#}
+{#            #}
+{#            {% if fields_to_display.show_rate_of_return %}#}
+{#            <td><b>{{ total_results.total_rate_of_return }}</b></td>#}
+{#            {% endif %}#}
+{#    #}
+{#            <td></td>  #}
+{#        </tr>#}
+    </tbody>
+</table>

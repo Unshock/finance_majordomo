@@ -113,15 +113,15 @@ class Asset(models.Model):
 
     def __str__(self):
         return self.latname
-    
+
     def get_delete_url(self):
         return reverse("delete_asset", kwargs={'pk': self.pk})
 
     def get_related_object(self):
         if self.group == "stock_shares":
-            return self.stock
+            return getattr(self, 'stock')
         elif self.group == "stock_bonds":
-            return self.bond
+            return getattr(self, 'bond')
 
 
 class Stock(Asset):
@@ -201,6 +201,14 @@ class Bond(Asset):
     )
     latest_coupon_update = models.DateField(
         verbose_name='Дата последнего обновления информации о купонах',
+        blank=True,
+        null=True
+    )
+
+    face_value = models.DecimalField(
+        max_digits=10,
+        decimal_places=4,
+        verbose_name="Номинал",
         blank=True,
         null=True
     )
