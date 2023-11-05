@@ -7,8 +7,8 @@ from finance_majordomo.dividends.utils import get_dividend_result, \
     get_dividend_result_usd
 from finance_majordomo.stocks.models import Asset, AssetsHistoricalData
 from finance_majordomo.stocks.utils import update_historical_data
-from finance_majordomo.transactions.utils import get_quantity, \
-    get_purchase_price, get_purchase_price_usd, get_quantity2
+from finance_majordomo.transactions.utils import get_quantity, get_quantity2, \
+    get_purchase_price
 from finance_majordomo.users.models import Portfolio, User
 from finance_majordomo.users.utils.utils import get_current_portfolio
 
@@ -59,7 +59,7 @@ class AssetItem:
         self.quantity = self._get_quantity()
 
     def _get_quantity(self):
-        return get_quantity2(self.portfolio, self.id, self.date)
+        return get_quantity2(self.portfolio.id, self.id, self.date)
     
     
     quantity = int
@@ -100,8 +100,10 @@ def get_portfolio_assets(user: User) -> list[AssetItem]:
         if current_quantity == 0:
             continue
 
-        asset_item.purchase_price = get_purchase_price(user, asset)
-        asset_item.purchase_price_usd = get_purchase_price_usd(user, asset)
+        asset_item.purchase_price = get_purchase_price(
+            portfolio.id, asset.id)
+        asset_item.purchase_price_usd = get_purchase_price(
+            portfolio.id, asset.id, currency='usd')
 
         asset_item.current_price = get_current_price(user, asset)
         asset_item.current_price_usd = get_current_price(

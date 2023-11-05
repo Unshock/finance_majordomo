@@ -45,11 +45,11 @@ def update_usd():
     print(last_date)
     last_date_str = datetime.strftime(last_date.tradedate, '%d/%m/%Y')
     update_currency_rates(date=last_date_str)
-    
+
 
 def get_usd_rate(date_dt):
 
-    for gap in range(0, 20):
+    for gap in range(0, 40):
         delta_date_dt = (date_dt - timedelta(gap))
 
         date_str = datetime.strftime(
@@ -58,10 +58,13 @@ def get_usd_rate(date_dt):
                      delta_date_dt.day), '%Y-%m-%d')
 
         day_status = get_prod_date(date_str).date_status
+        
+        print(day_status)
 
         if day_status == 'Working':
             try:
                 result = CurrencyRate.objects.get(tradedate=delta_date_dt)
+                print('resik', result)
                 return result.price_usd
             except CurrencyRate.DoesNotExist:
                 print(f'currency rate {delta_date_dt} doesnot exist')

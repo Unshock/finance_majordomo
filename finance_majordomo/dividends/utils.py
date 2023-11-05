@@ -237,7 +237,7 @@ def update_dividends_of_portfolio(
         tr_quantity = transaction.quantity if transaction.transaction_type == \
                                            'BUY' else transaction.quantity * -1
 
-        quantity = get_quantity2(portfolio, asset_obj.id, div.date) + tr_quantity
+        quantity = get_quantity2(portfolio.id, asset_obj.id, div.date) + tr_quantity
 
         try:
             dividend_of_portfolio = DividendsOfPortfolio.objects.get(

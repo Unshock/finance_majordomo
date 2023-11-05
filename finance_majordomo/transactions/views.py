@@ -154,8 +154,7 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
     def post(self, request, *args, **kwargs):
 
-        if request.POST.get('accrued_interest'):
-            accrued_interest = True
+        accrued_interest = request.POST.get('accrued_interest')
 
         form = TransactionForm(
             request.POST,

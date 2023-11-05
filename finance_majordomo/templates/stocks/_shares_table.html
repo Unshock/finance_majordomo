@@ -21,6 +21,10 @@
             {% if fields_to_display.show_purchase_price %}
             <th>{% translate "Purchase price" %}</th>
             {% endif %}
+        
+            {% if fields_to_display.show_purchase_price %}
+            <th>{% translate "Avg purchase price" %}</th>
+            {% endif %}
     
             {% if fields_to_display.show_current_price %}
             <th>{% translate "Current price" %}</th>
@@ -72,6 +76,10 @@
     
             {% if fields_to_display.show_purchase_price %}
             <td>{{ stock.purchase_price }}</td>
+            {% endif %}
+        
+            {% if fields_to_display.show_purchase_price %}
+            <td>{{ stock.avg_purchase_price }}</td>
             {% endif %}
     
             {% if fields_to_display.show_current_price %}

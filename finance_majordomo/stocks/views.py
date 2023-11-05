@@ -23,8 +23,8 @@ from finance_majordomo.dividends.utils import get_dividend_result_usd
 from .models import Asset
 from .services.user_assets_services import get_current_portfolio
 from ..currencies.models import CurrencyRate
-from ..transactions.utils import get_quantity, get_purchase_price, \
-    get_purchase_price_usd
+from ..transactions.utils import get_quantity, get_quantity2, \
+    get_purchase_price, get_average_purchase_price
 from .utils import get_money_result, update_historical_data
 from ..dividends.utils import get_dividend_result
 from ..users.models import Portfolio
@@ -88,6 +88,7 @@ class UsersStocks(LoginRequiredMixin, ListView):
 
     def get_user_stock_data(self):
         request = self.request
+
         user_assets = Asset.objects.filter(
             id__in=request.user.assetsofuser_set.values_list('asset'))
         
@@ -134,13 +135,18 @@ class UsersStocks(LoginRequiredMixin, ListView):
                 # update_today_data(stock)
                 update_historical_data(asset)
 
-                current_quantity = get_quantity(request.user, asset)
-
+                current_quantity = get_quantity2(current_portfolio.id, asset.id)
+                avg_purchase_price = get_average_purchase_price(
+                    current_portfolio.id, asset.id)
+                print('7654321', avg_purchase_price)
+                
                 if current_quantity == 0:
                     continue
 
-                purchase_price = get_purchase_price(request.user, asset)
-                purchase_price_usd = get_purchase_price_usd(request.user, asset)
+                purchase_price = get_purchase_price(
+                    current_portfolio.id, asset.id)
+                purchase_price_usd = get_purchase_price(
+                    current_portfolio.id, asset.id, currency='usd')
 
                 total_purchase_price += purchase_price
                 total_purchase_price_usd += purchase_price_usd
@@ -157,11 +163,11 @@ class UsersStocks(LoginRequiredMixin, ListView):
                 money_result_without_divs = moneyfmt(
                     get_money_result(current_price, purchase_price), sep=' ')
 
-
                 dividends_received = get_dividend_result(request.user, asset)
                 total_divs += dividends_received
 
-                dividends_received_usd = get_dividend_result_usd(request.user, asset)
+                dividends_received_usd = get_dividend_result_usd(
+                    request.user, asset)
                 total_divs_usd += dividends_received_usd
 
                 money_result_with_divs = moneyfmt(
@@ -181,6 +187,7 @@ class UsersStocks(LoginRequiredMixin, ListView):
                      'quantity': moneyfmt(
                          Decimal(current_quantity), sep=' ', places=0),
                      'purchase_price': moneyfmt(purchase_price, sep=' '),
+                     'avg_purchase_price': moneyfmt(avg_purchase_price, sep=' '),
                      'current_price': moneyfmt(current_price, sep=' '),
                      'percent_result': percent_result,
                      'dividends_received': moneyfmt(dividends_received, sep=' '),
@@ -234,10 +241,12 @@ class UsersStocks(LoginRequiredMixin, ListView):
     def get_current_price(self, asset, currency=None):
         currency_rate = self.get_currency_rate(currency)
 
+        portfolio = get_current_portfolio(self.request.user)
+
         last_date_price = AssetsHistoricalData.objects.filter(
             asset=asset).order_by('-tradedate')[0].legalcloseprice
 
-        current_quantity = get_quantity(self.request.user, asset)
+        current_quantity = get_quantity2(portfolio.id, asset.id)
 
         current_price = current_quantity * last_date_price / currency_rate
 

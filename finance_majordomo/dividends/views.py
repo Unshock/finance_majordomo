@@ -8,9 +8,12 @@ from django.views import View
 from django.views.generic import ListView
 from moneyfmt import moneyfmt
 
-from finance_majordomo.dividends.models import Dividend, DividendsOfUser
-from ..transactions.utils import get_quantity
+from finance_majordomo.dividends.models import Dividend, DividendsOfUser, \
+    DividendsOfPortfolio
+from ..transactions.utils import get_quantity, get_quantity2
 from django.utils.translation import gettext_lazy as _
+
+from ..users.utils.utils import get_current_portfolio
 
 
 class Dividends(LoginRequiredMixin, ListView):
@@ -29,35 +32,35 @@ class Dividends(LoginRequiredMixin, ListView):
         total_divs_upcoming = 0
 
         user = self.request.user
+        portfolio = get_current_portfolio(user)
         date_today_dt = datetime.today().date()
 
         delta = timedelta(days=90)
 
-        dividends_of_user = Dividend.objects.filter(
-            id__in=user.dividendsofuser_set.values_list('dividend'),
+        dividends_of_portfolio = Dividend.objects.filter(
+            id__in=portfolio.dividendsofportfolio_set.values_list('dividend'),
             date__lte=date_today_dt + delta
         )\
             .order_by('-date')
 
-        print(dividends_of_user, 'aYAYAYAYAYAYAYAYA')
+        print(dividends_of_portfolio, 'aYAYAYAYAYAYAYAYA')
 
-        
 
-        for div_obj in dividends_of_user:
+
+        for div_obj in dividends_of_portfolio:
             asset = div_obj.asset
             amount = div_obj.amount
 
             date_dt = div_obj.date
             date_str = datetime.strftime(date_dt, '%Y-%m-%d')
-            
 
             is_upcoming = False if date_dt <= date_today_dt else True
 
-            is_received = DividendsOfUser.objects.get(
-                user=user, dividend=div_obj).is_received
+            is_received = DividendsOfPortfolio.objects.get(
+                portfolio=portfolio, dividend=div_obj).is_received
 
-            quantity_for_the_date = get_quantity(
-                self.request.user, asset, date=date_str)
+            quantity_for_the_date = get_quantity2(
+                portfolio.id, asset.id, date=date_str)
 
             if quantity_for_the_date > 0:
                 total_div = Decimal(quantity_for_the_date * amount)
