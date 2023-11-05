@@ -74,7 +74,7 @@ def get_asset_board_history(ticker: str,
 # print(get_stock_board_history('gazp')[-1])
 # print(get_stock_board_history('posi')[-1])
 # print(get_stock_board_history('lsrg')[-1])
-print(get_asset_board_history('lqdt', board='TQTF')[-1])
+#print(get_asset_board_history('lqdt', board='TQTF')[-1])
 #print(get_asset_board_history('RU000A101QM3', board="TQCB", market='bonds')[-1])
 
 

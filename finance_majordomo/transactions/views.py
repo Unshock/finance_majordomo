@@ -17,7 +17,8 @@ from ..stocks.services.asset_services import get_or_create_asset_obj, \
 from ..stocks.services.user_assets_services import get_current_portfolio
 
 from ..transactions.utils import validate_transaction
-from ..dividends.utils import update_dividends_of_user
+from ..dividends.utils import update_dividends_of_user, \
+    update_dividends_of_portfolio
 
 
 class TransactionList(LoginRequiredMixin, ListView):
@@ -68,6 +69,8 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         return context
 
     def get(self, request, *args, **kwargs):
+        
+        print(self)
 
         assets_to_display_qs = get_all_assets_of_user(request.user)
 
@@ -92,7 +95,7 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
             # if asset_group == 'stock_shares':
             #     try:
             #         asset_obj = Stock.objects.get(secid=asset_secid)
-            # 
+            # form
             #     except Stock.DoesNotExist:
             #         # ADD ASSET TO DB
             #         asset_description = get_stock_description(asset_secid)
@@ -151,7 +154,14 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
     def post(self, request, *args, **kwargs):
 
-        form = TransactionForm(request.POST, request=request)
+        if request.POST.get('accrued_interest'):
+            accrued_interest = True
+
+        form = TransactionForm(
+            request.POST,
+            request=request,
+            accrued_interest=accrued_interest
+        )
 
         if form.is_valid():
 
@@ -164,6 +174,7 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
             accrued_interest = form.cleaned_data.get('accrued_interest')
 
             user = request.user
+            current_portfolio = get_current_portfolio(user)
 
             # Если в ходе поиска добавляем первую транзакцию для актива, 
             # то добавляем актив в AssetsOfUser
@@ -171,8 +182,8 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
                 asset_obj.users.add(user)
                 asset_obj.save()
 
-            current_portfolio = user.portfolio_set.filter(
-                is_current=True).last()
+            # current_portfolio = user.portfolio_set.filter(
+            #     is_current=True).last()
             aop = AssetOfPortfolio.objects.filter(portfolio=current_portfolio)
             if asset_obj not in aop:
                 asset_obj.portfolios.add(current_portfolio)
@@ -180,7 +191,7 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
             obj = Transaction.objects.create(
                 transaction_type=transaction_type,
-                user=user,
+                portfolio=current_portfolio,
                 asset=asset_obj,
                 date=date,
                 price=price,
@@ -195,11 +206,13 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
             asset_type = asset_obj.group
 
+            portfolio = get_current_portfolio(request.user)
+
             if asset_type == 'stock_shares':
-                update_dividends_of_user(request, asset_obj, date, obj)
+                update_dividends_of_portfolio(portfolio, asset_obj, date, obj)
 
             if asset_type == 'stock_bonds':
-                update_dividends_of_user(request, asset_obj, date, obj)
+                update_dividends_of_portfolio(portfolio, asset_obj, date, obj)
 
             messages.success(request, self.success_message)
             return redirect(self.success_url)

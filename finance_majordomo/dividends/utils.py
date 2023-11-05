@@ -9,13 +9,12 @@ import os
 from datetime import datetime
 
 from ..currencies.utils import get_usd_rate
-from ..transactions.utils import get_quantity
-
+from ..transactions.utils import get_quantity, get_quantity2
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'finance_majordomo.settings')
 django.setup()
 
-from .models import Dividend, DividendsOfUser
+from .models import Dividend, DividendsOfUser, DividendsOfPortfolio
 
 
 def get_stock_dividends(stock_obj):
@@ -223,3 +222,36 @@ def update_dividends_of_user(request, asset_obj, date=None, transaction=None):
             )
         print(dividend_of_user)
         dividend_of_user.save()
+
+
+def update_dividends_of_portfolio(
+        portfolio, asset_obj, date=None, transaction=None):
+
+    asset_dividends = Dividend.objects.filter(asset=asset_obj.id)
+
+    if date:
+        asset_dividends = asset_dividends.filter(date__gte=date)
+
+    for div in asset_dividends:
+
+        tr_quantity = transaction.quantity if transaction.transaction_type == \
+                                           'BUY' else transaction.quantity * -1
+
+        quantity = get_quantity2(portfolio, asset_obj.id, div.date) + tr_quantity
+
+        try:
+            dividend_of_portfolio = DividendsOfPortfolio.objects.get(
+                portfolio=portfolio,
+                dividend=div)
+
+            if quantity <= 0:
+                dividend_of_portfolio.is_received = False
+
+        except DividendsOfPortfolio.DoesNotExist:
+            dividend_of_portfolio = DividendsOfPortfolio.objects.create(
+                portfolio=portfolio,
+                dividend=div,
+                is_received=False
+            )
+        print(dividend_of_portfolio)
+        dividend_of_portfolio.save()

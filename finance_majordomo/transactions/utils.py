@@ -5,7 +5,9 @@ from collections import deque
 from .models import Transaction
 from ..currencies.utils import get_usd_rate
 from ..stocks.models import Asset
+
 from ..users.models import User, Portfolio
+from ..users.utils.utils import get_current_portfolio
 
 
 def get_quantity(user: User,
@@ -212,24 +214,26 @@ def validate_transaction(request, transaction: dict) -> bool:
             transaction_type == 'BUY' and validator == 'add_validator':
         return True
 
-    day_end_balance = get_quantity(
-        request.user, asset_obj, date=date) - quantity
+    portfolio = get_current_portfolio(request.user)
+
+    day_end_balance = get_quantity2(
+        portfolio, asset_obj.id, date=date) - quantity
 
     if day_end_balance < 0:
         return False
 
-    users_transactions = Transaction.objects.filter(
-        user=request.user,
-        ticker=asset_obj.id,
+    portfolio_transactions = Transaction.objects.filter(
+        portfolio=portfolio,
+        asset=asset_obj.id,
         date__gt=date).order_by('date')
 
     # that means the validated transaction would not affect any transactions:
-    if users_transactions.count() == 0:
+    if portfolio_transactions.count() == 0:
         return True
 
     cur_date = date
 
-    for transaction in users_transactions:
+    for transaction in portfolio_transactions:
 
         prev_date = cur_date
         cur_date = transaction.date

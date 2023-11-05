@@ -2,7 +2,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from finance_majordomo.stocks.models import Stock, Asset
-from finance_majordomo.users.models import User
+from finance_majordomo.users.models import User, Portfolio
 
 
 class Dividend(models.Model):
@@ -63,4 +63,30 @@ class DividendsOfUser(models.Model):
         unique_together = ('user', 'dividend')
         verbose_name = "Дивиденд пользователя"
         verbose_name_plural = "Дивиденды пользователей"
+        ordering = ['dividend']
+
+
+class DividendsOfPortfolio(models.Model):
+    portfolio = models.ForeignKey(
+        Portfolio,
+        on_delete=models.CASCADE,
+        null=True
+    )
+
+    dividend = models.ForeignKey(
+        Dividend,
+        on_delete=models.CASCADE,
+        null=True
+    )
+
+    is_received = models.BooleanField(
+        default=False,
+        help_text='shows if portfolio got dividend',
+        verbose_name='Dividend status')
+
+    class Meta:
+
+        unique_together = ('portfolio', 'dividend')
+        verbose_name = "Дивиденд портфеля"
+        verbose_name_plural = "Дивиденды портфеля"
         ordering = ['dividend']

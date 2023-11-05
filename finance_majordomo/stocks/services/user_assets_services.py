@@ -10,16 +10,7 @@ from finance_majordomo.stocks.utils import update_historical_data
 from finance_majordomo.transactions.utils import get_quantity, \
     get_purchase_price, get_purchase_price_usd, get_quantity2
 from finance_majordomo.users.models import Portfolio, User
-
-
-def get_current_portfolio(user: User):
-    current_portfolio = Portfolio.objects.filter(
-        user=user, is_current=True)
-
-    if len(current_portfolio) == 1:
-        return current_portfolio.last()
-    else:
-        raise Exception('problem with current portfolio determination')
+from finance_majordomo.users.utils.utils import get_current_portfolio
 
 
 def get_currency_rate(currency: str = None):
