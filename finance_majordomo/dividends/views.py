@@ -10,7 +10,7 @@ from moneyfmt import moneyfmt
 
 from finance_majordomo.dividends.models import Dividend, DividendsOfUser, \
     DividendsOfPortfolio
-from ..transactions.utils import get_quantity, get_quantity2
+from ..transactions.services.transaction_calculation_services import get_asset_quantity_for_portfolio
 from django.utils.translation import gettext_lazy as _
 
 from ..users.utils.utils import get_current_portfolio
@@ -59,7 +59,7 @@ class Dividends(LoginRequiredMixin, ListView):
             is_received = DividendsOfPortfolio.objects.get(
                 portfolio=portfolio, dividend=div_obj).is_received
 
-            quantity_for_the_date = get_quantity2(
+            quantity_for_the_date = get_asset_quantity_for_portfolio(
                 portfolio.id, asset.id, date=date_str)
 
             if quantity_for_the_date > 0:

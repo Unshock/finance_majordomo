@@ -13,10 +13,11 @@
                     <th>ID</th>
                     <th>{% translate "Asset type" %}</th>
                     <th>{% translate "Transaction type" %}</th>
-                    <th>{% translate "User" %}</th>
-                    <th>{% translate "Ticker" %}</th>
+                    <th>{% translate "Portfolio" %}</th>
+                    <th>{% translate "Asset" %}</th>
                     <th>{% translate "Date" %}</th>
                     <th>{% translate "Price" %}</th>
+                    <th>{% translate "Accrued interest" %}</th>
                     <th>{% translate "Fee" %}</th>
                     <th>{% translate "Quantity" %}</th>
                     <th></th>
@@ -29,10 +30,11 @@
                     <td>{{ transaction.id }}</td>
                     <td>{{ transaction.asset_type }}</td>
                     <td>{{ transaction.transaction_type }}</td>
-                    <td>{{ transaction.portfolio }}</td>
-                    <td>{{ transaction.ticker }}</td>
+                    <td>{{ transaction.portfolio.name }}</td>
+                    <td>{{ transaction.asset }}</td>
                     <td>{{ transaction.date }}</td>
                     <td>{{ transaction.price }}</td>
+                    <td>{{ transaction.accrued_interest }}</td>
                     <td>{{ transaction.fee }}</td>
                     <td>{{ transaction.quantity}}</td>
                     <td>

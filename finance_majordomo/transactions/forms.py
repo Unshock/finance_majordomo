@@ -7,7 +7,8 @@ from django.utils.translation import gettext_lazy as _
 from finance_majordomo.stocks.models import Stock, StocksOfUser, Bond, Asset
 from finance_majordomo.transactions.models import Transaction
 from finance_majordomo.stocks.views import UsersStocks
-from .utils import validate_transaction
+from .services.transaction_validation_services import validate_transaction, \
+    TransactionValidator
 
 from common.utils.stocks import validate_ticker, get_stock_description
 
@@ -65,19 +66,7 @@ class TransactionForm(forms.Form):
                          ]
         )
 
-        # self.fields['asset'].queryset = Asset.objects.all()
-
-        # super(TransactionForm, self).__init__(*args, **kwargs)
-        # self.helper = FormHelper()
-        # self.helper.form_id = 'id-exampleForm'
-        # self.helper.form_class = 'blueForms'
-        # self.helper.form_method = 'post'
-        # self.helper.form_action = 'submit_survey'
-        # 
-        # self.helper.add_input(Submit('submit', 'Submit'))
-
     transaction_type = forms.ChoiceField(
-        # initial='BUY',
 
         label=_('Transaction type'),
         choices=Transaction.transaction_type_choices,
@@ -147,16 +136,17 @@ class TransactionForm(forms.Form):
 
         if asset_obj and transaction_type and date and quantity:
 
-            validate_dict = {
-                'validator': 'add_validator',
-                'asset_obj': asset_obj,
-                'transaction_type': transaction_type,
-                'date': date,
-                'quantity': quantity
-            }
+            transaction_validator = TransactionValidator(
+                validation_type='add_validation',
+                asset_id=asset_obj.id,
+                transaction_type=transaction_type,
+                date=date,
+                quantity=quantity
+            )
 
-            if not validate_transaction(self.request, validate_dict):
-                raise ValidationError(_(
+            if not validate_transaction(self.request.user,
+                                        transaction_validator):
+                raise forms.ValidationError(_(
                     'Such a SELL would raise a short sale situation. '
                     'Short sales are not supported! '
                     'Please check the transaction type, date and quantity'))
@@ -164,48 +154,34 @@ class TransactionForm(forms.Form):
         return cleaned_data
 
     def clean_price(self):
-        # print('clean_price')
-        # print(self.cleaned_data)
         price = self.cleaned_data.get('price')
         if price <= 0:
             raise ValidationError(_("Price must be more than 0"))
         return price
 
     def clean_quantity(self):
-        # print('clean_quantity')
-        # print(self.cleaned_data)
         quantity = self.cleaned_data.get('quantity')
         if quantity <= 0:
             raise ValidationError(_("Quantity must be more than 0"))
         return quantity
 
     def clean_accrued_interest(self):
-        # print('clean_accrued_interest')
-        # print(self.cleaned_data)
         accrued_interest = self.cleaned_data.get('accrued_interest')
         if accrued_interest and accrued_interest < 0:
             raise ValidationError(_("Accrued interest must not be less than 0"))
         return accrued_interest
 
     def clean_fee(self):
-        # print('clean_fee')
-        # print(self.cleaned_data)
         fee = self.cleaned_data.get('fee')
         if fee is not None and fee < 0:
             raise ValidationError(_("Fee must be more or equal 0"))
         return fee
 
     def clean_date(self):
-        # print('clean_date')
-        # print(self.cleaned_data)
+
         date = self.cleaned_data.get('date')
         asset = self.cleaned_data.get('asset')
 
-        # print(self.cleaned_data)
-        # print('asset', type(asset), asset)
-        # print(Stock.objects.get(latname=asset.latname))
-        # issuedate = Stock.objects.get(latname=asset).issuedate
-        #print(self.cleaned_data.items())
         issuedate = asset.issuedate
         issuedate = datetime.datetime.strftime(issuedate, '%Y-%m-%d')
         if date < issuedate:

@@ -9,7 +9,9 @@ import os
 from datetime import datetime
 
 from ..currencies.utils import get_usd_rate
-from ..transactions.utils import get_quantity, get_quantity2
+from ..transactions.services.transaction_calculation_services import get_asset_quantity_for_portfolio
+from ..users.models import Portfolio
+from ..users.utils.utils import get_current_portfolio
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'finance_majordomo.settings')
 django.setup()
@@ -152,37 +154,61 @@ def add_dividends_to_model(asset_obj, dividend_dict):
     asset_obj.save()
 
 
-def get_dividend_result(user, asset_obj):
+# def get_dividend_result(user, asset_obj):
+# 
+#     users_dividends_received = Dividend.objects.filter(
+#         asset=asset_obj.id,
+#         id__in=user.dividendsofuser_set.filter(
+#             is_received=True).values_list('dividend'))
+# 
+#     sum_dividends_received = 0
+# 
+#     for div in users_dividends_received:
+#         print(div.date, type(div.date), 'DIVDATE')
+#         quantity = get_quantity(user, asset_obj, date=div.date)
+#         sum_dividends_received += quantity * div.amount
+# 
+#     return sum_dividends_received * Decimal(0.87)
+# 
+# 
+# def get_dividend_result_usd(user, asset_obj):
+# 
+#     users_dividends_received = Dividend.objects.filter(
+#         asset=asset_obj.id,
+#         id__in=user.dividendsofuser_set.filter(
+#             is_received=True).values_list('dividend'))
+# 
+#     sum_dividends_received = 0
+# 
+#     for div in users_dividends_received:
+# 
+#         quantity = get_quantity(user, asset_obj, date=div.date)
+#         usd_rate = get_usd_rate(div.date)
+#         sum_dividends_received += quantity * div.amount / usd_rate
+# 
+#     return sum_dividends_received * Decimal(0.87)
 
-    users_dividends_received = Dividend.objects.filter(
-        asset=asset_obj.id,
-        id__in=user.dividendsofuser_set.filter(
+
+def get_dividend_result_of_portfolio(
+        portfolio: Portfolio, asset_id: int, currency: str = None) -> Decimal:
+
+    portfolio_dividends_received = Dividend.objects.filter(
+        asset=asset_id,
+        id__in=portfolio.dividendsofportfolio_set.filter(
             is_received=True).values_list('dividend'))
 
-    sum_dividends_received = 0
+    currency_rate = Decimal('1')
 
-    for div in users_dividends_received:
-        print(div.date, type(div.date), 'DIVDATE')
-        quantity = get_quantity(user, asset_obj, date=div.date)
-        sum_dividends_received += quantity * div.amount
+    sum_dividends_received = Decimal('0')
 
-    return sum_dividends_received * Decimal(0.87)
+    for div in portfolio_dividends_received:
 
+        quantity = get_asset_quantity_for_portfolio(
+            portfolio.id, asset_id, date=div.date)
 
-def get_dividend_result_usd(user, asset_obj):
-
-    users_dividends_received = Dividend.objects.filter(
-        asset=asset_obj.id,
-        id__in=user.dividendsofuser_set.filter(
-            is_received=True).values_list('dividend'))
-
-    sum_dividends_received = 0
-
-    for div in users_dividends_received:
-
-        quantity = get_quantity(user, asset_obj, date=div.date)
-        usd_rate = get_usd_rate(div.date)
-        sum_dividends_received += quantity * div.amount / usd_rate
+        if currency == 'usd':
+            currency_rate = get_usd_rate(div.date)
+        sum_dividends_received += quantity * div.amount / currency_rate
 
     return sum_dividends_received * Decimal(0.87)
 
@@ -190,7 +216,7 @@ def get_dividend_result_usd(user, asset_obj):
 def update_dividends_of_user(request, asset_obj, date=None, transaction=None):
 
     asset_dividends = Dividend.objects.filter(asset=asset_obj.id)
-
+    portfolio = get_current_portfolio(request.user)
     print(asset_dividends, 'tttttttttttttttttttttttttttttttt')
 
     if date:
@@ -203,7 +229,8 @@ def update_dividends_of_user(request, asset_obj, date=None, transaction=None):
 
     for div in asset_dividends:
 
-        quantity = get_quantity(request.user, asset_obj, div.date)\
+        quantity = get_asset_quantity_for_portfolio(
+            portfolio.id, asset_obj.id, date=div.date)\
                    - transaction.quantity
 
         try:
@@ -225,9 +252,9 @@ def update_dividends_of_user(request, asset_obj, date=None, transaction=None):
 
 
 def update_dividends_of_portfolio(
-        portfolio, asset_obj, date=None, transaction=None):
+        portfolio, asset_id, date=None, transaction=None):
 
-    asset_dividends = Dividend.objects.filter(asset=asset_obj.id)
+    asset_dividends = Dividend.objects.filter(asset=asset_id)
 
     if date:
         asset_dividends = asset_dividends.filter(date__gte=date)
@@ -237,8 +264,11 @@ def update_dividends_of_portfolio(
         tr_quantity = transaction.quantity if transaction.transaction_type == \
                                            'BUY' else transaction.quantity * -1
 
-        quantity = get_quantity2(portfolio.id, asset_obj.id, div.date) + tr_quantity
-
+        quantity = get_asset_quantity_for_portfolio(
+            portfolio.id, asset_id, date=div.date) + tr_quantity
+        
+        print('DIVIDEND QUANTITTY', quantity, tr_quantity, quantity - tr_quantity)
+        
         try:
             dividend_of_portfolio = DividendsOfPortfolio.objects.get(
                 portfolio=portfolio,

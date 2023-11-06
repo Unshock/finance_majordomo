@@ -3,12 +3,11 @@ from datetime import datetime
 from decimal import Decimal
 
 from finance_majordomo.currencies.models import CurrencyRate
-from finance_majordomo.dividends.utils import get_dividend_result, \
-    get_dividend_result_usd
+from finance_majordomo.dividends.utils import get_dividend_result_of_portfolio
 from finance_majordomo.stocks.models import Asset, AssetsHistoricalData
 from finance_majordomo.stocks.utils import update_historical_data
-from finance_majordomo.transactions.utils import get_quantity, get_quantity2, \
-    get_purchase_price
+from finance_majordomo.transactions.services.transaction_calculation_services\
+    import get_asset_quantity_for_portfolio, get_purchase_price
 from finance_majordomo.users.models import Portfolio, User
 from finance_majordomo.users.utils.utils import get_current_portfolio
 
@@ -27,8 +26,10 @@ def get_current_price(user, asset, currency=None):
 
     last_date_price = AssetsHistoricalData.objects.filter(
         asset=asset).order_by('-tradedate')[0].legalcloseprice
-
-    current_quantity = get_quantity(user, asset)
+    
+    portfolio = get_current_portfolio(user)
+    
+    current_quantity = get_asset_quantity_for_portfolio(portfolio.id, asset)
 
     current_price = current_quantity * last_date_price / currency_rate
 
@@ -59,7 +60,7 @@ class AssetItem:
         self.quantity = self._get_quantity()
 
     def _get_quantity(self):
-        return get_quantity2(self.portfolio.id, self.id, self.date)
+        return get_asset_quantity_for_portfolio(self.portfolio.id, self.id, self.date)
     
     
     quantity = int
@@ -95,7 +96,7 @@ def get_portfolio_assets(user: User) -> list[AssetItem]:
         asset_item.group = asset.group
         asset_item.type = asset.type
 
-        current_quantity = get_quantity(user, asset)
+        current_quantity = get_asset_quantity_for_portfolio(portfolio.id, asset.id)
 
         if current_quantity == 0:
             continue
@@ -109,8 +110,10 @@ def get_portfolio_assets(user: User) -> list[AssetItem]:
         asset_item.current_price_usd = get_current_price(
             user, asset, currency='usd')
 
-        asset_item.dividends_received = get_dividend_result(user, asset)
-        asset_item.dividends_received_usd = get_dividend_result_usd(user, asset)
+        asset_item.dividends_received = get_dividend_result_of_portfolio(
+            portfolio, asset.id)
+        asset_item.dividends_received_usd = get_dividend_result_of_portfolio(
+            portfolio, asset.id, currency='usd')
 
         portfolio_assets_list.append(asset_item)
 

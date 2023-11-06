@@ -12,42 +12,42 @@ from django.utils.translation import gettext_lazy as _
 from finance_majordomo.transactions.forms import TransactionForm
 
 from finance_majordomo.transactions.models import Transaction
+from .services.transaction_validation_services import validate_transaction, \
+    TransactionValidator
 from ..stocks.services.asset_services import get_or_create_asset_obj, \
     get_all_assets_of_user
 from ..stocks.services.user_assets_services import get_current_portfolio
 
-from ..transactions.utils import validate_transaction
-from ..dividends.utils import update_dividends_of_user, \
-    update_dividends_of_portfolio
+
+from ..dividends.utils import update_dividends_of_portfolio
 
 
 class TransactionList(LoginRequiredMixin, ListView):
     login_url = 'login'
     model = Transaction
-    template_name = 'transaction/transaction_list.html'
+    template_name = 'transactions/transaction_list.html'
     context_object_name = 'transaction'
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         context['page_title'] = _("Transaction list")
-        context['transaction_list'] = Transaction.objects.all()
+        context['transaction_list'] = Transaction.objects.all().order_by('date')
         return context
 
 
 class UsersTransactionList(LoginRequiredMixin, ListView):
     login_url = 'login'
     model = Transaction
-    template_name = 'transaction/transaction_list.html'
+    template_name = 'transactions/transaction_list.html'
     context_object_name = 'stock'
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         context['page_title'] = self.request.user.username + " " + _(
             "transaction list")
-        print(Transaction.objects.filter(
-            portfolio=get_current_portfolio(self.request.user)))
         context['transaction_list'] = Transaction.objects.filter(
-            portfolio=get_current_portfolio(self.request.user))
+            portfolio=get_current_portfolio(self.request.user))\
+            .order_by('-date')
 
         return context
 
@@ -69,8 +69,6 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         return context
 
     def get(self, request, *args, **kwargs):
-        
-        print(self)
 
         assets_to_display_qs = get_all_assets_of_user(request.user)
 
@@ -92,45 +90,9 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
             if asset_group == 'stock_bonds':
                 accrued_interest = True
 
-            # if asset_group == 'stock_shares':
-            #     try:
-            #         asset_obj = Stock.objects.get(secid=asset_secid)
-            # form
-            #     except Stock.DoesNotExist:
-            #         # ADD ASSET TO DB
-            #         asset_description = get_stock_description(asset_secid)
-            #         asset_obj = add_asset(asset_description)
-            # 
-            #     asset = Stock.objects.filter(id=asset_obj.id)
-            # 
-            # elif asset_group == 'stock_bonds':
-            #     try:
-            # 
-            #         asset_obj = Bond.objects.get(secid=asset_secid)
-            # 
-            #     except Bond.DoesNotExist:
-            #         # ADD ASSET TO DB
-            # 
-            #         asset_description = get_stock_description(asset_secid)
-            # 
-            #         asset_obj = add_bond(asset_description)
-            # 
-            #     asset = Bond.objects.filter(id=asset_obj.id)
-
-            # transaction_form = TransactionForm(
-            #     request=request, assets_to_display=assets_to_display_qs)
-            # transaction_form.initial['ticker'] = asset_obj.id
-
-            # return render(
-            #     request,
-            #     self.template_name,
-            #     {'form': transaction_form,
-            #      'page_title': _("Add new transaction"),
-            #      'button_text': _('Add')
-            #      }
-            # )
-
         elif asset_id:
+            if Asset.objects.get(id=asset_id).group == 'stock_bonds':
+                accrued_interest = True
             initial_asset = asset_id
 
         if not assets_to_display_qs:
@@ -154,12 +116,10 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
     def post(self, request, *args, **kwargs):
 
-        accrued_interest = request.POST.get('accrued_interest')
-
         form = TransactionForm(
             request.POST,
             request=request,
-            accrued_interest=accrued_interest
+            accrued_interest=request.POST.get('accrued_interest')
         )
 
         if form.is_valid():
@@ -183,12 +143,11 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
             # current_portfolio = user.portfolio_set.filter(
             #     is_current=True).last()
-            aop = AssetOfPortfolio.objects.filter(portfolio=current_portfolio)
-            if asset_obj not in aop:
-                asset_obj.portfolios.add(current_portfolio)
-                asset_obj.save()
+            if asset_obj not in current_portfolio.assetofportfolio_set.all():
+                current_portfolio.asset.add(asset_obj)
+                current_portfolio.save()
 
-            obj = Transaction.objects.create(
+            transaction_obj = Transaction.objects.create(
                 transaction_type=transaction_type,
                 portfolio=current_portfolio,
                 asset=asset_obj,
@@ -199,19 +158,17 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
                 quantity=quantity
             )
 
-            obj.save()
+            transaction_obj.save()
 
-            print(obj, type(obj), obj.asset, obj.asset.id)
+            print(transaction_obj, type(transaction_obj), transaction_obj.asset, transaction_obj.asset.id)
 
             asset_type = asset_obj.group
 
             portfolio = get_current_portfolio(request.user)
 
-            if asset_type == 'stock_shares':
-                update_dividends_of_portfolio(portfolio, asset_obj, date, obj)
-
-            if asset_type == 'stock_bonds':
-                update_dividends_of_portfolio(portfolio, asset_obj, date, obj)
+            if asset_type in ['stock_shares', 'stock_bonds']:
+                update_dividends_of_portfolio(
+                    portfolio, asset_obj.id, date, transaction_obj)
 
             messages.success(request, self.success_message)
             return redirect(self.success_url)
@@ -247,28 +204,24 @@ class DeleteTransaction(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
 
         transaction = self.get_object()
 
-        # править если в транзакциях будут не только стоки
         asset_obj = transaction.asset
-        
-        print(asset_obj, '2121212121')
 
-        validation_dict = {
-            'validator': 'delete_validator',
-            'asset_obj': asset_obj,
-            'transaction_type': transaction.transaction_type,
-            'date': transaction.date,
-            'quantity': transaction.quantity
-        }
+        transaction_validator = TransactionValidator(
+            validation_type='delete_validation',
+            asset_id=asset_obj.id,
+            transaction_type=transaction.transaction_type,
+            date=transaction.date,
+            quantity=transaction.quantity
+        )
 
-        if validate_transaction(self.request, validation_dict):
-            print(asset_obj)
-            print(''
-                  'fffffffffffff')
-            print(asset_obj.asset_type)
-            if asset_obj.asset_type == 'stocks':
-                print('update start')
-                update_dividends_of_user(
-                    request, asset_obj, transaction.date, transaction)
+        if validate_transaction(self.request.user, transaction_validator):
+
+            update_dividends_of_portfolio(
+                portfolio=get_current_portfolio(request.user),
+                asset_id=asset_obj.id,
+                date=transaction.date,
+                transaction=transaction
+            )
 
             return super().post(request, *args, **kwargs)
 
