@@ -7,6 +7,7 @@ from typing import Literal
 from finance_majordomo.transactions.models import Transaction
 from .transaction_calculation_services import get_asset_quantity_for_portfolio
 from finance_majordomo.users.utils.utils import get_current_portfolio
+from ...stocks.models import Asset
 from ...users.models import User
 
 
@@ -41,13 +42,18 @@ def validate_transaction(user: User, transaction: TransactionValidator) -> bool:
         asset=asset_id,
         date__gte=date).order_by('-date', 'transaction_type')
 
-    transaction_dates = sorted(
-        list({trans.date for trans in portfolio_transactions}), reverse=True)
+    transaction_dates = {trans.date for trans in portfolio_transactions}
+    transaction_dates.add(date)
 
-    for transaction_date in transaction_dates:
+    transaction_dates_sorted = sorted(list(transaction_dates), reverse=True)
+
+    for transaction_date in transaction_dates_sorted:
         day_end_balance = get_asset_quantity_for_portfolio(
                 portfolio.id, asset_id, date=transaction_date) - quantity
-
         if day_end_balance < 0:
             return False
     return True
+
+
+def is_accrued_interest_required(asset: Asset) -> bool:
+    return True if asset.group == 'stock_bonds' else False

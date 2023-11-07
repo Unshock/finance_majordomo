@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator
 from django.db import models
@@ -55,7 +57,7 @@ class Transaction(models.Model):
         max_digits=8,
         decimal_places=2,
         null=True,
-        default='0.00',
+        default=Decimal('0'),
         verbose_name=_('Accrued Interest')
     )
 
@@ -63,7 +65,7 @@ class Transaction(models.Model):
         max_digits=8,
         decimal_places=2,
         null=True,
-        default='0.00',
+        default=Decimal('0'),
         verbose_name=_('Transaction fee')
     )
 

@@ -1,14 +1,13 @@
 import datetime
 
 from django.core.exceptions import ValidationError
-from django.forms import ModelForm
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from finance_majordomo.stocks.models import Stock, StocksOfUser, Bond, Asset
 from finance_majordomo.transactions.models import Transaction
 from finance_majordomo.stocks.views import UsersStocks
 from .services.transaction_validation_services import validate_transaction, \
-    TransactionValidator
+    TransactionValidator, is_accrued_interest_required
 
 from common.utils.stocks import validate_ticker, get_stock_description
 
@@ -28,6 +27,7 @@ class TransactionForm(forms.Form):
         super(TransactionForm, self).__init__(*args, **kwargs)
 
         if self.request.method == "GET":
+            print(self.accrued_interest, '1')
             self.fields['asset'] = forms.ModelChoiceField(
                 queryset=self.assets_to_display,
                 label=_('Asset'),
@@ -35,12 +35,12 @@ class TransactionForm(forms.Form):
             )
 
         if self.request.method == "POST":
+            print(self.accrued_interest, '2')
             self.fields['asset'] = forms.ModelChoiceField(
                 queryset=Asset.objects.all(),
             )
 
         if self.accrued_interest:
-
             self.fields['accrued_interest'] = forms.DecimalField(
                 max_digits=8,
                 decimal_places=2,
@@ -75,13 +75,15 @@ class TransactionForm(forms.Form):
             attrs={
                 'class': 'form-check-inline d-inline-flex justify-content-center',
 
-                }
+            }
         ),
     )
 
-    date = forms.CharField(
+    date = forms.DateField(
         label=_('Date'),
-        widget=forms.TextInput(
+        initial=datetime.date.today,
+        widget=forms.DateInput(
+            format="%Y-%m-%d",
             attrs={"class": "form-control",
                    "placeholder": _('YYYY-MM-DD'),
                    "rows": "10",
@@ -126,8 +128,8 @@ class TransactionForm(forms.Form):
 
         cleaned_data = super().clean()
 
-        #print('cleaned_data', self.cleaned_data)
-        #print('cleaned_data', cleaned_data)
+        # print('cleaned_data', self.cleaned_data)
+        # print('cleaned_data', cleaned_data)
 
         asset_obj = cleaned_data.get('asset')
         transaction_type = cleaned_data.get('transaction_type')
@@ -167,6 +169,7 @@ class TransactionForm(forms.Form):
 
     def clean_accrued_interest(self):
         accrued_interest = self.cleaned_data.get('accrued_interest')
+
         if accrued_interest and accrued_interest < 0:
             raise ValidationError(_("Accrued interest must not be less than 0"))
         return accrued_interest
@@ -181,9 +184,9 @@ class TransactionForm(forms.Form):
 
         date = self.cleaned_data.get('date')
         asset = self.cleaned_data.get('asset')
-
+        print(type(date), type(asset.issuedate))
         issuedate = asset.issuedate
-        issuedate = datetime.datetime.strftime(issuedate, '%Y-%m-%d')
+        #issuedate = datetime.datetime.strftime(issuedate, '%Y-%m-%d')
         if date < issuedate:
             raise ValidationError(
                 _("The stock started trading after the specified date") +

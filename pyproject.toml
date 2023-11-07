@@ -19,6 +19,7 @@ django-crispy-forms = "^2.0"
 crispy-bootstrap4 = "^2022.1"
 mock = "^5.0.2"
 xmltodict = "^0.13.0"
+django-service-objects = "^0.7.1"
 
 [tool.poetry.dev-dependencies]
 
