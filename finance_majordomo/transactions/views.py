@@ -63,8 +63,13 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     success_url = reverse_lazy('transactions')
     success_message = _("Transaction has been successfully added!")
 
+    accrued_interest_err_message = _(
+        'Accrued Interest is required for the bond group asset')
+
     unsuccess_url = reverse_lazy('add_transaction')
     unsuccess_message = _("Transaction has not been added!")
+
+    form = TransactionForm()
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -73,7 +78,6 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         return context
 
     def get(self, request, *args, **kwargs):
-        print(request)
         assets_to_display_qs = get_all_assets_of_user(request.user)
 
         asset_id = request.GET.get('asset_id')
@@ -85,34 +89,42 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
         if asset_secid and asset_group:
 
+            print('a')
+
             asset_obj = get_or_create_asset_obj(asset_secid)
             asset_obj_qs = Asset.objects.filter(id=asset_obj.id)
 
             assets_to_display_qs |= asset_obj_qs
-            initial_asset = asset_obj.id
+            initial_asset = asset_obj
+
+            self.form.fields['asset'].initial = initial_asset
+
 
             if asset_group == 'stock_bonds':
                 accrued_interest = True
 
         elif asset_id:
+            print()
             if Asset.objects.get(id=asset_id).group == 'stock_bonds':
                 accrued_interest = True
-            initial_asset = asset_id
+            self.form.fields['asset'].initial = asset_id
 
         if not assets_to_display_qs:
             return redirect('search')
 
-        transaction_form = TransactionForm(
-            request=request,
-            assets_to_display=assets_to_display_qs,
-            accrued_interest=accrued_interest
-        )
-        transaction_form.initial['asset'] = initial_asset
+        self.form.set_assets_to_display(assets_to_display_qs)
+        # transaction_form = TransactionForm(
+        #     request=request,
+        #     assets_to_display=assets_to_display_qs,
+        #     accrued_interest=accrued_interest,
+        #     accrued_interest_err_message=self.accrued_interest_err_message
+        # )
+        # transaction_form.initial['asset'] = initial_asset
 
         return render(
             request,
             self.template_name,
-            {'form': transaction_form,
+            {'form': self.form,#transaction_form,
              'page_title': _("Add new transaction"),
              'button_text': _('Add')
              }
@@ -123,14 +135,12 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         form = TransactionForm(
             request.POST,
             request=request,
-            accrued_interest=request.POST.get('accrued_interest')
+            accrued_interest=request.POST.get('accrued_interest'),
+            accrued_interest_err_message=self.accrued_interest_err_message
         )
 
         if form.is_valid():
             try:
-                print('1', is_accrued_interest_required(
-                        form.cleaned_data.get('asset')))
-                
                 CreateTransactionService.execute({
                     'transaction_type': form.cleaned_data['transaction_type'],
                     'date': form.cleaned_data['date'],
@@ -141,79 +151,18 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
                     'accrued_interest': form.cleaned_data.get(
                         'accrued_interest'),
 
-                    'user': request.user,
-                    'accrued_interest_required': is_accrued_interest_required(
-                        form.cleaned_data.get('asset'))
+                    'user': request.user
                 })
 
-            except service_objects.errors.InvalidInputsError as e:
-                errors = e.errors.get('accrued_interest')
-                print(errors, e.args)
-                if errors and 'This field is required.' in errors:
+                messages.success(request, self.success_message)
+                return redirect(self.success_url)
 
-                    print('111', form.cleaned_data.get('asset'))
+            except Exception as e:
+                print(e)
 
-                    form = TransactionForm(
-                        request.POST,
-                        request=request,
-                        accrued_interest=True
-                    )
+        elif self.accrued_interest_err_message in form.errors.get('__all__'):
+            form.add_accrued_interest_field()
 
-                    form.add_error(None, 'Accrued interest field is required for Bonds')
-
-                #raise django.core.exceptions.ValidationError
-
-
-            # transaction_type = form.cleaned_data.get('transaction_type')
-            # asset_obj = form.cleaned_data.get('asset')
-            # date = form.cleaned_data.get('date')
-            # price = form.cleaned_data.get('price')
-            # fee = form.cleaned_data.get('fee')
-            # quantity = form.cleaned_data.get('quantity')
-            # accrued_interest = form.cleaned_data.get('accrued_interest')
-            # 
-            # user = request.user
-            # current_portfolio = get_current_portfolio(user)
-            # 
-            # # Если в ходе поиска добавляем первую транзакцию для актива, 
-            # # то добавляем актив в AssetsOfUser
-            # if asset_obj not in user.assetsofuser_set.all():
-            #     asset_obj.users.add(user)
-            #     asset_obj.save()
-            # 
-            # # current_portfolio = user.portfolio_set.filter(
-            # #     is_current=True).last()
-            # if asset_obj not in current_portfolio.assetofportfolio_set.all():
-            #     current_portfolio.asset.add(asset_obj)
-            #     current_portfolio.save()
-            # 
-            # transaction_obj = Transaction.objects.create(
-            #     transaction_type=transaction_type,
-            #     portfolio=current_portfolio,
-            #     asset=asset_obj,
-            #     date=date,
-            #     price=price,
-            #     accrued_interest=accrued_interest,
-            #     fee=fee,
-            #     quantity=quantity
-            # )
-            # 
-            # transaction_obj.save()
-            # 
-            # print(transaction_obj, type(transaction_obj), transaction_obj.asset, transaction_obj.asset.id)
-            # 
-            # asset_type = asset_obj.group
-            # 
-            # portfolio = get_current_portfolio(request.user)
-            # 
-            # if asset_type in ['stock_shares', 'stock_bonds']:
-            #     update_dividends_of_portfolio(
-            #         portfolio, asset_obj.id, date, transaction_obj)
-            # 
-            # messages.success(request, self.success_message)
-            # return redirect(self.success_url)
-
-        #return super().post(request, *args, **kwargs)
         return render(
             request,
             self.template_name,

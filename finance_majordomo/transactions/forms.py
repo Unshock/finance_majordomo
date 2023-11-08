@@ -24,36 +24,26 @@ class TransactionForm(forms.Form):
         self.request = kwargs.pop('request', None)
         self.assets_to_display = kwargs.pop('assets_to_display', None)
         self.accrued_interest = kwargs.pop('accrued_interest', None)
+        self.accrued_interest_err_message = kwargs.pop(
+            'accrued_interest_err_message', None)
         super(TransactionForm, self).__init__(*args, **kwargs)
 
-        if self.request.method == "GET":
-            print(self.accrued_interest, '1')
-            self.fields['asset'] = forms.ModelChoiceField(
-                queryset=self.assets_to_display,
-                label=_('Asset'),
-                empty_label=_('Choose stock from the list')
-            )
-
-        if self.request.method == "POST":
-            print(self.accrued_interest, '2')
-            self.fields['asset'] = forms.ModelChoiceField(
-                queryset=Asset.objects.all(),
-            )
+        # if self.request.method == "GET":
+        #     #print(self.accrued_interest, '1')
+        #     self.fields['asset'] = forms.ModelChoiceField(
+        #         queryset=self.assets_to_display,
+        #         label=_('Asset'),
+        #         empty_label=_('Choose stock from the list')
+        #     )
+        # 
+        # if self.request.method == "POST":
+        #     #print(self.accrued_interest, '2')
+        #     self.fields['asset'] = forms.ModelChoiceField(
+        #         queryset=Asset.objects.all(),
+        #     )
 
         if self.accrued_interest:
-            self.fields['accrued_interest'] = forms.DecimalField(
-                max_digits=8,
-                decimal_places=2,
-                label=_('Accrued Interest'),
-                widget=forms.TextInput(
-                    attrs={"class": "form-control",
-                           "rows": "10",
-                           "cols": "40",
-                           }
-                )
-            )
-
-            self.fields['accrued_interest'].required = True
+            self.add_accrued_interest_field()
 
         self.order_fields(
             field_order=['transaction_type',
@@ -66,8 +56,13 @@ class TransactionForm(forms.Form):
                          ]
         )
 
-    transaction_type = forms.ChoiceField(
+    asset = forms.ModelChoiceField(
+        queryset=Asset.objects.all(),
+        label=_('Asset'),
+        empty_label=_('Choose stock from the list')
+    )
 
+    transaction_type = forms.ChoiceField(
         label=_('Transaction type'),
         choices=Transaction.transaction_type_choices,
         widget=RadioSelectButtonGroup(
@@ -136,7 +131,7 @@ class TransactionForm(forms.Form):
         date = cleaned_data.get('date')
         quantity = cleaned_data.get('quantity')
 
-        if asset_obj and transaction_type and date and quantity:
+        if isinstance(asset_obj, Asset) and transaction_type and date and quantity:
 
             transaction_validator = TransactionValidator(
                 validation_type='add_validation',
@@ -152,6 +147,10 @@ class TransactionForm(forms.Form):
                     'Such a SELL would raise a short sale situation. '
                     'Short sales are not supported! '
                     'Please check the transaction type, date and quantity'))
+
+            if is_accrued_interest_required(asset_obj) and cleaned_data.get(
+                        'accrued_interest') is None:
+                raise forms.ValidationError(self.accrued_interest_err_message)
 
         return cleaned_data
 
@@ -184,7 +183,7 @@ class TransactionForm(forms.Form):
 
         date = self.cleaned_data.get('date')
         asset = self.cleaned_data.get('asset')
-        print(type(date), type(asset.issuedate))
+        #print(type(date), type(asset.issuedate))
         issuedate = asset.issuedate
         #issuedate = datetime.datetime.strftime(issuedate, '%Y-%m-%d')
         if date < issuedate:
@@ -193,3 +192,15 @@ class TransactionForm(forms.Form):
                 f" ({issuedate})"
             )
         return date
+
+    def add_accrued_interest_field(self):
+        self.fields['accrued_interest'] = forms.DecimalField(
+            max_digits=8,
+            decimal_places=2,
+            label=_('Accrued Interest'),
+            widget=forms.TextInput(),
+            required=True
+        )
+
+    def set_assets_to_display(self, assets_to_display):
+        self.fields['asset'].queryset = assets_to_display
