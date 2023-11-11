@@ -36,7 +36,7 @@ class CreateTransactionService(Service):
         user = self.cleaned_data.get('user')
         current_portfolio = get_current_portfolio(user)
 
-        self.transaction_obj = Transaction.objects.create(
+        transaction_obj = Transaction.objects.create(
             transaction_type=transaction_type,
             portfolio=current_portfolio,
             asset=asset,
@@ -47,7 +47,7 @@ class CreateTransactionService(Service):
             quantity=quantity
         )
 
-        print(self.transaction_obj)
+        print(transaction_obj)
 
         # Если в ходе поиска добавляем первую транзакцию для актива, 
         # то добавляем актив в AssetsOfUser
@@ -61,9 +61,9 @@ class CreateTransactionService(Service):
 
         if asset.group in ['stock_shares', 'stock_bonds']:
             update_dividends_of_portfolio(
-                current_portfolio, asset.id, date, self.transaction_obj)
+                current_portfolio, asset.id, date, transaction_obj)
 
-        return self.transaction_obj
+        return transaction_obj
 
     def post_process(self):
         # Send verification email (check out django-herald)

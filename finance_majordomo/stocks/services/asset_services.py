@@ -284,12 +284,13 @@ def add_asset_to_portfolio(asset, portfolio):
 
 
 def get_or_create_asset_obj(asset_secid: str) -> Asset:
-
+    print('[[[[[[[[[[[[[[[[[[[[[[', asset_secid)
     try:
         asset_obj = Asset.objects.get(secid=asset_secid)
 
     except Asset.DoesNotExist:
         asset_description = get_stock_description(asset_secid)
+        print(asset_description)
         asset_obj = create_asset_obj(asset_description)
-
+        print(asset_obj)
     return asset_obj

@@ -14,6 +14,8 @@ from django.utils.translation import gettext_lazy as _
 from finance_majordomo.transactions.forms import TransactionForm
 
 from finance_majordomo.transactions.models import Transaction
+from .services.transaction_form_creation_service import \
+    CreateTransactionFormService
 from .services.transaction_model_management_services import \
     CreateTransactionService
 from .services.transaction_validation_services import validate_transaction, \
@@ -69,6 +71,9 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     unsuccess_url = reverse_lazy('add_transaction')
     unsuccess_message = _("Transaction has not been added!")
 
+    page_title = _("Add new transaction")
+    button_text = _('Add')
+
     form = TransactionForm()
 
     def get_context_data(self, *, object_list=None, **kwargs):
@@ -78,14 +83,34 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         return context
 
     def get(self, request, *args, **kwargs):
-        assets_to_display_qs = get_all_assets_of_user(request.user)
+        
+        print(request.POST, request.GET)
 
-        asset_id = request.GET.get('asset_id')
-        asset_secid = request.GET.get('asset_secid')
-        asset_group = request.GET.get('asset_group')
+        try:
+            form = CreateTransactionFormService.execute({
+                'asset_id': request.GET.get('asset_id'),
+                'asset_secid': request.GET.get('asset_secid'),
+                'asset_group': request.GET.get('asset_group'),
+                'user': request.user
+            },
+                request=request,
+                accrued_interest_err_message=self.accrued_interest_err_message
+            )
 
-        initial_asset = None
-        accrued_interest = False
+            #print(form)
+            return render(
+                request,
+                self.template_name,
+                {'form': form,  # transaction_form,
+                 'page_title': self.page_title,
+                 'button_text': self.button_text
+                 }
+            )
+
+        except Exception as e:
+            print(e)
+            #return redirect('search')
+            return
 
         if asset_secid and asset_group:
 
@@ -125,20 +150,34 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
             request,
             self.template_name,
             {'form': self.form,#transaction_form,
-             'page_title': _("Add new transaction"),
-             'button_text': _('Add')
+             'page_title': self.page_title,
+             'button_text': self.button_text
              }
         )
 
     def post(self, request, *args, **kwargs):
 
-        form = TransactionForm(
-            request.POST,
+        print(request.POST, request.GET)
+        print(request.POST.items())
+        print(type(request), type(request.POST))
+
+        form = CreateTransactionFormService.execute(
+            {
+                'asset_id': request.POST.get('asset'),
+                'user': request.user
+            },
             request=request,
-            accrued_interest=request.POST.get('accrued_interest'),
             accrued_interest_err_message=self.accrued_interest_err_message
         )
 
+        # form = TransactionForm(
+        #     request.POST,
+        #     request=request,
+        #     accrued_interest=request.POST.get('accrued_interest'),
+        #     accrued_interest_err_message=self.accrued_interest_err_message
+        # )
+        #print(form, form.is_valid())
+        print(form.errors.items())
         if form.is_valid():
             try:
                 CreateTransactionService.execute({
@@ -159,7 +198,9 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
             except Exception as e:
                 print(e)
-
+                
+            
+        
         elif self.accrued_interest_err_message in form.errors.get('__all__'):
             form.add_accrued_interest_field()
 
@@ -167,8 +208,8 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
             request,
             self.template_name,
             {'form': form,
-             'page_title': _("Add new transaction"),
-             'button_text': _('Add')
+             'page_title': self.page_title,
+             'button_text': self.button_text
              }
         )
 

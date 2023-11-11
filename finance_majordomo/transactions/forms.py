@@ -20,10 +20,10 @@ from crispy_forms.layout import Submit
 class TransactionForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
-
-        self.request = kwargs.pop('request', None)
+        self.user = kwargs.pop('user', None) #  user
+        self.request = kwargs.pop('request', None) #  user
         self.assets_to_display = kwargs.pop('assets_to_display', None)
-        self.accrued_interest = kwargs.pop('accrued_interest', None)
+        #self.accrued_interest = kwargs.pop('accrued_interest', None)
         self.accrued_interest_err_message = kwargs.pop(
             'accrued_interest_err_message', None)
         super(TransactionForm, self).__init__(*args, **kwargs)
@@ -42,8 +42,8 @@ class TransactionForm(forms.Form):
         #         queryset=Asset.objects.all(),
         #     )
 
-        if self.accrued_interest:
-            self.add_accrued_interest_field()
+        #if self.accrued_interest:
+        #    self.add_accrued_interest_field()
 
         self.order_fields(
             field_order=['transaction_type',
@@ -123,8 +123,8 @@ class TransactionForm(forms.Form):
 
         cleaned_data = super().clean()
 
-        # print('cleaned_data', self.cleaned_data)
-        # print('cleaned_data', cleaned_data)
+        print('cleaned_data', self.cleaned_data)
+        print('cleaned_data', cleaned_data)
 
         asset_obj = cleaned_data.get('asset')
         transaction_type = cleaned_data.get('transaction_type')
@@ -141,15 +141,21 @@ class TransactionForm(forms.Form):
                 quantity=quantity
             )
 
-            if not validate_transaction(self.request.user,
+            if not validate_transaction(self.user,
                                         transaction_validator):
                 raise forms.ValidationError(_(
                     'Such a SELL would raise a short sale situation. '
                     'Short sales are not supported! '
                     'Please check the transaction type, date and quantity'))
-
+            
+            
+            print('=-=========================================')
+            print(is_accrued_interest_required(asset_obj), cleaned_data.get('accrued_interest'), asset_obj)
+            print('=-=========================================')
+            
             if is_accrued_interest_required(asset_obj) and cleaned_data.get(
                         'accrued_interest') is None:
+                
                 raise forms.ValidationError(self.accrued_interest_err_message)
 
         return cleaned_data
