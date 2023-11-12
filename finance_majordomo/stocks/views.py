@@ -21,6 +21,8 @@ from common.utils.stocks import get_asset_board_history, \
     make_json_trade_info_dict
 from finance_majordomo.dividends.utils import get_dividend_result_of_portfolio
 from .models import Asset
+from .services.asset_model_management_services import \
+    create_asset_obj_from_description
 from .services.user_assets_services import get_current_portfolio
 from ..currencies.models import CurrencyRate
 from ..transactions.services.transaction_calculation_services import get_asset_quantity_for_portfolio, \
@@ -604,13 +606,7 @@ class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         if form.is_valid():
 
             stock_description = form.cleaned_data.get('stock_description')
-
-            stock_group = stock_description.get('Group')
-
-            if stock_group == 'stock_shares':
-                add_asset(stock_description)
-
-
+            create_asset_obj_from_description(stock_description)
 
             messages.success(request, self.success_message)
             return redirect(self.success_url)

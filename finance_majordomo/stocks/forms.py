@@ -4,9 +4,10 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 from finance_majordomo.stocks.models import Stock
 
-from common.utils.stocks import validate_ticker, get_stock_description
+from common.utils.stocks import validate_ticker, get_asset_description
 
 
+#to delete
 class StockForm(ModelForm):
 
     ticker = forms.CharField(
@@ -21,10 +22,10 @@ class StockForm(ModelForm):
     def clean_ticker(self):
         ticker = self.cleaned_data['ticker'].upper()
 
-        if Stock.objects.filter(ticker=ticker).count() == 1:
+        if Stock.objects.filter(secid=ticker).count() == 1:
             raise ValidationError(_(f"Тикер {ticker} уже добавлен"))
 
-        stock_description = get_stock_description(ticker)
+        stock_description = get_asset_description(ticker)
 
         if not stock_description:
             raise ValidationError(_(f"Ticker {ticker} hasn't been found"))

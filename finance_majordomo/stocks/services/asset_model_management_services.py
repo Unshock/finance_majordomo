@@ -2,31 +2,32 @@ from service_objects.fields import ModelField
 from service_objects.services import Service
 from django import forms
 
-from common.utils.stocks import get_stock_description, get_bond_coupon_history
+from common.utils.stocks import get_asset_description, get_bond_coupon_history
 from finance_majordomo.dividends.utils import get_stock_dividends, \
     add_dividends_to_model
 from finance_majordomo.stocks.models import Asset, Bond, Stock
 from finance_majordomo.stocks.utils import get_asset_history_data, \
-    add_bond_history_data_to_model, add_share_history_data_to_model, \
     add_share_history_data_to_model2, add_bond_history_data_to_model2
-from finance_majordomo.stocks.views import get_normalized_asset_type
 
 
-def get_or_create_asset_obj2(asset_secid: str, primary_boardid: str = None) -> Asset:
+
+def get_or_create_asset_obj(
+        asset_secid: str, primary_boardid: str = None) -> Asset:
+
     print('[[[[[[[[[[[[[[[[[[[[[[', asset_secid)
+
     try:
         asset_obj = Asset.objects.get(secid=asset_secid)
 
     except Asset.DoesNotExist:
-        asset_description = get_stock_description(asset_secid)
+        asset_description = get_asset_description(asset_secid)
         asset_description['primary_boardid'] = primary_boardid
-        print(asset_description.items())
-        asset_obj = create_asset_obj2(asset_description)
+        asset_obj = create_asset_obj_from_description(asset_description)
 
     return asset_obj
 
 
-def create_asset_obj2(asset_description: dict) -> Asset:
+def create_asset_obj_from_description(asset_description: dict) -> Asset:
     secid = asset_description.get('SECID')
     isin = asset_description.get('ISIN')
 
@@ -51,7 +52,7 @@ def create_asset_obj2(asset_description: dict) -> Asset:
     groupname = asset_description.get('GROUPNAME')
     primary_boardid = asset_description.get('primary_boardid')
 
-    asset_type = get_normalized_asset_type(type)
+    #asset_type = get_normalized_asset_type(type)
 
     startdatemoex = asset_description.get('STARTDATEMOEX')
     buybackdate = asset_description.get('BUYBACKDATE')
@@ -77,7 +78,7 @@ def create_asset_obj2(asset_description: dict) -> Asset:
         'group': group,
         'groupname': groupname,
         'primary_boardid': primary_boardid,
-        'asset_type': asset_type,
+        'asset_type': group, # mb to delete
         'startdatemoex': startdatemoex,
         'buybackdate': buybackdate,
         'matdate': matdate,
@@ -167,7 +168,7 @@ class CreateAssetService(Service):
             groupname=groupname,
             primary_boardid=primary_boardid,
         )
-        print(asset_obj)
+
         return asset_obj
 
     def _create_sub_asset(self, asset):

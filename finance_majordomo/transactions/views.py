@@ -22,8 +22,7 @@ from .services.transaction_model_management_services import \
 from .services.transaction_validation_services import validate_transaction, \
     TransactionValidator, is_accrued_interest_required
 from ..search.forms import SearchResultForm
-from ..stocks.services.asset_services import get_or_create_asset_obj, \
-    get_all_assets_of_user
+from ..stocks.services.asset_services import get_all_assets_of_user
 from ..stocks.services.user_assets_services import get_current_portfolio
 
 

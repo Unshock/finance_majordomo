@@ -8,7 +8,6 @@ from ..users.models import User, Portfolio
 
 
 class Asset(models.Model):
-
     asset_types = [
         ('stocks', 'stocks'),
         ('bonds', 'bonds'),
@@ -138,7 +137,6 @@ class Asset(models.Model):
 
 
 class Stock(Asset):
-
     latest_dividend_update = models.DateField(
         verbose_name='Дата последнего обновления информации о дивидендах',
         blank=True,
@@ -175,7 +173,6 @@ class StocksOfUser(models.Model):
 
 
 class Bond(Asset):
-
     startdatemoex = models.DateField(
         verbose_name="Дата начала торгов на MOEX",
         blank=True
@@ -256,7 +253,6 @@ class BondOfUser(models.Model):
 
 
 class ProdCalendar(models.Model):
-
     date_status_choice = [
         ('0', 'Working'),
         ('1', 'Nonworking'),
@@ -276,6 +272,7 @@ class ProdCalendar(models.Model):
     class Meta:
         ordering = ['date', 'date_status']
 
+
 class AssetsHistoricalData(models.Model):
     asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
 
@@ -293,8 +290,10 @@ class AssetsHistoricalData(models.Model):
     waval = models.DecimalField(max_digits=13, decimal_places=5, null=True)
     trendclspr = models.DecimalField(max_digits=7, decimal_places=3, null=True)
 
-    couponpercent = models.DecimalField(max_digits=13, decimal_places=5, null=True)
-    couponvalue = models.DecimalField(max_digits=13, decimal_places=5, null=True)
+    couponpercent = models.DecimalField(max_digits=13, decimal_places=5,
+                                        null=True)
+    couponvalue = models.DecimalField(max_digits=13, decimal_places=5,
+                                      null=True)
     yieldclose = models.DecimalField(max_digits=13, decimal_places=5, null=True)
 
     is_closed = models.BooleanField(blank=False)
@@ -302,7 +301,6 @@ class AssetsHistoricalData(models.Model):
 
     class Meta:
         unique_together = ['asset', 'tradedate']
-
 
 
 # class SharesHistoricalData(models.Model):
@@ -358,9 +356,6 @@ class AssetsHistoricalData(models.Model):
 #         unique_together = ['bond', 'tradedate']
 
 
-
-
-
 class AssetOfPortfolio(models.Model):
     asset = models.ForeignKey(
         Asset,
@@ -393,4 +388,3 @@ class AssetsOfUser(models.Model):
         verbose_name = "Активы пользователя"
         verbose_name_plural = "Активы пользователей"
         ordering = ['user']
-        

@@ -9,7 +9,7 @@ from finance_majordomo.stocks.views import UsersStocks
 from .services.transaction_validation_services import validate_transaction, \
     TransactionValidator, is_accrued_interest_required
 
-from common.utils.stocks import validate_ticker, get_stock_description
+from common.utils.stocks import validate_ticker, get_asset_description
 
 from bootstrap4.widgets import RadioSelectButtonGroup
 

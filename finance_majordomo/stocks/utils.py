@@ -70,7 +70,8 @@ def add_share_history_data_to_model(stock_obj, asset_history_data):
 
             is_closed=True
         )
-        
+
+
 def add_share_history_data_to_model2(asset, asset_history_data):
     for day_data in asset_history_data:
         AssetsHistoricalData.objects.create(
@@ -117,6 +118,7 @@ def add_bond_history_data_to_model(bond_obj, asset_history_data):
 
             is_closed=True
         )
+
 
 def add_bond_history_data_to_model2(asset, asset_history_data):
     #print(asset_history_data)

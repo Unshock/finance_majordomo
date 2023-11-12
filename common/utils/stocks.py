@@ -167,9 +167,9 @@ def get_bond_current_price(secid: str, board):
 
 #get_stock_current_price('gazp')
 
-def get_stock_description(ticker: str):
+def get_asset_description(secid: str):
     with requests.Session() as session:
-        data = apimoex.find_security_description(session, ticker.upper())
+        data = apimoex.find_security_description(session, secid.upper())
         # print(data)
         result_data = {}
         # print(111)
@@ -180,14 +180,14 @@ def get_stock_description(ticker: str):
 
 import pprint
 
-# p1 = pprint.pformat(get_stock_description('LQDT'), indent=2)
-# p2 = pprint.pformat(get_stock_description('sber'), indent=2)
-p3 = pprint.pformat(get_stock_description('zsgpp'), indent=2)
-p4 = pprint.pformat(get_stock_description('lqdt'), indent=2)
-#p5 = pprint.pformat(get_stock_description('SU26222RMFS8'), indent=2)
+# p1 = pprint.pformat(get_asset_description('LQDT'), indent=2)
+# p2 = pprint.pformat(get_asset_description('sber'), indent=2)
+#p3 = pprint.pformat(get_asset_description('zsgpp'), indent=2)
+#p4 = pprint.pformat(get_asset_description('lqdt'), indent=2)
+#p5 = pprint.pformat(get_asset_description('SU26222RMFS8'), indent=2)
 
 
-# p6 = pprint.pformat(get_stock_description('RU000A0JTW83'), indent=2)
+# p6 = pprint.pformat(get_asset_description('RU000A0JTW83'), indent=2)
 # print(p1)
 # print(p2)
 #print(p3)
@@ -245,7 +245,7 @@ def get_security(security_info: str):
 # for el in a[:10]:
 #    print(el['secid'], el['name'], el.get('type'), el.get('group'))
 #
-# b = get_stock_description('SBER')
+# b = get_asset_description('SBER')
 # for key, value in b.items():
 #    print(key, value)
 

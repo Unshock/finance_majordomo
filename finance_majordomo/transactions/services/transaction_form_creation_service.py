@@ -4,8 +4,10 @@ from service_objects.services import Service
 from django import forms
 
 from finance_majordomo.stocks.models import Asset
+from finance_majordomo.stocks.services.asset_model_management_services import \
+    get_or_create_asset_obj
 from finance_majordomo.stocks.services.asset_services import \
-    get_or_create_asset_obj, get_all_assets_of_user
+    get_all_assets_of_user
 from finance_majordomo.transactions.forms import TransactionForm
 from finance_majordomo.users.models import User
 from finance_majordomo.users.utils.utils import get_current_portfolio

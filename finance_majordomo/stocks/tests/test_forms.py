@@ -4,7 +4,7 @@ from .setting import SettingsStocks
 from ..forms import StockForm
 import mock
 from common.utils import stocks
-from common.utils.stocks import get_stock_description
+from common.utils.stocks import get_asset_description
 #from mocked_utils import mocked_get_stock_description
 from .mocked_utils import mocked_get_stock_description
 from django.utils.translation import gettext_lazy as _
