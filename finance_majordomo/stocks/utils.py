@@ -38,7 +38,7 @@ def get_asset_history_data(asset, start_date=None):
         asset.secid,
         start_date=start_date,
         market=get_asset_market(asset.group),
-        board=get_asset_board(asset.type))
+        board=asset.primary_boardid)
 
     return asset_history_data[get_first_trade_date_index(asset_history_data):]
 
@@ -70,14 +70,60 @@ def add_share_history_data_to_model(stock_obj, asset_history_data):
 
             is_closed=True
         )
+        
+def add_share_history_data_to_model2(asset, asset_history_data):
+    for day_data in asset_history_data:
+        AssetsHistoricalData.objects.create(
+            asset=Asset.objects.get(id=asset.id),
+
+            tradedate=day_data.get('TRADEDATE'),
+            numtrades=day_data.get('NUMTRADES'),
+            value=day_data.get('VALUE'),
+            open=day_data.get('OPEN'),
+            low=day_data.get('LOW'),
+            high=day_data.get('HIGH'),
+            legalcloseprice=day_data.get('LEGALCLOSEPRICE'),
+            waprice=day_data.get('WAPRICE'),
+            close=day_data.get('CLOSE'),
+            volume=day_data.get('VOLUME'),
+            waval=day_data.get('WAVAL'),
+            trendclspr=day_data.get('TRENDCLSPR'),
+
+            is_closed=True
+        )
 
 
 def add_bond_history_data_to_model(bond_obj, asset_history_data):
-    print(asset_history_data)
+    #print(asset_history_data)
 
     for day_data in asset_history_data:
         AssetsHistoricalData.objects.create(
             asset=Asset.objects.get(id=bond_obj.asset_ptr_id),
+
+            tradedate=day_data.get('TRADEDATE'),
+            numtrades=day_data.get('NUMTRADES'),
+            value=day_data.get('VALUE'),
+            open=day_data.get('OPEN'),
+            low=day_data.get('LOW'),
+            high=day_data.get('HIGH'),
+            legalcloseprice=day_data.get('LEGALCLOSEPRICE'),
+            waprice=day_data.get('WAPRICE'),
+            close=day_data.get('CLOSE'),
+            volume=day_data.get('VOLUME'),
+
+            yieldclose=day_data.get("YIELDCLOSE"),
+            couponpercent=day_data.get("COUPONPERCENT"),
+            couponvalue=day_data.get("COUPONVALUE"),
+
+            is_closed=True
+        )
+
+def add_bond_history_data_to_model2(asset, asset_history_data):
+    #print(asset_history_data)
+
+    for day_data in asset_history_data:
+        AssetsHistoricalData.objects.create(
+            asset=Asset.objects.get(id=asset.id),
 
             tradedate=day_data.get('TRADEDATE'),
             numtrades=day_data.get('NUMTRADES'),

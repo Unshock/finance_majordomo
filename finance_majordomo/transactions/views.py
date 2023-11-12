@@ -5,6 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
+from django.views import View
 from django.views.generic import ListView, CreateView, DeleteView
 
 from finance_majordomo.stocks.models import Asset, AssetOfPortfolio
@@ -20,6 +21,7 @@ from .services.transaction_model_management_services import \
     CreateTransactionService
 from .services.transaction_validation_services import validate_transaction, \
     TransactionValidator, is_accrued_interest_required
+from ..search.forms import SearchResultForm
 from ..stocks.services.asset_services import get_or_create_asset_obj, \
     get_all_assets_of_user
 from ..stocks.services.user_assets_services import get_current_portfolio
@@ -74,110 +76,55 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     page_title = _("Add new transaction")
     button_text = _('Add')
 
-    form = TransactionForm()
-
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['page_title'] = _("Add new transaction")
-        context['button_text'] = _("Add")
+        context['page_title'] = self.page_title
+        context['button_text'] = self.button_text
         return context
 
     def get(self, request, *args, **kwargs):
-        
-        print(request.POST, request.GET)
 
         try:
             form = CreateTransactionFormService.execute({
                 'asset_id': request.GET.get('asset_id'),
                 'asset_secid': request.GET.get('asset_secid'),
                 'asset_group': request.GET.get('asset_group'),
-                'user': request.user
+                'primary_boardid': request.GET.get('primary_boardid'),
+                'user': request.user,
+                'accrued_interest_err_message':
+                    self.accrued_interest_err_message
             },
-                request=request,
-                accrued_interest_err_message=self.accrued_interest_err_message
+                request=request
             )
 
-            #print(form)
             return render(
                 request,
                 self.template_name,
-                {'form': form,  # transaction_form,
+                {'form': form,
                  'page_title': self.page_title,
                  'button_text': self.button_text
                  }
             )
 
-        except Exception as e:
-            print(e)
-            #return redirect('search')
-            return
-
-        if asset_secid and asset_group:
-
-            print('a')
-
-            asset_obj = get_or_create_asset_obj(asset_secid)
-            asset_obj_qs = Asset.objects.filter(id=asset_obj.id)
-
-            assets_to_display_qs |= asset_obj_qs
-            initial_asset = asset_obj
-
-            self.form.fields['asset'].initial = initial_asset
-
-
-            if asset_group == 'stock_bonds':
-                accrued_interest = True
-
-        elif asset_id:
-            print()
-            if Asset.objects.get(id=asset_id).group == 'stock_bonds':
-                accrued_interest = True
-            self.form.fields['asset'].initial = asset_id
-
-        if not assets_to_display_qs:
+        except ValueError:
             return redirect('search')
 
-        self.form.set_assets_to_display(assets_to_display_qs)
-        # transaction_form = TransactionForm(
-        #     request=request,
-        #     assets_to_display=assets_to_display_qs,
-        #     accrued_interest=accrued_interest,
-        #     accrued_interest_err_message=self.accrued_interest_err_message
-        # )
-        # transaction_form.initial['asset'] = initial_asset
-
-        return render(
-            request,
-            self.template_name,
-            {'form': self.form,#transaction_form,
-             'page_title': self.page_title,
-             'button_text': self.button_text
-             }
-        )
+        except Exception as e:
+            messages.error(self.request, e)
+            return redirect('transactions')
 
     def post(self, request, *args, **kwargs):
-
-        print(request.POST, request.GET)
-        print(request.POST.items())
-        print(type(request), type(request.POST))
 
         form = CreateTransactionFormService.execute(
             {
                 'asset_id': request.POST.get('asset'),
-                'user': request.user
+                'user': request.user,
+                'accrued_interest_err_message':
+                    self.accrued_interest_err_message
             },
-            request=request,
-            accrued_interest_err_message=self.accrued_interest_err_message
+            request=request
         )
 
-        # form = TransactionForm(
-        #     request.POST,
-        #     request=request,
-        #     accrued_interest=request.POST.get('accrued_interest'),
-        #     accrued_interest_err_message=self.accrued_interest_err_message
-        # )
-        #print(form, form.is_valid())
-        print(form.errors.items())
         if form.is_valid():
             try:
                 CreateTransactionService.execute({
@@ -197,10 +144,9 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
                 return redirect(self.success_url)
 
             except Exception as e:
-                print(e)
-                
-            
-        
+                messages.error(self.request, e)
+                return redirect('transactions')
+
         elif self.accrued_interest_err_message in form.errors.get('__all__'):
             form.add_accrued_interest_field()
 
@@ -222,13 +168,6 @@ class DeleteTransaction(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
     success_message = _("Transaction has been successfully deleted!")
     error_message = _('Delete of this BUY would raise a short sale situation. '
                       'Short sales are not supported!')
-
-    # def dispatch(self, request, *args, **kwargs):
-    #     if self.get_object().creator.id == request.user.id \
-    #             or request.user.is_staff:
-    #         return super().dispatch(request, *args, **kwargs)
-    #     messages.error(request, _('You can delete only your labels'))
-    #     return redirect('labels')
 
     def post(self, request, *args, **kwargs):
 
@@ -265,3 +204,4 @@ class DeleteTransaction(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
         context['button_text'] = _("Delete")
         context['delete_object'] = str(self.get_object())
         return context
+

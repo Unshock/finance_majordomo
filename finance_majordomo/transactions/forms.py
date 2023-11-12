@@ -59,7 +59,7 @@ class TransactionForm(forms.Form):
     asset = forms.ModelChoiceField(
         queryset=Asset.objects.all(),
         label=_('Asset'),
-        empty_label=_('Choose stock from the list')
+        empty_label=_('Choose asset from the list')
     )
 
     transaction_type = forms.ChoiceField(
@@ -190,9 +190,10 @@ class TransactionForm(forms.Form):
         date = self.cleaned_data.get('date')
         asset = self.cleaned_data.get('asset')
         #print(type(date), type(asset.issuedate))
+        
         issuedate = asset.issuedate
         #issuedate = datetime.datetime.strftime(issuedate, '%Y-%m-%d')
-        if date < issuedate:
+        if issuedate and date < issuedate:
             raise ValidationError(
                 _("The stock started trading after the specified date") +
                 f" ({issuedate})"

@@ -15,3 +15,15 @@ class SearchForm(forms.Form):
     )
 
 
+class SearchResultForm(forms.Form):
+
+    secid = forms.CharField(disabled=True)
+    shortname = forms.CharField(disabled=True)
+    regnumber = forms.CharField(disabled=True)
+    name = forms.CharField(disabled=True)
+    isin = forms.CharField(disabled=True, widget=forms.TextInput(attrs={"class": "form-label"}))
+    type = forms.CharField(disabled=True, widget=forms.HiddenInput)
+    group = forms.CharField(disabled=True, widget=forms.HiddenInput)
+    primary_boardid = forms.CharField(disabled=True, widget=forms.HiddenInput)
+
+

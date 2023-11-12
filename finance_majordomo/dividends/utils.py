@@ -149,6 +149,7 @@ def add_dividends_to_model(asset_obj, dividend_dict):
             print(dividend)
             dividend.save()
 
+    asset_obj.latest_accrual_update = datetime.today()
     asset_obj.latest_dividend_update = datetime.today()
     #print('stock', stock_obj, stock_obj.latest_dividend_update)
     asset_obj.save()

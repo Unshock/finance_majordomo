@@ -49,7 +49,8 @@ class Asset(models.Model):
 
     issuedate = models.DateField(
         verbose_name="Дата начала торгов",
-        blank=True
+        blank=True,
+        null=True
     )
 
     latname = models.CharField(
@@ -97,6 +98,12 @@ class Asset(models.Model):
         blank=True
     )
 
+    primary_boardid = models.CharField(
+        max_length=100,
+        verbose_name="Основной режим торгов",
+        blank=True
+    )
+
     portfolios = models.ManyToManyField(
         Portfolio,
         through='AssetOfPortfolio',
@@ -109,6 +116,12 @@ class Asset(models.Model):
         through='AssetsOfUser',
         through_fields=('asset', 'user'),
         related_name='asset1'
+    )
+
+    latest_accrual_update = models.DateField(
+        verbose_name='Дата последнего обновления информации о начислениях',
+        blank=True,
+        null=True
     )
 
     def __str__(self):

@@ -4,6 +4,8 @@ from common.utils.stocks import get_stock_description, get_bond_coupon_history
 from finance_majordomo.dividends.utils import add_dividends_to_model, \
     get_stock_dividends
 from finance_majordomo.stocks.models import Asset, Stock, Bond, AssetOfPortfolio
+from finance_majordomo.stocks.services.asset_model_management_services import \
+    create_asset_obj2
 from finance_majordomo.stocks.utils import add_share_history_data_to_model, \
     add_bond_history_data_to_model, get_asset_history_data, get_asset_board
 from finance_majordomo.stocks.views import get_normalized_asset_type
@@ -33,6 +35,8 @@ def create_base_asset(asset_description: dict) -> Asset:
 
     group = asset_description.get('GROUP')
     groupname = asset_description.get('GROUPNAME')
+    primary_boardid = asset_description.get('primary_boardid')
+    
 
     asset_type = get_normalized_asset_type(type)
 
@@ -60,9 +64,12 @@ def create_base_asset(asset_description: dict) -> Asset:
         group=group,
         type=type,
         groupname=groupname,
+        primary_boardid=primary_boardid
         #stock_data=json_stock_board_data,
     )
-
+    
+    print("ASSET OBJ", asset_obj)
+    
     return asset_obj
 
 
@@ -90,6 +97,7 @@ def add_asset(stock_description: dict) -> Stock:
 
     group = stock_description.get('GROUP')
     groupname = stock_description.get('GROUPNAME')
+    primary_boardid = stock_description.get('primary_boardid')
 
     asset_type = get_normalized_asset_type(type)
 
@@ -100,6 +108,8 @@ def add_asset(stock_description: dict) -> Stock:
 
     if None in check_list:
         print("SOMETHING HAVE NOT BEEN LOADED - GOT NONE")
+        
+    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAA'", issuedate)
 
     # Ищем инфу о ценах акции за весь период чтобы записать в JSONField
 
@@ -119,15 +129,19 @@ def add_asset(stock_description: dict) -> Stock:
         group=group,
         type=type,
         groupname=groupname,
+        primary_boardid=primary_boardid
         #stock_data=json_stock_board_data,
     )
+    
+    print(stock_obj, '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
 
     asset_history_data = get_asset_history_data(stock_obj)
     
     try:
         add_share_history_data_to_model(stock_obj, asset_history_data)
 
-    except Exception('HISTORY PROBLEM'):
+    except Exception as e:
+        print('History problev', e)
         pass
 
     # add dividend for stock
@@ -165,6 +179,7 @@ def add_bond(stock_description: dict) -> Bond:
 
     group = stock_description.get('GROUP')
     groupname = stock_description.get('GROUPNAME')
+    primary_boardid = stock_description.get('primary_boardid')
 
     asset_type = get_normalized_asset_type(type)
 
@@ -212,6 +227,7 @@ def add_bond(stock_description: dict) -> Bond:
         group=group,
         type=type,
         groupname=groupname,
+        primary_boardid=primary_boardid,
 
         startdatemoex=startdatemoex,
         buybackdate=buybackdate,
@@ -225,8 +241,8 @@ def add_bond(stock_description: dict) -> Bond:
 
     )
 
-    print(secid)
-    print(type, board)
+    #print(secid)
+    #print(type, board)
     asset_history_data = get_asset_history_data(bond_obj)
 
     try:
@@ -283,14 +299,19 @@ def add_asset_to_portfolio(asset, portfolio):
     )
 
 
-def get_or_create_asset_obj(asset_secid: str) -> Asset:
+def get_or_create_asset_obj(asset_secid: str, primary_boardid: str = None) -> Asset:
     print('[[[[[[[[[[[[[[[[[[[[[[', asset_secid)
     try:
         asset_obj = Asset.objects.get(secid=asset_secid)
 
     except Asset.DoesNotExist:
         asset_description = get_stock_description(asset_secid)
-        print(asset_description)
-        asset_obj = create_asset_obj(asset_description)
-        print(asset_obj)
+        asset_description['primary_boardid'] = primary_boardid
+
+        #asset_obj = create_asset_obj(asset_description)
+        try:
+            asset_obj = create_asset_obj2(asset_description)
+        except Exception as e:
+            print('1', e)
+        
     return asset_obj

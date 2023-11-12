@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load bootstrap4 %}
 {% block content %}
     <div class="container wrapper flex-grow-1">
         <h1 class="my-4">{{ page_title }}</h1>
@@ -16,12 +17,13 @@
                     <th>{% translate "ISIN" %}</th>
                     <th>{% translate "Type" %}</th>
                     <th>{% translate "Group" %}</th>
+                    <th>{% translate "BoardID" %}</th>
                     <th></th>
 
                 </tr>
             </thead>
         
-            <tbody method="get">
+            <tbody>
                 {% for search_result in search_result_list %}
                 <tr>
                     <td>{{ search_result.secid }}</td>
@@ -31,16 +33,17 @@
                     <td>{{ search_result.isin }}</td>
                     <td>{{ search_result.type }}</td>
                     <td>{{ search_result.group }}</td>
+                    <td>{{ search_result.primary_boardid }}</td>
                     <td>
                         <div class="d-flex justify-content-left">
-                            <a class="btn btn-primary btn-sm" href="{% url "add_transaction" %}?asset_secid={{ search_result.secid }}&asset_group={{ search_result.group }}" role="button">{% translate "Add transaction" %}</a>
+                            <a class="btn btn-primary btn-sm" href="{% url "add_transaction" %}?asset_secid={{ search_result.secid }}&asset_group={{ search_result.group }}&primary_boardid={{ search_result.primary_boardid }}" role="button">{% translate "Add transaction" %}</a>
                         </div>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-            
+           
         {% else %}
             
         <h1 class="my-4">Nothing has been found</h1>    
