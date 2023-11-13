@@ -10,7 +10,12 @@ from moneyfmt import moneyfmt
 
 from finance_majordomo.dividends.models import Dividend, DividendsOfUser, \
     DividendsOfPortfolio
-from ..transactions.services.transaction_calculation_services import get_asset_quantity_for_portfolio
+from .dividend_services.dividend_model_management_services import \
+    TogglePortfolioDividendService
+from .dividend_services.dividend_view_services import \
+    PortfolioAccrualViewContextService
+from ..transactions.services.transaction_calculation_services import \
+    get_asset_quantity_for_portfolio
 from django.utils.translation import gettext_lazy as _
 
 from ..users.utils.utils import get_current_portfolio
@@ -26,66 +31,16 @@ class Dividends(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['page_title'] = _("Dividend list")
 
-        dividend_list = []
-        total_divs_payable = 0
-        total_divs_received = 0
-        total_divs_upcoming = 0
+        portfolio = get_current_portfolio(self.request.user)
 
-        user = self.request.user
-        portfolio = get_current_portfolio(user)
-        date_today_dt = datetime.today().date()
-
-        delta = timedelta(days=90)
-
-        dividends_of_portfolio = Dividend.objects.filter(
-            id__in=portfolio.dividendsofportfolio_set.values_list('dividend'),
-            date__lte=date_today_dt + delta
-        )\
-            .order_by('-date')
-
-        print(dividends_of_portfolio, 'aYAYAYAYAYAYAYAYA')
-
-
-
-        for div_obj in dividends_of_portfolio:
-            asset = div_obj.asset
-            amount = div_obj.amount
-
-            date_dt = div_obj.date
-            date_str = datetime.strftime(date_dt, '%Y-%m-%d')
-
-            is_upcoming = False if date_dt <= date_today_dt else True
-
-            is_received = DividendsOfPortfolio.objects.get(
-                portfolio=portfolio, dividend=div_obj).is_received
-
-            quantity_for_the_date = get_asset_quantity_for_portfolio(
-                portfolio.id, asset.id, date=date_str)
-
-            if quantity_for_the_date > 0:
-                total_div = Decimal(quantity_for_the_date * amount)
-
-                if not is_upcoming:
-                    total_divs_payable += total_div
-                    total_divs_received += total_div if is_received else 0
-
-                else:
-                    total_divs_upcoming += total_div
-
-                dividend_list.append({
-                    'div_obj': div_obj,
-                    'date': date_str,
-                    'quantity': quantity_for_the_date,
-                    'total_div': total_div,
-                    'is_received': is_received,
-                    'is_upcoming': is_upcoming,
-                })
-
-        total_divs_payable = moneyfmt(
-            total_divs_payable * Decimal(0.87), sep=' ')
-
-        total_divs_received = moneyfmt(
-            total_divs_received * Decimal(0.87), sep=' ')
+        dividend_list, \
+        total_divs_payable, \
+        total_divs_received, \
+        total_divs_upcoming = PortfolioAccrualViewContextService.execute(
+            {'portfolio': portfolio,
+             'days_delta': 90
+             }
+        )
 
         context['dividend_list'] = dividend_list
         context['total_divs_payable'] = total_divs_payable
@@ -93,59 +48,162 @@ class Dividends(LoginRequiredMixin, ListView):
         context['total_divs_upcoming'] = total_divs_upcoming
         return context
 
+        # dividend_list = []
+        # total_divs_payable = 0
+        # total_divs_received = 0
+        # total_divs_upcoming = 0
+        # 
+        # user = self.request.user
+        # portfolio = get_current_portfolio(user)
+        # date_today_dt = datetime.today().date()
+        # 
+        # delta = timedelta(days=90)
+        # 
+        # dividends_of_portfolio = Dividend.objects.filter(
+        #     id__in=portfolio.dividendsofportfolio_set.values_list('dividend'),
+        #     date__lte=date_today_dt + delta
+        # )\
+        #     .order_by('-date')
+        # 
+        # print(dividends_of_portfolio, 'aYAYAYAYAYAYAYAYA')
+        # print(DividendsOfPortfolio.objects.filter(portfolio=portfolio))
+        # print('11111111111111111')
+        # for el in DividendsOfPortfolio.objects.filter(portfolio=portfolio):
+        #     print(el.dividend.date)
+        # 
+        # for div_obj in dividends_of_portfolio:
+        #     asset = div_obj.asset
+        #     amount = div_obj.amount
+        # 
+        #     date_dt = div_obj.date
+        #     date_str = datetime.strftime(date_dt, '%Y-%m-%d')
+        # 
+        #     is_upcoming = False if date_dt <= date_today_dt else True
+        # 
+        #     is_received = DividendsOfPortfolio.objects.get(
+        #         portfolio=portfolio, dividend=div_obj).is_received
+        # 
+        #     quantity_for_the_date = get_asset_quantity_for_portfolio(
+        #         portfolio.id, asset.id, date=date_dt)
+        # 
+        # 
+        #     if quantity_for_the_date > 0:
+        #         total_div = Decimal(quantity_for_the_date * amount)
+        # 
+        #         if not is_upcoming:
+        #             total_divs_payable += total_div
+        #             total_divs_received += total_div if is_received else 0
+        # 
+        #         else:
+        #             total_divs_upcoming += total_div
+        # 
+        #         dividend_list.append({
+        #             'div_obj': div_obj,
+        #             'date': date_str,
+        #             'quantity': quantity_for_the_date,
+        #             'total_div': total_div,
+        #             'is_received': is_received,
+        #             'is_upcoming': is_upcoming,
+        #         })
+        # 
+        # total_divs_payable = moneyfmt(
+        #     total_divs_payable * Decimal(0.87), sep=' ')
+        # 
+        # total_divs_received = moneyfmt(
+        #     total_divs_received * Decimal(0.87), sep=' ')
+        # 
+        # context['dividend_list'] = dividend_list
+        # context['total_divs_payable'] = total_divs_payable
+        # context['total_divs_received'] = total_divs_received
+        # context['total_divs_upcoming'] = total_divs_upcoming
+        # return context
+
 
 class UsersDividends(LoginRequiredMixin, ListView):
     pass
 
 
-class AddDivToUser(SuccessMessageMixin, LoginRequiredMixin, View):
+class TogglePortfolioDiv(SuccessMessageMixin, LoginRequiredMixin, View):
     model = Dividend
     login_url = 'login'
-    success_message = _("Stock has been successfully added to user's stock list")
 
     def get(self, request, *args, **kwargs):
-        user = request.user
 
-        dividend_id = kwargs['pk_dividend']
-        dividend = Dividend.objects.get(id=dividend_id)
-
-        try:
-            dividend_of_user = DividendsOfUser.objects.get(user=user,
-                                                           dividend=dividend)
-        except DividendsOfUser.DoesNotExist:
-            raise Exception('such dividend has not been found')
-            #dividend.users.add(user)
-            #dividend.save()
-            # dividend_of_user = DividendsOfUser.objects.get(user=user,
-            #                                                dividend=dividend)
-        print(dividend_of_user.is_received)
-        dividend_of_user.is_received = True
-        dividend_of_user.save()
-        print(dividend_of_user.is_received)
-        return redirect('dividends')
-
-
-class RemoveDivFromUser(SuccessMessageMixin, LoginRequiredMixin, View):
-    model = Dividend
-    login_url = 'login'
-    success_message = _(
-        "Stock has been successfully added to user's stock list")
-
-    def get(self, request, *args, **kwargs):
-        user = request.user
-
-        dividend_id = kwargs['pk_dividend']
-        dividend = Dividend.objects.get(id=dividend_id)
+        portfolio = get_current_portfolio(request.user)
+        dividend = Dividend.objects.get(id=kwargs.get('pk_dividend'))
 
         try:
-            dividend_of_user = DividendsOfUser.objects.get(user=user,
-                                                           dividend=dividend)
-        except DividendsOfUser.DoesNotExist:
+            TogglePortfolioDividendService.execute({
+                'portfolio': portfolio,
+                'dividend': dividend,
+            })
 
-            raise Exception('such dividend has not been found')
-
-        dividend_of_user.is_received = False
-        dividend_of_user.save()
-
+        except Exception as e:
+            print(e)
 
         return redirect('dividends')
+
+# class AddDivToUser(SuccessMessageMixin, LoginRequiredMixin, View):
+#     model = Dividend
+#     login_url = 'login'
+#     success_message = _("Stock has been successfully added to user's stock list")
+# 
+#     def get(self, request, *args, **kwargs):
+#         user = request.user
+# 
+#         dividend_id = kwargs['pk_dividend']
+#         dividend = Dividend.objects.get(id=dividend_id)
+# 
+#         portfolio = get_current_portfolio(user)
+# 
+#         try:
+#             TogglePortfolioDividendService.execute({
+#                 'portfolio': portfolio,
+#                 'dividend': dividend,
+#             })
+# 
+#         except Exception as e:
+#             print(e)
+# 
+#         return redirect('dividends')
+# 
+#         try:
+#             dividend_of_user = DividendsOfUser.objects.get(user=user,
+#                                                            dividend=dividend)
+#         except DividendsOfUser.DoesNotExist:
+#             raise Exception('such dividend has not been found')
+#             #dividend.users.add(user)
+#             #dividend.save()
+#             # dividend_of_user = DividendsOfUser.objects.get(user=user,
+#             #                                                dividend=dividend)
+#         print(dividend_of_user.is_received)
+#         dividend_of_user.is_received = True
+#         dividend_of_user.save()
+#         print(dividend_of_user.is_received)
+#         return redirect('dividends')
+# 
+# 
+# class RemoveDivFromUser(SuccessMessageMixin, LoginRequiredMixin, View):
+#     model = Dividend
+#     login_url = 'login'
+#     success_message = _(
+#         "Stock has been successfully added to user's stock list")
+# 
+#     def get(self, request, *args, **kwargs):
+#         user = request.user
+# 
+#         dividend_id = kwargs['pk_dividend']
+#         dividend = Dividend.objects.get(id=dividend_id)
+# 
+#         try:
+#             dividend_of_user = DividendsOfUser.objects.get(user=user,
+#                                                            dividend=dividend)
+#         except DividendsOfUser.DoesNotExist:
+# 
+#             raise Exception('such dividend has not been found')
+# 
+#         dividend_of_user.is_received = False
+#         dividend_of_user.save()
+# 
+# 
+#         return redirect('dividends')

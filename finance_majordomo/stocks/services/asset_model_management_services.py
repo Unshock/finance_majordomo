@@ -222,7 +222,7 @@ class CreateAssetService(Service):
             add_share_history_data_to_model2(asset_obj, historical_data)
 
         except Exception as e:
-            print('2', e)
+            print(e)
             pass
 
     @staticmethod

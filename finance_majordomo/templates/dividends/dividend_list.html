@@ -25,13 +25,13 @@
             <tbody>
 
                 {% for dividend in dividend_list %}
-                <tr id="dividend_id_{{ div.id }}"> 
-                    <td>{{ dividend.div_obj.asset.latname }}</td>
-                    <td>{{ dividend.quantity }}</td>
+                <tr id="dividend_id_{{ dividend.id }}"> 
+                    <td>{{ dividend.asset_name }}</td>
+                    <td>{{ dividend.asset_quantity }}</td>
                     <td>{{ dividend.date }}</td>
-                    <td>{{ dividend.div_obj.amount }}</td>
+                    <td>{{ dividend.amount }}</td>
                     
-                    <td>{{ dividend.total_div }}</td>
+                    <td>{{ dividend.sum }}</td>
                 
                     {% if dividend.is_upcoming %}
                     <td>
@@ -42,13 +42,13 @@
                     {% elif dividend.is_received %}
                     <td>
                         <div class="d-flex justify-content-left">
-                            <a class="btn btn-success btn-sm" href="{% url "remove_div_from_user" dividend.div_obj.id %}" role="button">{% translate "Remove dividend" %}</a>
+                            <a class="btn btn-success btn-sm" href="{% url "toggle_portfolio_div" dividend.id %}" role="button">{% translate "Remove dividend" %}</a>
                         </div>
                     </td>
                     {% else %}
                     <td>
                         <div class="d-flex justify-content-left">
-                            <a class="btn btn-primary btn-sm" href="{% url "add_div_to_user" dividend.div_obj.id %}" role="button">{% translate "Get dividend" %}</a>
+                            <a class="btn btn-primary btn-sm" href="{% url "toggle_portfolio_div" dividend.id %}" role="button">{% translate "Get dividend" %}</a>
                         </div>
                     </td>
                     {% endif %}
