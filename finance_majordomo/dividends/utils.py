@@ -27,23 +27,17 @@ def get_stock_dividends(stock_obj):
         secid = stock_obj.secid
     else:
         raise Exception('stock_type не опознан')
-
-    path = find_path_using_ticker(secid)
-    print(path)
+    
+    
 
     url = f'https://' \
           f'{"закрытияреестров.рф".encode("idna").decode()}' \
-          f'/{path}/'
-
-    # url = f'https://' \
-    #       f'{"закрытияреестров.рф".encode("idna").decode()}' \
-    #       f'/{secid.upper()}/'
+          f'/{secid.upper()}/'
 
     dividend_page_code = requests.get(url)
     dividend_page_code.encoding = 'utf-8'
 
     dividend_page_soup = BeautifulSoup(dividend_page_code.text, 'lxml')
-    print(url)
 
     table = dividend_page_soup.find(
         'table',
@@ -117,28 +111,8 @@ def get_stock_dividends(stock_obj):
                     {'div': preferred_share_div,
                      'value': preferred_share_price}
 
-    #print(dividend_dict)
+    print(dividend_dict)
     return dividend_dict
-
-def find_path_using_ticker(ticker):
-    url = f'https://' \
-          f'{"закрытияреестров.рф".encode("idna").decode()}' \
-          f'/_/'
-
-    dividend_page_code = requests.get(url)
-    dividend_page_code.encoding = 'utf-8'
-
-    dividend_page_soup = BeautifulSoup(dividend_page_code.text, 'lxml')
-
-    a = dividend_page_soup.select_one(f'span:contains("{ticker.upper()}")')
-
-    if not a:
-        a = dividend_page_soup.select_one(f'span:contains("{ticker.lower()}")')
-
-    b = a.find('a').get('href')
-
-    return b.strip('./')
-
 
 
 def add_dividends_to_model(asset_obj, dividend_dict):
