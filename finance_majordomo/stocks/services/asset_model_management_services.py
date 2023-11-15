@@ -3,8 +3,10 @@ from service_objects.services import Service
 from django import forms
 
 from common.utils.stocks import get_asset_description, get_bond_coupon_history
-from finance_majordomo.dividends.utils import get_stock_dividends, \
-    add_dividends_to_model
+from finance_majordomo.dividends.dividend_services.dividend_model_management_services import FillAccrualModel
+from finance_majordomo.dividends.dividend_services.dividends_parser_services import \
+    get_share_dividends
+
 from finance_majordomo.stocks.models import Asset, Bond, Stock
 from finance_majordomo.stocks.utils import get_asset_history_data, \
     add_share_history_data_to_model2, add_bond_history_data_to_model2
@@ -237,15 +239,28 @@ class CreateAssetService(Service):
     def _fill_with_accrual(asset_obj):
 
         if asset_obj.group == 'stock_shares':
-            accrual_dict = get_stock_dividends(asset_obj)
-            add_dividends_to_model(asset_obj, accrual_dict)
+
+            accruals_dict = get_share_dividends(asset_obj)
+            FillAccrualModel.execute(
+                {
+                    'asset': asset_obj
+                 },
+                accruals_dict=accruals_dict)
+
+            # add_dividends_to_model(asset_obj, accruals_dict)
 
         elif asset_obj.group == 'stock_bonds':
-            accrual_dict = get_bond_coupon_history(asset_obj.secid)
-            add_dividends_to_model(asset_obj, accrual_dict)
+
+            accruals_dict = get_bond_coupon_history(asset_obj.secid)
+            FillAccrualModel.execute(
+                {
+                    'asset': asset_obj
+                 },
+                accruals_dict=accruals_dict)
+            # add_dividends_to_model(asset_obj, accrual_dict)
 
         else:
-            pass
+            raise Exception(f'unsupported group: {asset_obj.group}')
 
 
 class CreateShareService(Service):

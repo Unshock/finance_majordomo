@@ -19,12 +19,13 @@ from django.utils.translation import gettext_lazy as _
 
 from common.utils.stocks import get_asset_board_history, \
     make_json_trade_info_dict
-from finance_majordomo.dividends.utils import get_dividend_result_of_portfolio
 from .models import Asset
 from .services.asset_model_management_services import \
     create_asset_obj_from_description
 from .services.user_assets_services import get_current_portfolio
 from ..currencies.models import CurrencyRate
+from ..dividends.dividend_services.accrual_calc_services import \
+    get_accrual_result_of_portfolio
 from ..transactions.services.transaction_calculation_services import get_asset_quantity_for_portfolio, \
     get_purchase_price, get_average_purchase_price
 from .utils import get_money_result, update_historical_data
@@ -166,12 +167,12 @@ class UsersStocks(LoginRequiredMixin, ListView):
                 money_result_without_divs = moneyfmt(
                     get_money_result(current_price, purchase_price), sep=' ')
 
-                dividends_received = get_dividend_result_of_portfolio(
-                    current_portfolio, asset.id)
+                dividends_received = get_accrual_result_of_portfolio(
+                    current_portfolio)
                 total_divs += dividends_received
 
-                dividends_received_usd = get_dividend_result_of_portfolio(
-                    current_portfolio, asset.id, currency='usd')
+                dividends_received_usd = get_accrual_result_of_portfolio(
+                    current_portfolio, currency='usd')
 
                 total_divs_usd += dividends_received_usd
 

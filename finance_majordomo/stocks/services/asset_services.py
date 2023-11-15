@@ -1,8 +1,7 @@
 from django.db.models import QuerySet
 
 from common.utils.stocks import get_bond_coupon_history
-from finance_majordomo.dividends.utils import add_dividends_to_model, \
-    get_stock_dividends
+
 from finance_majordomo.stocks.models import Asset, Stock, Bond, AssetOfPortfolio
 
 from finance_majordomo.stocks.utils import add_share_history_data_to_model, \

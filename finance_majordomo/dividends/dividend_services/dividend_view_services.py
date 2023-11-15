@@ -41,7 +41,7 @@ class PortfolioAccrualViewContextService(Service):
         total_divs_payable = self._get_total_divs_payable(accrual_list)
         total_divs_received = self._get_total_divs_received(accrual_list)
         total_divs_upcoming = self._get_total_divs_upcoming(accrual_list)
-        
+
         return accrual_list, total_divs_payable, total_divs_received, total_divs_upcoming
 
     def _get_portfolio_accruals(self):
