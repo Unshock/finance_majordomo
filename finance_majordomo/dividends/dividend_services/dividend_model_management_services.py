@@ -6,6 +6,9 @@ from service_objects.services import Service
 
 from finance_majordomo.dividends.models import Dividend, DividendsOfPortfolio
 from finance_majordomo.stocks.models import Asset
+from finance_majordomo.transactions.models import Transaction
+from finance_majordomo.transactions.services.transaction_calculation_services import \
+    get_asset_quantity_for_portfolio
 from finance_majordomo.users.models import Portfolio
 
 
@@ -86,3 +89,95 @@ class FillAccrualModel(Service):
             amount=amount
         )
         dividend.save()
+
+
+class UpdateAccrualsOfPortfolio(Service):
+
+    portfolio = ModelField(Portfolio)
+    transaction = ModelField(Transaction)
+
+    def process(self):
+
+        self.portfolio = self.cleaned_data.get('portfolio')
+        self.transaction = self.cleaned_data.get('transaction')
+
+        self._update_accruals_of_portfolio(
+            self._get_accruals_transaction_affects()
+        )
+
+    def _get_accruals_transaction_affects(self):
+        asset = self.transaction.asset
+        date = self.transaction.date
+
+        return Dividend.objects.filter(asset=asset, date__gte=date)
+
+    def _create_accrual_of_portfolio(self, accrual):
+
+        DividendsOfPortfolio.objects.create(
+            portfolio=self.portfolio,
+            dividend=accrual,
+            is_received=False
+        )
+
+    def _update_accruals_of_portfolio(self, accruals):
+
+        for accrual in accruals:
+            tr_type = self.transaction.transaction_type
+            quantity = self.transaction.quantity
+            asset = self.transaction.asset
+            date = self.transaction.date
+
+            trans_date_quantity = get_asset_quantity_for_portfolio(
+                self.portfolio, asset, date
+            )
+
+            trans_date_quantity += quantity if tr_type == 'BUY' else -quantity
+
+            try:
+                dividend_of_portfolio = DividendsOfPortfolio.objects.get(
+                    portfolio=self.portfolio,
+                    dividend=accrual)
+
+                if quantity <= 0:
+                    dividend_of_portfolio.is_received = False
+
+            except DividendsOfPortfolio.DoesNotExist:
+                self._create_accrual_of_portfolio(accrual)
+
+                
+
+
+def update_dividends_of_portfolio(
+        portfolio, asset_id, date=None, transaction=None):
+    asset_dividends = Dividend.objects.filter(asset=asset_id)
+
+    if date:
+        asset_dividends = asset_dividends.filter(date__gte=date)
+
+    for div in asset_dividends:
+
+        tr_quantity = transaction.quantity if transaction.transaction_type == \
+                                              'BUY' else transaction.quantity * -1
+
+        quantity = get_asset_quantity_for_portfolio(
+            portfolio.id, asset_id, date=div.date) + tr_quantity
+
+        print('DIVIDEND QUANTITTY', quantity, tr_quantity,
+              quantity - tr_quantity)
+
+        try:
+            dividend_of_portfolio = DividendsOfPortfolio.objects.get(
+                portfolio=portfolio,
+                dividend=div)
+
+            if quantity <= 0:
+                dividend_of_portfolio.is_received = False
+
+        except DividendsOfPortfolio.DoesNotExist:
+            dividend_of_portfolio = DividendsOfPortfolio.objects.create(
+                portfolio=portfolio,
+                dividend=div,
+                is_received=False
+            )
+        print(dividend_of_portfolio)
+        dividend_of_portfolio.save()

@@ -21,6 +21,8 @@ from .services.transaction_model_management_services import \
     CreateTransactionService
 from .services.transaction_validation_services import validate_transaction, \
     TransactionValidator, is_accrued_interest_required
+from ..dividends.dividend_services.dividend_model_management_services import \
+    UpdateAccrualsOfPortfolio
 from ..search.forms import SearchResultForm
 from ..stocks.services.asset_services import get_all_assets_of_user
 from ..stocks.services.user_assets_services import get_current_portfolio
@@ -184,12 +186,17 @@ class DeleteTransaction(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
 
         if validate_transaction(self.request.user, transaction_validator):
 
-            update_dividends_of_portfolio(
-                portfolio=get_current_portfolio(request.user),
-                asset_id=asset_obj.id,
-                date=transaction.date,
-                transaction=transaction
-            )
+            UpdateAccrualsOfPortfolio.execute({
+                'portfolio': get_current_portfolio(request.user),
+                'transaction': transaction
+            })
+
+            # update_dividends_of_portfolio(
+            #     portfolio=get_current_portfolio(request.user),
+            #     asset_id=asset_obj.id,
+            #     date=transaction.date,
+            #     transaction=transaction
+            # )
 
             return super().post(request, *args, **kwargs)
 

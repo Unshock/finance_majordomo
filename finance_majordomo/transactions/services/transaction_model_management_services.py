@@ -2,6 +2,8 @@ from service_objects.fields import ModelField
 from service_objects.services import Service
 from django import forms
 
+from finance_majordomo.dividends.dividend_services.dividend_model_management_services import \
+    UpdateAccrualsOfPortfolio
 from finance_majordomo.dividends.utils import update_dividends_of_portfolio
 from finance_majordomo.stocks.models import Asset
 from finance_majordomo.transactions.models import Transaction
@@ -60,8 +62,12 @@ class CreateTransactionService(Service):
             current_portfolio.save()
 
         if asset.group in ['stock_shares', 'stock_bonds']:
-            update_dividends_of_portfolio(
-                current_portfolio, asset.id, date, transaction_obj)
+            UpdateAccrualsOfPortfolio.execute({
+                'portfolio': current_portfolio,
+                'transaction': transaction_obj
+            })
+            # update_dividends_of_portfolio(
+            #     current_portfolio, asset.id, date, transaction_obj)
 
         return transaction_obj
 
