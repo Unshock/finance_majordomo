@@ -272,23 +272,6 @@ from finance_majordomo.users.models import User
 #     else:
 #         raise Exception('type is incorrect')
 
-
-def get_all_assets_of_user(user: User) -> QuerySet:
-
-    assets_of_user = Asset.objects.none()
-
-    portfolios_of_user = user.portfolio_set.all()
-
-    for portfolio in portfolios_of_user:
-
-        portfolio_assets = Asset.objects.filter(
-            id__in=portfolio.assetofportfolio_set.values_list('asset'))
-
-        assets_of_user |= portfolio_assets
-
-    return assets_of_user
-
-
 def add_asset_to_portfolio(asset, portfolio):
 
     AssetOfPortfolio.objects.get_or_create(

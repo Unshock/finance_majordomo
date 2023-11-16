@@ -75,7 +75,7 @@ class PortfolioAccrualViewContextService(Service):
 
             if asset_quantity <= 0:
                 continue
-            
+
             accrual_amount = accrual.dividend.amount
             accrual_total = accrual_amount * asset_quantity
             accrual_id = accrual.dividend.id

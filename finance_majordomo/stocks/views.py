@@ -11,6 +11,7 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, DeleteView
 
+from common.utils.money_formatter import set_moneyfmt
 from finance_majordomo.stocks.forms import StockForm
 from finance_majordomo.stocks.models import Stock, AssetsHistoricalData
 from finance_majordomo.transactions.models import Transaction
@@ -22,6 +23,7 @@ from common.utils.stocks import get_asset_board_history, \
 from .models import Asset
 from .services.asset_model_management_services import \
     create_asset_obj_from_description
+from .services.asset_view_services import GetAssetsOfUser
 from .services.user_assets_services import get_current_portfolio
 from ..currencies.models import CurrencyRate
 from ..dividends.dividend_services.accrual_calc_services import \
@@ -45,6 +47,17 @@ class Stocks(LoginRequiredMixin, ListView):
         context['page_title'] = _("Stock list")
         context['stock_list'] = Asset.objects.all()
         return context
+
+
+class PortfolioAssets(LoginRequiredMixin, ListView):
+    login_url = 'login'
+    model = Stock
+    transaction = Transaction
+    template_name = 'stocks/user_stock_list.html'
+    context_object_name = 'stock'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
 
 
 class UsersStocks(LoginRequiredMixin, ListView):
@@ -92,6 +105,8 @@ class UsersStocks(LoginRequiredMixin, ListView):
     def get_user_stock_data(self):
         request = self.request
 
+        GetAssetsOfUser.execute({'user': self.request.user})
+
         user_assets = Asset.objects.filter(
             id__in=request.user.assetsofuser_set.values_list('asset'))
         
@@ -101,6 +116,13 @@ class UsersStocks(LoginRequiredMixin, ListView):
             print(user_assets)
     
             current_portfolio = get_current_portfolio(request.user)
+            
+            a = Asset.objects.filter(id__in=current_portfolio.assetofportfolio_set.values_list('asset'))
+            
+            
+            print(a, '555555555555555555555555555555555555555555555555555555555555555555555555555')
+            for i in a:
+                print(i)
     
             # print('==========$=====================')
             # print(request.user.stocksofuser_set.values_list('stock'))
@@ -167,8 +189,8 @@ class UsersStocks(LoginRequiredMixin, ListView):
                 money_result_without_divs = moneyfmt(
                     get_money_result(current_price, purchase_price), sep=' ')
 
-                dividends_received = get_accrual_result_of_portfolio(
-                    current_portfolio)
+                dividends_received = \
+                    get_accrual_result_of_portfolio(current_portfolio)
                 total_divs += dividends_received
 
                 dividends_received_usd = get_accrual_result_of_portfolio(
@@ -193,7 +215,7 @@ class UsersStocks(LoginRequiredMixin, ListView):
                      'quantity': moneyfmt(
                          Decimal(current_quantity), sep=' ', places=0),
                      'purchase_price': moneyfmt(purchase_price, sep=' '),
-                     'avg_purchase_price': moneyfmt(avg_purchase_price, sep=' '),
+                     'avg_purchase_price': moneyfmt(avg_purchase_price, sep=' ', curr='$'),
                      'current_price': moneyfmt(current_price, sep=' '),
                      'percent_result': percent_result,
                      'dividends_received': moneyfmt(dividends_received, sep=' '),
@@ -219,9 +241,9 @@ class UsersStocks(LoginRequiredMixin, ListView):
                 'total_purchase_price': moneyfmt(total_purchase_price, sep=' '),
                 'total_current_price': moneyfmt(total_current_price, sep=' '),
                 'total_percent_result': total_percent_result,
-                'total_divs': moneyfmt(total_divs, sep=' '),
-                'total_financial_result_no_divs': moneyfmt(
-                    total_financial_result_no_divs, sep=' '),
+                'total_divs': set_moneyfmt(total_divs),
+                'total_financial_result_no_divs': set_moneyfmt(
+                    total_financial_result_no_divs),
                 'total_financial_result_with_divs': moneyfmt(
                     total_financial_result_with_divs, sep=' '),
                 'total_rate_of_return': total_rate_of_return,

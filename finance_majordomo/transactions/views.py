@@ -24,7 +24,7 @@ from .services.transaction_validation_services import validate_transaction, \
 from ..dividends.dividend_services.dividend_model_management_services import \
     UpdateAccrualsOfPortfolio
 from ..search.forms import SearchResultForm
-from ..stocks.services.asset_services import get_all_assets_of_user
+
 from ..stocks.services.user_assets_services import get_current_portfolio
 
 

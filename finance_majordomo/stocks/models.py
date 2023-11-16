@@ -4,6 +4,8 @@ from django.urls import reverse
 
 from django.utils.translation import gettext_lazy as _
 
+from ..transactions.services.transaction_calculation_services import \
+    get_purchase_price
 from ..users.models import User, Portfolio
 
 
@@ -366,6 +368,9 @@ class AssetOfPortfolio(models.Model):
         Portfolio,
         on_delete=models.CASCADE
     )
+
+    #def get_purchase_price(self):
+    #    return get_purchase_price(self.portfolio.id, self.asset.id)
 
     class Meta:
         verbose_name = "Объекты портфеля"

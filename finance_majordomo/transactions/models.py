@@ -82,7 +82,7 @@ class Transaction(models.Model):
     def __str__(self):
         return f'{self.transaction_type} ' \
                f'x{self.quantity} {self.asset.secid} ' \
-               f'for {self.price}'
+               f'for {self.price} on {self.date}'
 
     class Meta:
         verbose_name = "Транзакция"

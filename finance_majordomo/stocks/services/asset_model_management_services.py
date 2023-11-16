@@ -190,7 +190,7 @@ class CreateAssetService(Service):
             days_to_redemption = self.cleaned_data['days_to_redemption']
             face_value = self.cleaned_data['face_value']
 
-            CreateShareService.execute({
+            CreateBondService.execute({
                 'asset': asset,
 
                 'startdatemoex': startdatemoex,
