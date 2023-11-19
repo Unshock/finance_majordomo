@@ -6,6 +6,8 @@ from django import forms
 from finance_majordomo.stocks.models import Asset
 from finance_majordomo.stocks.services.asset_model_management_services import \
     get_or_create_asset_obj
+from finance_majordomo.stocks.services.asset_view_services import \
+    GetAssetsOfUser
 
 from finance_majordomo.transactions.forms import TransactionForm
 from finance_majordomo.users.models import User
@@ -59,7 +61,7 @@ class CreateTransactionFormService(Service):
     def _get_assets_to_display_qs(self):
 
         user = self.cleaned_data.get('user')
-        assets_to_display_qs = get_all_assets_of_user(user)
+        assets_to_display_qs = GetAssetsOfUser.execute({'user': user})
 
         if self.asset_id:
             assets_to_display_qs |= Asset.objects.filter(id=self.asset_id)

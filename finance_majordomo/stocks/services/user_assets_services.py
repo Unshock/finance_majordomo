@@ -83,6 +83,11 @@ def get_portfolio_assets(user: User) -> list[AssetItem]:
     portfolio_assets = Asset.objects.filter(
         id__in=portfolio.assetofportfolio_set.values_list('asset'))
 
+    assets_portfolio = portfolio.assetofportfolio_set.all()
+
+    print('ASSETS OF PORTFOILO', assets_portfolio)
+    print('ASSETS OF PORTFOILO', assets_portfolio[0].get_purchase_price())
+
     for asset in portfolio_assets:
 
         # update_history_data(stock)

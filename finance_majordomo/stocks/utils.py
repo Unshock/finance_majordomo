@@ -2,10 +2,9 @@ from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from django.db.models import Max
 
-from common.utils.stocks import get_date_status, get_stock_current_price, \
-    get_asset_board_history, get_current
-from finance_majordomo.stocks.models import ProdCalendar, \
-    AssetsHistoricalData, Asset
+from common.utils.stocks import get_asset_board_history, get_current
+from finance_majordomo.stocks.models import AssetsHistoricalData, Asset, \
+    ProdCalendar
 
 
 def get_money_result(current_price, purchace_price):
@@ -146,30 +145,12 @@ def add_bond_history_data_to_model2(asset, asset_history_data):
         )
 
 
-def get_prod_date(date: str) -> ProdCalendar:
-    try:
-        prod_date = ProdCalendar.objects.get(date=date)
-    except ProdCalendar.DoesNotExist:
-
-        try:
-            date_status = get_date_status(date)
-        except ConnectionError:
-            raise ConnectionError('ne smog poluchit date status from internet')
-
-        prod_date = ProdCalendar.objects.create(
-            date=date,
-            date_status=date_status
-        )
-
-    return prod_date
-
-
 def update_historical_data(asset_obj: object, date=None):
     related_obj = asset_obj.get_related_object()
 
     print(asset_obj, related_obj)
 
-    today_status = get_prod_date(
+    today_status = ProdCalendar.get_date(
         datetime.strftime(datetime.today(), '%Y-%m-%d')).date_status
 
     today_date = datetime.today().date()
@@ -204,7 +185,7 @@ def update_historical_data(asset_obj: object, date=None):
                          delta_date_dt.month,
                          delta_date_dt.day), '%Y-%m-%d')
 
-            day_status = get_prod_date(date_str).date_status
+            day_status = ProdCalendar.get_date(date_str).date_status
 
             if day_status == 'Working':
                 update_history_data(asset_obj, date=latest_date_str)

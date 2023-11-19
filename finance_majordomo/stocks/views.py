@@ -117,6 +117,8 @@ class UsersStocks(LoginRequiredMixin, ListView):
     
             current_portfolio = get_current_portfolio(request.user)
             
+            print('333333333333333333333333333333333333333333333333', current_portfolio.get_assets_of_portfolio())
+            
             a = Asset.objects.filter(id__in=current_portfolio.assetofportfolio_set.values_list('asset'))
             
             
@@ -131,9 +133,15 @@ class UsersStocks(LoginRequiredMixin, ListView):
             print(current_portfolio, current_portfolio.user)
             users_assets = Asset.objects.filter(
                id__in=current_portfolio.assetofportfolio_set.values_list('asset'))
+            #users_assets = current_portfolio.asset.all()
 
             print('===============================')
             print(users_assets)
+            assets_portfolio = current_portfolio.assetofportfolio_set.all()
+
+            print('ASSETS OF PORTFOILO', assets_portfolio)
+            print('ASSETS OF PORTFOILO',
+                  assets_portfolio[0].get_purchase_price())
             print('===============================')
     
             #print(request.user.stocksofuser_set.values_list('stock'))

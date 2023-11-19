@@ -1,12 +1,15 @@
+from __future__ import annotations
+from datetime import datetime
+
 from django.db import models
 from django.core.validators import MinLengthValidator
 from django.urls import reverse
 
 from django.utils.translation import gettext_lazy as _
 
-from ..transactions.services.transaction_calculation_services import \
-    get_purchase_price
+from common.utils.stocks import get_date_status
 from ..users.models import User, Portfolio
+
 
 
 class Asset(models.Model):
@@ -271,6 +274,25 @@ class ProdCalendar(models.Model):
         verbose_name='Статус дня'
     )
 
+    @staticmethod
+    def get_date(date: datetime.date) -> ProdCalendar:
+        try:
+            prod_date = ProdCalendar.objects.get(date=date)
+
+        except ProdCalendar.DoesNotExist:
+
+            try:
+                prod_date = ProdCalendar.objects.create(
+                    date=date,
+                    date_status=get_date_status(date)
+                )
+
+            except Exception as e:
+                print(e, 'ne smog poluchit date status from internet')
+                raise Exception
+
+        return prod_date
+
     class Meta:
         ordering = ['date', 'date_status']
 
@@ -337,7 +359,7 @@ class AssetsHistoricalData(models.Model):
 #     value = models.DecimalField(max_digits=15, decimal_places=2, null=True)
 #     open = models.DecimalField(max_digits=13, decimal_places=5, null=True)
 #     low = models.DecimalField(max_digits=13, decimal_places=5, null=True)
-#     high = models.DecimalField(max_digits=13, decimal_places=5, null=True)
+#     high = models.DecimalField(max_digits=13, vm4decimal_places=5, null=True)
 #     legalcloseprice = models.DecimalField(max_digits=13, decimal_places=5)
 #     waprice = models.DecimalField(max_digits=13, decimal_places=5, null=True)
 #     close = models.DecimalField(max_digits=13, decimal_places=5, null=True)
@@ -369,8 +391,12 @@ class AssetOfPortfolio(models.Model):
         on_delete=models.CASCADE
     )
 
-    #def get_purchase_price(self):
-    #    return get_purchase_price(self.portfolio.id, self.asset.id)
+    def get_purchase_price(self, currency=None, date=None):
+        from ..transactions.services.transaction_calculation_services import \
+            get_purchase_price
+        return get_purchase_price(
+            self.portfolio.id, self.asset.id, currency=currency, date=date
+        )
 
     class Meta:
         verbose_name = "Объекты портфеля"

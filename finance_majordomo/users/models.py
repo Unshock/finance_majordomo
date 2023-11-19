@@ -49,6 +49,12 @@ class Portfolio(models.Model):
                        "current portfolio is used to work with transactions")
     )
 
+    def get_assets_of_portfolio(self):
+        return self.asset.all()
+
+    class Meta:
+        unique_together = ('name', 'user')
+
 
 class UserSettings(models.Model):
 

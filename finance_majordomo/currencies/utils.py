@@ -5,7 +5,7 @@ from .models import CurrencyRate
 import requests
 import xmltodict
 
-from ..stocks.utils import get_prod_date
+from ..stocks.models import ProdCalendar
 
 
 def update_currency_rates(date=None):
@@ -57,7 +57,7 @@ def get_usd_rate(date_dt):
                      delta_date_dt.month,
                      delta_date_dt.day), '%Y-%m-%d')
 
-        day_status = get_prod_date(date_str).date_status
+        day_status = ProdCalendar.get_date(date_str).date_status
         
         print(day_status)
 
