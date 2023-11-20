@@ -87,19 +87,19 @@
             {% endif %}
                         
             {% if fields_to_display.show_money_result_without_divs %}
-            <td>{{ stock.money_result_without_divs}}</td>
+            <td>{{ stock.financial_result_no_accruals}}</td>
             {% endif %}
         
             {% if fields_to_display.show_percent_result %}
-            <td>{{ stock.percent_result }}</td>
+            <td>{{ stock.percentage_result_no_accruals }}</td>
             {% endif %}
         
             {% if fields_to_display.show_dividends_received %}
-            <td>{{ stock.dividends_received }}</td>
+            <td>{{ stock.accruals_received }}</td>
             {% endif %}
         
             {% if fields_to_display.show_money_result_with_divs %}
-            <td>{{ stock.money_result_with_divs }}</td>
+            <td>{{ stock.financial_result_with_accruals }}</td>
             {% endif %}
         
             {% if fields_to_display.show_rate_of_return %}

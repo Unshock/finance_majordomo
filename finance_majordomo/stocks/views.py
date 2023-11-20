@@ -11,7 +11,7 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, DeleteView
 
-from common.utils.money_formatter import set_moneyfmt
+from common.utils.values_formatters import set_money_fmt
 from finance_majordomo.stocks.forms import StockForm
 from finance_majordomo.stocks.models import Stock, AssetsHistoricalData
 from finance_majordomo.transactions.models import Transaction
@@ -23,14 +23,15 @@ from common.utils.stocks import get_asset_board_history, \
 from .models import Asset
 from .services.asset_model_management_services import \
     create_asset_obj_from_description
-from .services.asset_view_services import GetAssetsOfUser
+from .services.asset_view_services import GetAssetsOfUser, \
+    PortfolioAssetsViewContextService
 from .services.user_assets_services import get_current_portfolio
 from ..currencies.models import CurrencyRate
 from ..dividends.dividend_services.accrual_calc_services import \
     get_accrual_result_of_portfolio
 from ..transactions.services.transaction_calculation_services import get_asset_quantity_for_portfolio, \
     get_purchase_price, get_average_purchase_price
-from .utils import get_money_result, update_historical_data
+
 
 from ..users.models import Portfolio
 from finance_majordomo.currencies.utils import update_currency_rates, update_usd
@@ -73,225 +74,223 @@ class UsersStocks(LoginRequiredMixin, ListView):
 
         context['page_title'] = self.request.user.username + " " + _(
             "stock list")
-        user_stock_data = self.get_user_stock_data()
+        #user_stock_data = self.get_user_stock_data()
 
-        # total_price = {'total_purchase_price': self.get_total_purchase_price(user_stock_data),
-        #                'total_current_price': self.get_total_current_price(user_stock_data),
-        #                'total_percent_result': self.get_percent_result(
-        #                    Decimal(self.get_total_purchase_price(user_stock_data)),
-        #                    Decimal(self.get_total_current_price(user_stock_data))
-        #                )
-        #                }
+        portfolio_assets_data = PortfolioAssetsViewContextService.execute(
+            {'portfolio': get_current_portfolio(self.request.user)})
+
+        asset_list = portfolio_assets_data.get('asset_list')
+        total_results = portfolio_assets_data.get('total_results')
 
         context['fields_to_display'] = self.request.user.usersettings
-        context['current_portfolio'] = \
-            Portfolio.objects.filter(user=self.request.user, is_current=True)
-        context['stock_list'] = user_stock_data.get('stock_list')
-        context['total_results'] = user_stock_data.get('total_results')
+        context['current_portfolio'] = get_current_portfolio(self.request.user)
+        context['stock_list'] = asset_list
+        context['total_results'] = total_results
+
         return context
 
-    def get_total_purchase_price(self, stock_list):
-        total_purchase_price = sum(
-            [stock['purchase_price'] for stock in stock_list]
-        )
-        return "{:.2f}".format(total_purchase_price)
-
-    def get_total_current_price(self, stock_list):
-        total_current_price = sum(
-            [float(stock['current_price']) for stock in stock_list]
-        )
-        return "{:.2f}".format(total_current_price)
-
-    def get_user_stock_data(self):
-        request = self.request
-
-        GetAssetsOfUser.execute({'user': self.request.user})
-
-        user_assets = Asset.objects.filter(
-            id__in=request.user.assetsofuser_set.values_list('asset'))
-        
-        print('QQQQQQQQQQQQQQQQQQQQQQ', user_assets)
-        
-        if user_assets:
-            print(user_assets)
-    
-            current_portfolio = get_current_portfolio(request.user)
-            
-            print('333333333333333333333333333333333333333333333333', current_portfolio.get_assets_of_portfolio())
-            
-            a = Asset.objects.filter(id__in=current_portfolio.assetofportfolio_set.values_list('asset'))
-            
-            
-            print(a, '555555555555555555555555555555555555555555555555555555555555555555555555555')
-            for i in a:
-                print(i)
-    
-            # print('==========$=====================')
-            # print(request.user.stocksofuser_set.values_list('stock'))
-            # print('==========$=====================')
-            # 
-            print(current_portfolio, current_portfolio.user)
-            users_assets = Asset.objects.filter(
-               id__in=current_portfolio.assetofportfolio_set.values_list('asset'))
-            #users_assets = current_portfolio.asset.all()
-
-            print('===============================')
-            print(users_assets)
-            assets_portfolio = current_portfolio.assetofportfolio_set.all()
-
-            print('ASSETS OF PORTFOILO', assets_portfolio)
-            print('ASSETS OF PORTFOILO',
-                  assets_portfolio[0].get_purchase_price())
-            print('===============================')
-    
-            #print(request.user.stocksofuser_set.values_list('stock'))
-    
-            total_purchase_price = Decimal('0')
-            total_current_price = Decimal('0')
-            total_divs = Decimal('0')
-
-            total_purchase_price_usd = Decimal('0')
-            total_current_price_usd = Decimal('0')
-            total_divs_usd = Decimal('0')
-
-            user_stock_data = {'total_results': {},
-                               'stock_list': []
-                               }
-            print('user asseets', user_assets)
-
-            update_currency_rates()
-            update_usd()
-
-            for asset in user_assets:
-
-                # update_history_data(stock)
-                # update_today_data(stock)
-                update_historical_data(asset)
-
-                current_quantity = get_asset_quantity_for_portfolio(current_portfolio.id, asset.id)
-
-                if current_quantity == 0:
-                    continue
-
-                avg_purchase_price = get_average_purchase_price(
-                    current_portfolio.id, asset.id)
-                print('7654321', avg_purchase_price)
-
-                purchase_price = get_purchase_price(
-                    current_portfolio.id, asset.id)
-                purchase_price_usd = get_purchase_price(
-                    current_portfolio.id, asset.id, currency='usd')
-
-                total_purchase_price += purchase_price
-                total_purchase_price_usd += purchase_price_usd
-
-                current_price = self.get_current_price(asset)
-                current_price_usd = self.get_current_price(asset, currency='usd')
-
-                total_current_price += current_price
-                total_current_price_usd += current_price_usd
-
-                percent_result = self.get_percent_result(
-                    purchase_price, current_price)
-
-                money_result_without_divs = moneyfmt(
-                    get_money_result(current_price, purchase_price), sep=' ')
-
-                dividends_received = \
-                    get_accrual_result_of_portfolio(current_portfolio)
-                total_divs += dividends_received
-
-                dividends_received_usd = get_accrual_result_of_portfolio(
-                    current_portfolio, currency='usd')
-
-                total_divs_usd += dividends_received_usd
-
-                money_result_with_divs = moneyfmt(
-                    get_money_result(
-                        current_price + dividends_received,
-                        purchase_price),
-                    sep=' ')
-
-                rate_of_return = self.get_percent_result(
-                    purchase_price, current_price + dividends_received)
-
-                user_stock_data['stock_list'].append(
-                    {'id': asset.id,
-                     'ticker': asset.secid,
-                     'name': asset.name,
-                     'currency': asset.currency,
-                     'quantity': moneyfmt(
-                         Decimal(current_quantity), sep=' ', places=0),
-                     'purchase_price': moneyfmt(purchase_price, sep=' '),
-                     'avg_purchase_price': moneyfmt(avg_purchase_price, sep=' ', curr='$'),
-                     'current_price': moneyfmt(current_price, sep=' '),
-                     'percent_result': percent_result,
-                     'dividends_received': moneyfmt(dividends_received, sep=' '),
-                     'money_result_without_divs': money_result_without_divs,
-                     'money_result_with_divs': money_result_with_divs,
-                     'rate_of_return': rate_of_return,
-                     })
-                print(type(moneyfmt(
-                         Decimal(current_quantity), sep=' ', places=0)))
-
-            total_financial_result_no_divs = total_current_price - total_purchase_price
-            total_financial_result_with_divs = total_current_price + total_divs - total_purchase_price
-            
-            print(total_current_price_usd, total_divs_usd, total_purchase_price_usd)
-            total_financial_result_with_divs_usd = total_current_price_usd + total_divs_usd - total_purchase_price_usd
-            
-            total_percent_result = self.get_percent_result(
-                total_purchase_price, total_current_price)
-            total_rate_of_return = self.get_percent_result(
-                total_purchase_price, (total_financial_result_with_divs + total_purchase_price))
-
-            user_stock_data['total_results'] = {
-                'total_purchase_price': moneyfmt(total_purchase_price, sep=' '),
-                'total_current_price': moneyfmt(total_current_price, sep=' '),
-                'total_percent_result': total_percent_result,
-                'total_divs': set_moneyfmt(total_divs),
-                'total_financial_result_no_divs': set_moneyfmt(
-                    total_financial_result_no_divs),
-                'total_financial_result_with_divs': moneyfmt(
-                    total_financial_result_with_divs, sep=' '),
-                'total_rate_of_return': total_rate_of_return,
-
-                'total_current_price_usd': moneyfmt(
-                    total_current_price_usd, sep=' '),
-                'total_financial_result_with_divs_usd': moneyfmt(
-                    total_financial_result_with_divs_usd, sep=' ')
-            }
-
-            return user_stock_data
-        return dict()
-
-    @staticmethod
-    def get_currency_rate(currency: str = None):
-        if currency and currency.lower() == 'usd':
-            currency_rate = CurrencyRate.objects.last().price_usd
-        else:
-            currency_rate = Decimal('1')
-
-        return currency_rate
-
-    def get_current_price(self, asset, currency=None):
-        currency_rate = self.get_currency_rate(currency)
-
-        portfolio = get_current_portfolio(self.request.user)
-
-        last_date_price = AssetsHistoricalData.objects.filter(
-            asset=asset).order_by('-tradedate')[0].legalcloseprice
-
-        current_quantity = get_asset_quantity_for_portfolio(
-            portfolio.id, asset.id)
-
-        current_price = current_quantity * last_date_price / currency_rate
-
-        if asset.group == 'stock_bonds':
-            bond = asset.get_related_object()
-            current_price = current_price * bond.face_value / 100
-
-        return Decimal(current_price)
+    # def get_total_purchase_price(self, stock_list):
+    #     total_purchase_price = sum(
+    #         [stock['purchase_price'] for stock in stock_list]
+    #     )
+    #     return "{:.2f}".format(total_purchase_price)
+    # 
+    # def get_total_current_price(self, stock_list):
+    #     total_current_price = sum(
+    #         [float(stock['current_price']) for stock in stock_list]
+    #     )
+    #     return "{:.2f}".format(total_current_price)
+    # 
+    # def get_user_stock_data(self):
+    #     request = self.request
+    # 
+    #     GetAssetsOfUser.execute({'user': self.request.user})
+    # 
+    #     user_assets = Asset.objects.filter(
+    #         id__in=request.user.assetsofuser_set.values_list('asset'))
+    #     
+    #     print('QQQQQQQQQQQQQQQQQQQQQQ', user_assets)
+    #     
+    #     if user_assets:
+    #         print(user_assets)
+    # 
+    #         current_portfolio = get_current_portfolio(request.user)
+    #         
+    #         print('333333333333333333333333333333333333333333333333', current_portfolio.get_assets_of_portfolio())
+    #         
+    #         a = Asset.objects.filter(id__in=current_portfolio.assetofportfolio_set.values_list('asset'))
+    #         
+    #         
+    #         print(a, '555555555555555555555555555555555555555555555555555555555555555555555555555')
+    #         for i in a:
+    #             print(i)
+    # 
+    #         # print('==========$=====================')
+    #         # print(request.user.stocksofuser_set.values_list('stock'))
+    #         # print('==========$=====================')
+    #         # 
+    #         print(current_portfolio, current_portfolio.user)
+    #         users_assets = Asset.objects.filter(
+    #            id__in=current_portfolio.assetofportfolio_set.values_list('asset'))
+    #         #users_assets = current_portfolio.asset.all()
+    # 
+    #         print('===============================')
+    #         print(users_assets)
+    #         assets_portfolio = current_portfolio.assetofportfolio_set.all()
+    # 
+    #         print('ASSETS OF PORTFOILO', assets_portfolio)
+    #         print('ASSETS OF PORTFOILO',
+    #               assets_portfolio[0].get_purchase_price())
+    #         print('===============================')
+    # 
+    #         #print(request.user.stocksofuser_set.values_list('stock'))
+    # 
+    #         total_purchase_price = Decimal('0')
+    #         total_current_price = Decimal('0')
+    #         total_divs = Decimal('0')
+    # 
+    #         total_purchase_price_usd = Decimal('0')
+    #         total_current_price_usd = Decimal('0')
+    #         total_divs_usd = Decimal('0')
+    # 
+    #         user_stock_data = {'total_results': {},
+    #                            'stock_list': []
+    #                            }
+    #         print('user asseets', user_assets)
+    # 
+    #         update_currency_rates()
+    #         update_usd()
+    # 
+    #         for asset in user_assets:
+    # 
+    #             # update_history_data(stock)
+    #             # update_today_data(stock)
+    #             update_historical_data(asset)
+    # 
+    #             current_quantity = get_asset_quantity_for_portfolio(current_portfolio.id, asset.id)
+    # 
+    #             if current_quantity == 0:
+    #                 continue
+    # 
+    #             avg_purchase_price = get_average_purchase_price(
+    #                 current_portfolio.id, asset.id)
+    #             print('7654321', avg_purchase_price)
+    # 
+    #             purchase_price = get_purchase_price(
+    #                 current_portfolio.id, asset.id)
+    #             purchase_price_usd = get_purchase_price(
+    #                 current_portfolio.id, asset.id, currency='usd')
+    # 
+    #             total_purchase_price += purchase_price
+    #             total_purchase_price_usd += purchase_price_usd
+    # 
+    #             current_price = self.get_current_price(asset)
+    #             current_price_usd = self.get_current_price(asset, currency='usd')
+    # 
+    #             total_current_price += current_price
+    #             total_current_price_usd += current_price_usd
+    # 
+    #             percent_result = self.get_percent_result(
+    #                 purchase_price, current_price)
+    # 
+    #             money_result_without_divs = moneyfmt(
+    #                 get_money_result(current_price, purchase_price), sep=' ')
+    # 
+    #             dividends_received = \
+    #                 get_accrual_result_of_portfolio(current_portfolio)
+    #             total_divs += dividends_received
+    # 
+    #             dividends_received_usd = get_accrual_result_of_portfolio(
+    #                 current_portfolio, currency='usd')
+    # 
+    #             total_divs_usd += dividends_received_usd
+    # 
+    #             money_result_with_divs = moneyfmt(
+    #                 get_money_result(
+    #                     current_price + dividends_received,
+    #                     purchase_price),
+    #                 sep=' ')
+    # 
+    #             rate_of_return = self.get_percent_result(
+    #                 purchase_price, current_price + dividends_received)
+    # 
+    #             user_stock_data['stock_list'].append(
+    #                 {'id': asset.id,
+    #                  'ticker': asset.secid,
+    #                  'name': asset.name,
+    #                  'currency': asset.currency,
+    #                  'quantity': moneyfmt(
+    #                      Decimal(current_quantity), sep=' ', places=0),
+    #                  'purchase_price': moneyfmt(purchase_price, sep=' '),
+    #                  'avg_purchase_price': moneyfmt(avg_purchase_price, sep=' ', curr='$'),
+    #                  'current_price': moneyfmt(current_price, sep=' '),
+    #                  'percent_result': percent_result,
+    #                  'dividends_received': moneyfmt(dividends_received, sep=' '),
+    #                  'money_result_without_divs': money_result_without_divs,
+    #                  'money_result_with_divs': money_result_with_divs,
+    #                  'rate_of_return': rate_of_return,
+    #                  })
+    #             print(type(moneyfmt(
+    #                      Decimal(current_quantity), sep=' ', places=0)))
+    # 
+    #         total_financial_result_no_divs = total_current_price - total_purchase_price
+    #         total_financial_result_with_divs = total_current_price + total_divs - total_purchase_price
+    #         
+    #         print(total_current_price_usd, total_divs_usd, total_purchase_price_usd)
+    #         total_financial_result_with_divs_usd = total_current_price_usd + total_divs_usd - total_purchase_price_usd
+    #         
+    #         total_percent_result = self.get_percent_result(
+    #             total_purchase_price, total_current_price)
+    #         total_rate_of_return = self.get_percent_result(
+    #             total_purchase_price, (total_financial_result_with_divs + total_purchase_price))
+    # 
+    #         user_stock_data['total_results'] = {
+    #             'total_purchase_price': moneyfmt(total_purchase_price, sep=' '),
+    #             'total_current_price': moneyfmt(total_current_price, sep=' '),
+    #             'total_percent_result': total_percent_result,
+    #             'total_divs': set_money_fmt(total_divs),
+    #             'total_financial_result_no_divs': set_money_fmt(
+    #                 total_financial_result_no_divs),
+    #             'total_financial_result_with_divs': moneyfmt(
+    #                 total_financial_result_with_divs, sep=' '),
+    #             'total_rate_of_return': total_rate_of_return,
+    # 
+    #             'total_current_price_usd': moneyfmt(
+    #                 total_current_price_usd, sep=' '),
+    #             'total_financial_result_with_divs_usd': moneyfmt(
+    #                 total_financial_result_with_divs_usd, sep=' ')
+    #         }
+    # 
+    #         return user_stock_data
+    #     return dict()
+    # 
+    # @staticmethod
+    # def get_currency_rate(currency: str = None):
+    #     if currency and currency.lower() == 'usd':
+    #         currency_rate = CurrencyRate.objects.last().price_usd
+    #     else:
+    #         currency_rate = Decimal('1')
+    # 
+    #     return currency_rate
+    # 
+    # def get_current_price(self, asset, currency=None):
+    #     currency_rate = self.get_currency_rate(currency)
+    # 
+    #     portfolio = get_current_portfolio(self.request.user)
+    # 
+    #     last_date_price = AssetsHistoricalData.objects.filter(
+    #         asset=asset).order_by('-tradedate')[0].legalcloseprice
+    # 
+    #     current_quantity = get_asset_quantity_for_portfolio(
+    #         portfolio.id, asset.id)
+    # 
+    #     current_price = current_quantity * last_date_price / currency_rate
+    # 
+    #     if asset.group == 'stock_bonds':
+    #         bond = asset.get_related_object()
+    #         current_price = current_price * bond.face_value / 100
+    # 
+    #     return Decimal(current_price)
     # 
     # def get_current_price_alt(self, stock):
     #     last_date_price = AssetsHistoricalData.objects.filter(
@@ -368,18 +367,18 @@ class UsersStocks(LoginRequiredMixin, ListView):
     #     return Decimal(current_price)
     #     #ПРОВЕРИТЬ ЧТО ПОСЛЕДНЯЯ ДАТА АКТУАЛЬНА
 
-    @staticmethod
-    def get_percent_result(purchase_price, current_price):
-        if current_price == 0 and purchase_price == 0:
-            return '+ 0.00'
-        if current_price > 0 and purchase_price > 0:
-            result = (Decimal(current_price) - Decimal(
-                purchase_price)) / Decimal(purchase_price)
-
-            print(len(str(result)))
-            return f'- {"{:.2%}".format(-result)}' if result < 0 else f'+ {"{:.2%}".format(result)}'
-        #return '0'
-        raise ValueError('current_price and purchase_price must be > 0')
+    # @staticmethod
+    # def get_percent_result(purchase_price, current_price):
+    #     if current_price == 0 and purchase_price == 0:
+    #         return '+ 0.00'
+    #     if current_price > 0 and purchase_price > 0:
+    #         result = (Decimal(current_price) - Decimal(
+    #             purchase_price)) / Decimal(purchase_price)
+    # 
+    #         print(len(str(result)))
+    #         return f'- {"{:.2%}".format(-result)}' if result < 0 else f'+ {"{:.2%}".format(result)}'
+    #     #return '0'
+    #     raise ValueError('current_price and purchase_price must be > 0')
 
 
 # class StockData(object):
@@ -457,7 +456,7 @@ class UsersStocks(LoginRequiredMixin, ListView):
 #                 """
 #                 There is a possibility that all the days in the gap are holidays -
 #                 so need to find the last working day. Updating from the last date in DB.
-#                 """
+#                 """user_stock_data
 #                 #actual_last_date = self.today
 #                 for gap in range(0, actual_date_gap):
 #                     #print('gap', gap, 'for', self.stock.ticker, 'last_day', last_day, 'actual date gap', actual_date_gap)
@@ -605,13 +604,10 @@ def get_normalized_asset_type(type: str) -> str:
         'ofz_bond': 'bonds',
         'corporate_bond': 'bonds',
         'exchange_bond': 'bonds'
-        
+
     }
 
     return types_dict.get(type)
-
-
-
 
 
 class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):

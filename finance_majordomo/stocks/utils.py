@@ -7,10 +7,6 @@ from finance_majordomo.stocks.models import AssetsHistoricalData, Asset, \
     ProdCalendar
 
 
-def get_money_result(current_price, purchace_price):
-    return Decimal(current_price - purchace_price)
-
-
 def get_asset_board(asset_type):
     boards_dict = {
         'ofz_bond': 'TQOB',
@@ -120,7 +116,6 @@ def add_bond_history_data_to_model(bond_obj, asset_history_data):
 
 
 def add_bond_history_data_to_model2(asset, asset_history_data):
-    #print(asset_history_data)
 
     for day_data in asset_history_data:
         AssetsHistoricalData.objects.create(

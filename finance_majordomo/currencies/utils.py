@@ -10,13 +10,14 @@ from ..stocks.models import ProdCalendar
 
 def update_currency_rates(date=None):
 
+    # Постоянно шлет реквесты - переделать на update
+
     if date:
         date_req1 = date
     else:
         date_req1 = '01/01/2023'
 
-    date_req2 = datetime.strftime(
-        datetime.today().date(), '%d/%m/%Y')
+    date_req2 = datetime.strftime(datetime.today(), '%d/%m/%Y')
 
     url = f'https://www.cbr.ru/scripts/XML_dynamic.asp?date_req1={date_req1}' \
           f'&date_req2={date_req2}&VAL_NM_RQ=R01235'
@@ -58,7 +59,7 @@ def get_usd_rate(date_dt):
                      delta_date_dt.day), '%Y-%m-%d')
 
         day_status = ProdCalendar.get_date(date_str).date_status
-        
+
         print(day_status)
 
         if day_status == 'Working':

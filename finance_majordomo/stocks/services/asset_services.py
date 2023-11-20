@@ -1,12 +1,16 @@
+from decimal import Decimal
+
 from django.db.models import QuerySet
 
 from common.utils.stocks import get_bond_coupon_history
+from finance_majordomo.currencies.models import CurrencyRate
 
-from finance_majordomo.stocks.models import Asset, Stock, Bond, AssetOfPortfolio
+from finance_majordomo.stocks.models import Asset, Stock, Bond, \
+    AssetOfPortfolio, AssetsHistoricalData
 
 from finance_majordomo.stocks.utils import add_share_history_data_to_model, \
     add_bond_history_data_to_model, get_asset_history_data, get_asset_board
-from finance_majordomo.stocks.views import get_normalized_asset_type
+#from finance_majordomo.stocks.views import get_normalized_asset_type
 from finance_majordomo.users.models import User
 
 # 
@@ -278,3 +282,27 @@ def add_asset_to_portfolio(asset, portfolio):
         asset=asset,
         portfolio=portfolio
     )
+
+def get_currency_rate(currency: str = None):
+    if currency and currency.lower() == 'usd':
+        currency_rate = CurrencyRate.objects.last().price_usd
+    else:
+        currency_rate = Decimal('1')
+
+    return currency_rate
+
+
+def get_current_asset_price_per_asset(asset: Asset, currency: str) -> Decimal:
+
+    currency_rate = get_currency_rate(currency)
+
+    last_date_price = AssetsHistoricalData.objects.filter(
+        asset=asset).order_by('-tradedate')[0].legalcloseprice
+
+    current_price = last_date_price / currency_rate
+
+    if asset.group == 'stock_bonds':
+        bond = asset.get_related_object()
+        current_price = current_price * bond.face_value / 100
+
+    return Decimal(current_price)
