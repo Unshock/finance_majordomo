@@ -12,10 +12,13 @@ class User(AbstractUser):
         auto_now_add=True, verbose_name=_("Creation_date")
     )
 
-    fields_to_display = models.JSONField(
-        verbose_name='Поля для отображения',
-        default=json.dumps(get_default_display_options())
-    )
+    # fields_to_display = models.JSONField(
+    #     verbose_name='Поля для отображения',
+    #     default=json.dumps(get_default_display_options())
+    # )
+
+    def get_current_portfolio(self):
+        return self.portfolio_set.filter(is_current=True).last()
 
     @property
     def full_name(self):

@@ -7,11 +7,10 @@
         {% include 'stocks/_cards_deck_portfolio.html' %}
     
         <div class="d-flex justify-content-between my-4">
-            <a class="btn btn-primary btn-sm" href="{% url "add_stock" %}" role="button">{% translate "Add stock" %}</a>
+            <a class="btn btn-primary btn-sm" href="{% url "stocks:add_stock" %}" role="button">{% translate "Add stock" %}</a>
             <a class="btn btn-primary btn-sm" href="{% url "set_fields" %}" role="button">{% translate "Set display options" %}</a>
         </div>
-        
-        
+                
         {% include 'stocks/_shares_table.html' %}
         
     </div>

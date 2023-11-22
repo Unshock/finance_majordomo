@@ -42,13 +42,13 @@
                     {% elif dividend.is_received %}
                     <td>
                         <div class="d-flex justify-content-left">
-                            <a class="btn btn-success btn-sm" href="{% url "toggle_portfolio_div" dividend.id %}" role="button">{% translate "Remove dividend" %}</a>
+                            <a class="btn btn-success btn-sm" href="{% url "stocks:toggle_portfolio_div" dividend.id %}" role="button">{% translate "Remove dividend" %}</a>
                         </div>
                     </td>
                     {% else %}
                     <td>
                         <div class="d-flex justify-content-left">
-                            <a class="btn btn-primary btn-sm" href="{% url "toggle_portfolio_div" dividend.id %}" role="button">{% translate "Get dividend" %}</a>
+                            <a class="btn btn-primary btn-sm" href="{% url "stocks:toggle_portfolio_div" dividend.id %}" role="button">{% translate "Get dividend" %}</a>
                         </div>
                     </td>
                     {% endif %}

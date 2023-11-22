@@ -3,12 +3,12 @@ import datetime
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
 
-from ..models import Stock
-from finance_majordomo.stocks.models.models import Transaction
 from finance_majordomo.stocks.models.models import Dividend, DividendsOfUser
+from finance_majordomo.stocks.models import Stock, StocksOfUser
+from finance_majordomo.stocks.models.models import Transaction
 
 
-class SettingsStocks(TestCase):
+class SettingsTransactions(TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -57,6 +57,7 @@ class SettingsStocks(TestCase):
             ticker="LSNGP",
             type="preferred_share",
             isin="isin_id_2",
+            latname='lsngp_lat',
             issuedate=datetime.date(2000, 1, 1),
             isqualifiedinvestors=False,
             morningsession=False,
@@ -78,16 +79,17 @@ class SettingsStocks(TestCase):
         )
 
         # For utils tests
-        # cls.stock_id_4 = Stock.objects.create(
-        #     ticker="TATNP",
-        #     type="preferred_share",
-        #     isin="isin_id_4",
-        #     issuedate=datetime.date(2000, 1, 1),
-        #     isqualifiedinvestors=False,
-        #     morningsession=False,
-        #     eveningsession=False,
-        #     stock_data={},
-        # )
+        cls.stock_id_4 = Stock.objects.create(
+            ticker="TATNP",
+            type="preferred_share",
+            isin="isin_id_4",
+            latname='tatnp_lat',
+            issuedate=datetime.date(2000, 1, 1),
+            isqualifiedinvestors=False,
+            morningsession=False,
+            eveningsession=False,
+            stock_data={},
+        )
 
         cls.dividend_id_1 = Dividend.objects.create(
             stock_id=1,
@@ -173,3 +175,22 @@ class SettingsStocks(TestCase):
             price='200',
             quantity=1
         )
+        
+        cls.transaction_id_7 = Transaction.objects.create(
+            transaction_type='SELL',
+            asset_type='STOCK',
+            user=cls.user_authenticated,
+            ticker=cls.stock_id_3,
+            date='2021-01-01',
+            price='200',
+            quantity=2
+        )
+
+        StocksOfUser.objects.create(
+            user=cls.user_authenticated, stock=cls.stock_id_1)
+
+        StocksOfUser.objects.create(
+            user=cls.user_authenticated, stock=cls.stock_id_3)
+
+        StocksOfUser.objects.create(
+            user=cls.user_authenticated_another, stock=cls.stock_id_2)

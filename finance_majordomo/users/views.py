@@ -12,13 +12,13 @@ from django.views import View
 from django.views.generic import CreateView, ListView
 from django.utils.translation import gettext_lazy as _
 
-from finance_majordomo.stocks.models import Stock
+from finance_majordomo.stocks.models.asset import Stock, Asset
 from finance_majordomo.users.forms import RegisterUserForm, LoginUserForm, \
     FieldsUserForm
 from finance_majordomo.users.models import User, Portfolio, UserSettings
 from .utils.utils import set_fields_to_user
 from .utils.fields_to_display import FIELDS_TO_DISPLAY
-from finance_majordomo.stocks.models import Asset
+
 
 # Create your views here.
 
@@ -183,7 +183,7 @@ class AddAssetToPortfolio(SuccessMessageMixin, LoginRequiredMixin, View):
 class SetFieldsToDisplay(SuccessMessageMixin, LoginRequiredMixin, View):
     template_name = 'users/display_options.html'
     success_message = _("Display options have been successfully set")
-    success_url = reverse_lazy('users_stocks')
+    success_url = reverse_lazy('stocks:users_stocks')
 
     user_settings_form = modelform_factory(
         UserSettings,

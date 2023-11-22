@@ -36,7 +36,7 @@
                     <td>{{ search_result.primary_boardid }}</td>
                     <td>
                         <div class="d-flex justify-content-left">
-                            <a class="btn btn-primary btn-sm" href="{% url "add_transaction" %}?asset_secid={{ search_result.secid }}&asset_group={{ search_result.group }}&primary_boardid={{ search_result.primary_boardid }}" role="button">{% translate "Add transaction" %}</a>
+                            <a class="btn btn-primary btn-sm" href="{% url "stocks:add_transaction" %}?asset_secid={{ search_result.secid }}&asset_group={{ search_result.group }}&primary_boardid={{ search_result.primary_boardid }}" role="button">{% translate "Add transaction" %}</a>
                         </div>
                     </td>
                 </tr>

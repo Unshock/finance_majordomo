@@ -51,11 +51,6 @@ INSTALLED_APPS = [
     'finance_majordomo',
     'finance_majordomo.users',
     'finance_majordomo.stocks',
-    'finance_majordomo.transactions',
-    'finance_majordomo.currencies',
-    'finance_majordomo.dividends',
-    'finance_majordomo.assets',
-    'finance_majordomo.search'
 
 ]
 

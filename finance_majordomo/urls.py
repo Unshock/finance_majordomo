@@ -21,13 +21,15 @@ from finance_majordomo.users.views import LoginUser, logout_user
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.index, name="home"),
+    #path('', views.index, name="home"),
 
+    #path('', include("finance_majordomo.stocks.urls")),
+    path('', include("finance_majordomo.stocks.urls")),
     path("users/", include("finance_majordomo.users.urls")),
     path("stocks/", include("finance_majordomo.stocks.urls")),
-    path("transactions/", include("finance_majordomo.transactions.urls")),
-    path("dividends/", include("finance_majordomo.dividends.urls")),
-    path("search/", include("finance_majordomo.search.urls")),
+    path("transactions/", include("finance_majordomo.stocks.urls")),
+    path("dividends/", include("finance_majordomo.stocks.urls")),
+    path("search/", include("finance_majordomo.stocks.urls")),
 
     path("login/", LoginUser.as_view(), name="login"),
     path("logout/", logout_user, name="logout")

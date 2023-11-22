@@ -4,9 +4,9 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
 
 from ..models import UserSettings
-from ...dividends.models import Dividend, DividendsOfUser
+from finance_majordomo.stocks.models.models import Dividend, DividendsOfUser
 from ...stocks.models import Stock
-from ...transactions.models import Transaction
+from finance_majordomo.stocks.models.models import Transaction
 
 
 class SettingsUsers(TestCase):
