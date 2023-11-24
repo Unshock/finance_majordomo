@@ -1,0 +1,71 @@
+[
+{
+    "model": "stocks.asset",
+    "pk": 30,
+    "fields": {
+        "creation_date": "2023-11-24T18:02:13.975Z",
+        "asset_type": "",
+        "secid": "POSI",
+        "name": "iПозитив",
+        "isin": "RU000A103X66",
+        "currency": "RUR",
+        "issuedate": "2021-12-17",
+        "latname": "PJSC Positive Group",
+        "isqualifiedinvestors": false,
+        "morningsession": false,
+        "eveningsession": true,
+        "typename": "Акция обыкновенная",
+        "group": "stock_shares",
+        "type": "common_share",
+        "groupname": "Акции",
+        "primary_boardid": "TQBR",
+        "latest_accrual_update": "2023-11-24"
+    }
+},
+{
+    "model": "stocks.asset",
+    "pk": 31,
+    "fields": {
+        "creation_date": "2023-11-24T18:03:13.912Z",
+        "asset_type": "",
+        "secid": "LSRG",
+        "name": "ЛСР ао",
+        "isin": "RU000A0JPFP0",
+        "currency": "RUR",
+        "issuedate": "2007-11-09",
+        "latname": "LSR",
+        "isqualifiedinvestors": false,
+        "morningsession": false,
+        "eveningsession": false,
+        "typename": "Акция обыкновенная",
+        "group": "stock_shares",
+        "type": "common_share",
+        "groupname": "Акции",
+        "primary_boardid": "TQBR",
+        "latest_accrual_update": "2023-11-24"
+    }
+},
+{
+    "model": "stocks.asset",
+    "pk": 32,
+    "fields": {
+        "creation_date": "2023-11-24T18:17:20.748Z",
+        "asset_type": "",
+        "secid": "SU26222RMFS8",
+        "name": "ОФЗ 26222",
+        "isin": "RU000A0JXQF2",
+        "currency": "RUR",
+        "issuedate": "2017-05-03",
+        "latname": "OFZ-PD 26222",
+        "isqualifiedinvestors": false,
+        "morningsession": false,
+        "eveningsession": true,
+        "typename": "Государственная облигация",
+        "group": "stock_bonds",
+        "type": "ofz_bond",
+        "groupname": "Облигации",
+        "primary_boardid": "TQOB",
+        "latest_accrual_update": "2023-11-24"
+    }
+}
+]

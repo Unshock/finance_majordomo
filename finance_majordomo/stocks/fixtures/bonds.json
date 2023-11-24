@@ -1,0 +1,17 @@
+[
+{
+    "model": "stocks.bond",
+    "pk": 32,
+    "fields": {
+        "startdatemoex": "2017-05-03",
+        "buybackdate": null,
+        "matdate": "2024-10-16",
+        "couponpercent": "7.1000",
+        "couponfrequency": 2,
+        "couponvalue": "35.4000",
+        "days_to_redemption": 327,
+        "latest_coupon_update": null,
+        "face_value": "1000.0000"
+    }
+}
+]

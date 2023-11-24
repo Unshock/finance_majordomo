@@ -28,7 +28,6 @@ class CreateTransactionFormService(Service):
 
     def process(self):
         self._create_form()
-
         self._get_and_set_initial_asset_id()
         self._set_assets_to_display_to_form()
         self._add_accrued_interest_to_form()

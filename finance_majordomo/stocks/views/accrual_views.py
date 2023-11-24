@@ -64,4 +64,4 @@ class TogglePortfolioDiv(SuccessMessageMixin, LoginRequiredMixin, View):
         except Exception as e:
             print(e)
 
-        return redirect('dividends')
+        return redirect('stocks:dividends')

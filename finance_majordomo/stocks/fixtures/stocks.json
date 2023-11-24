@@ -1,0 +1,16 @@
+[
+{
+    "model": "stocks.stock",
+    "pk": 30,
+    "fields": {
+        "latest_dividend_update": null
+    }
+},
+{
+    "model": "stocks.stock",
+    "pk": 31,
+    "fields": {
+        "latest_dividend_update": null
+    }
+}
+]

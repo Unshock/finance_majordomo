@@ -7,7 +7,7 @@ from service_objects.services import Service
 from common.utils.values_formatters import set_money_fmt, set_percentage_fmt
 from finance_majordomo.stocks.utils.currencies_utils import update_currency_rates, update_usd
 from finance_majordomo.stocks.services.accrual_services.accrual_calc_services import \
-    get_accrual_result_of_portfolio
+    get_accrual_result_of_portfolio, get_accrual_result_of_asset
 from finance_majordomo.stocks.models.asset import Asset
 from finance_majordomo.stocks.services.asset_services.asset_services import \
     get_current_asset_price_per_asset
@@ -41,18 +41,6 @@ class GetAssetsOfUser(Service):
                 id__in=portfolio.assetofportfolio_set.values('asset'))
 
         return assets_of_user
-
-
-# @dataclass
-# class PortfolioAssetItem:
-#     asset_name: str
-#     asset_quantity: Decimal
-#     id: int
-#     amount: Decimal
-#     sum: Decimal
-#     date: datetime.date
-#     is_received: bool
-#     is_upcoming: bool
 
 
 class PortfolioAssetItem:
@@ -139,9 +127,9 @@ class PortfolioAssetItem:
             if formatter else current_price_total
 
     def _get_accrual_received(self, currency=None, formatter=None):
-        accrual_received = get_accrual_result_of_portfolio(
-            self.portfolio, currency=currency)
-
+        accrual_received = get_accrual_result_of_asset(
+            self.portfolio, self.asset, currency=currency)
+        print('accral_rec', accrual_received)
         return formatter(accrual_received) if formatter else accrual_received
 
     def format_all_fields(self):

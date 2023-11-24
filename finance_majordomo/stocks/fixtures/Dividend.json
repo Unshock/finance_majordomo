@@ -1,0 +1,32 @@
+[
+{
+    "model": "stocks.dividend",
+    "pk": 1,
+    "fields": {
+        "creation_date": "2023-11-24T18:02:15.195Z",
+        "asset": 30,
+        "date": "2023-04-16",
+        "amount": "37.87"
+    }
+},
+{
+    "model": "stocks.dividend",
+    "pk": 2,
+    "fields": {
+        "creation_date": "2023-11-24T18:17:24.122Z",
+        "asset": 32,
+        "date": "2023-04-19",
+        "amount": "35.40"
+    }
+},
+{
+    "model": "stocks.dividend",
+    "pk": 3,
+    "fields": {
+        "creation_date": "2023-11-24T18:17:24.123Z",
+        "asset": 32,
+        "date": "2023-05-18",
+        "amount": "10.40"
+    }
+}
+]

@@ -1,0 +1,29 @@
+[
+{
+    "model": "stocks.dividendsofportfolio",
+    "pk": 1,
+    "fields": {
+        "portfolio": 2,
+        "dividend": 1,
+        "is_received": false
+    }
+},
+{
+    "model": "stocks.dividendsofportfolio",
+    "pk": 2,
+    "fields": {
+        "portfolio": 2,
+        "dividend": 2,
+        "is_received": true
+    }
+},
+{
+    "model": "stocks.dividendsofportfolio",
+    "pk": 3,
+    "fields": {
+        "portfolio": 2,
+        "dividend": 3,
+        "is_received": true
+    }
+}
+]

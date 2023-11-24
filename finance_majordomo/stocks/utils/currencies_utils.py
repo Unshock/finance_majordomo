@@ -60,7 +60,7 @@ def get_usd_rate(date_dt):
 
         day_status = ProdCalendar.get_date(date_str).date_status
 
-        print(day_status)
+        #print(day_status)
 
         if day_status == 'Working':
             try:

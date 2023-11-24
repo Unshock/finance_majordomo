@@ -178,6 +178,7 @@ class StocksOfUser(models.Model):
 
 
 class Bond(Asset):
+
     startdatemoex = models.DateField(
         verbose_name="Дата начала торгов на MOEX",
         blank=True

@@ -101,7 +101,7 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
         except Exception as e:
             messages.error(self.request, e)
-            return redirect('transactions')
+            return redirect('stocks:transactions')
 
     def post(self, request, *args, **kwargs):
 
@@ -135,7 +135,7 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
             except Exception as e:
                 messages.error(self.request, e)
-                return redirect('transactions')
+                return redirect('stocks:transactions')
 
         elif self.accrued_interest_err_message in form.errors.get('__all__'):
             form.add_accrued_interest_field()
@@ -191,7 +191,7 @@ class DeleteTransaction(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
 
         else:
             messages.error(self.request, self.error_message)
-            return redirect('transactions')
+            return redirect('stocks:transactions')
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)

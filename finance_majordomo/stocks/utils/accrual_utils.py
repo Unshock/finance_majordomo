@@ -14,7 +14,7 @@ def update_dividends_of_user(request, asset_obj, date=None, transaction=None):
 
     asset_dividends = Dividend.objects.filter(asset=asset_obj.id)
     portfolio = get_current_portfolio(request.user)
-    print(asset_dividends, 'tttttttttttttttttttttttttttttttt')
+    #print(asset_dividends, 'tttttttttttttttttttttttttttttttt')
 
     if date:
         asset_dividends = asset_dividends.filter(date__gte=date)
@@ -44,7 +44,7 @@ def update_dividends_of_user(request, asset_obj, date=None, transaction=None):
                 dividend=div,
                 is_received=False
             )
-        print(dividend_of_user)
+        #print(dividend_of_user)
         dividend_of_user.save()
 
 
@@ -80,5 +80,5 @@ def update_dividends_of_portfolio(
                 dividend=div,
                 is_received=False
             )
-        print(dividend_of_portfolio)
+        #print(dividend_of_portfolio)
         dividend_of_portfolio.save()

@@ -10,7 +10,7 @@ from finance_majordomo.stocks.models.models import DividendsOfUser
 class TestDividendsViews(SettingsDividends):
 
     def setUp(self):
-        self.list_url = reverse('dividends')
+        self.list_url = reverse('stocks:dividends')
         self.add_dividend = reverse(
             'add_div_to_user', kwargs={'pk_dividend': 1})
         self.remove_dividend = reverse(

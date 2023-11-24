@@ -15,4 +15,4 @@ def set_fields():
     print(json_fields)
 
 
-set_fields()
+#set_fields()

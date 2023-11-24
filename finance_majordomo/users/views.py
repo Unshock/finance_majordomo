@@ -107,13 +107,13 @@ class LoginUser(SuccessMessageMixin, LoginView):
         return context
 
     def get_success_url(self):
-        return reverse_lazy('home')
+        return reverse_lazy('stocks:home')
 
 
 def logout_user(request):
     logout(request)
     messages.info(request, _('You have been successfully logged out!'))
-    return redirect('home')
+    return redirect('stocks:home')
 
 
 class AddStockToUser(SuccessMessageMixin, LoginRequiredMixin, View):
@@ -126,7 +126,7 @@ class AddStockToUser(SuccessMessageMixin, LoginRequiredMixin, View):
         stock.users.add(request.user)
         stock.save()
 
-        return redirect('stocks')
+        return redirect('stocks:stocks')
 
         # user = User.objects.get(id=kwargs['pk_user'])
         # user.stocks.add(Stock.objects.get(id=kwargs['pk_stock']))
@@ -177,7 +177,7 @@ class AddAssetToPortfolio(SuccessMessageMixin, LoginRequiredMixin, View):
         asset.portfolios.add(current_portfolio)
         asset.save()
 
-        return redirect('stocks')
+        return redirect('stocks:stocks')
 
 
 class SetFieldsToDisplay(SuccessMessageMixin, LoginRequiredMixin, View):

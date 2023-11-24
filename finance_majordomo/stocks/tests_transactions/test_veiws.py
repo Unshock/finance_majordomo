@@ -12,18 +12,18 @@ from finance_majordomo.stocks.models.models import Transaction
 class TestTransactionsViews(SettingsTransactions):
 
     def setUp(self):
-        self.list_all_transactions = reverse('transactions')
-        self.list_user_transactions = reverse('user_transactions')
-        self.add_transaction = reverse('add_transaction')
+        self.list_all_transactions = reverse('stocks:transactions')
+        self.list_user_transactions = reverse('stocks:user_transactions')
+        self.add_transaction = reverse('stocks:add_transaction')
         self.delete_transaction = reverse(
-            'delete_transaction', kwargs={'pk': 1})
+            'stocks:delete_transaction', kwargs={'pk': 1})
         self.login = reverse('login')
         self.add_transaction_with_id = \
-            reverse('add_transaction') + '?asset_id=1'
+            reverse('stocks:add_transaction') + '?asset_id=1'
         self.add_transaction_with_asset_secid_existed = \
-            reverse('add_transaction') + '?asset_secid=LSNGP'
+            reverse('stocks:add_transaction') + '?asset_secid=LSNGP'
         self.add_transaction_with_asset_secid_nonexisted = \
-            reverse('add_transaction') + '?asset_secid=GAZP'
+            reverse('stocks:add_transaction') + '?asset_secid=GAZP'
 
     def test_urls_to_views(self):
         #print(self.add_transaction_with_id)

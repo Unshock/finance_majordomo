@@ -23,8 +23,9 @@ def get_or_create_asset_obj(
     except Asset.DoesNotExist:
         asset_description = get_asset_description(asset_secid)
         asset_description['primary_boardid'] = primary_boardid
+        print(asset_description)
         asset_obj = create_asset_obj_from_description(asset_description)
-
+        print(2)
     return asset_obj
 
 
@@ -89,7 +90,7 @@ def create_asset_obj_from_description(asset_description: dict) -> Asset:
         'days_to_redemption': days_to_redemption,
         'face_value': face_value,
     })
-
+    print('aset')
     return asset
 
 
@@ -124,9 +125,13 @@ class CreateAssetService(Service):
     face_value = forms.DecimalField(required=False)
 
     def process(self):
+        print('2')
         asset_obj = self._create_base_asset()
+        print('3')
         self._create_sub_asset(asset_obj)
+        print('4')
         self._fill_with_historical_data(asset_obj)
+        print('5')
         self._fill_with_accrual(asset_obj)
 
         return asset_obj
@@ -310,6 +315,9 @@ class CreateBondService(Service):
         bond_obj = Bond.objects.create(
             asset_ptr=asset,
             creation_date=asset.creation_date,
+            isqualifiedinvestors=asset.isqualifiedinvestors,
+            morningsession=asset.morningsession,
+            eveningsession=asset.eveningsession,
 
             startdatemoex=startdatemoex,
             buybackdate=buybackdate,

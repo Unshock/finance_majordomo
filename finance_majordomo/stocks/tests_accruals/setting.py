@@ -3,9 +3,22 @@ import datetime
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
 
-from finance_majordomo.stocks.models.models import Dividend, DividendsOfUser
-from finance_majordomo.stocks.models import Stock
-from finance_majordomo.stocks.models.models import Transaction
+from finance_majordomo.stocks.models.accrual_models import Dividend, DividendsOfUser
+from finance_majordomo.stocks.models.asset import Stock, AssetsHistoricalData
+from finance_majordomo.stocks.models.transaction_models import Transaction
+from finance_majordomo.users.models import User
+
+
+
+
+class A(TestCase):
+    
+    fixtures = ['user.json', 'AssetsHistoricalData.json', 'assets.json']
+    
+    def setUp(self) -> None:
+        self.client: Client = Client()
+
+    def test_user(self):
 
 
 class SettingsDividends(TestCase):

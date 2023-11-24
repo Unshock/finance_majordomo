@@ -1,0 +1,32 @@
+[
+{
+    "model": "users.portfolio",
+    "pk": 2,
+    "fields": {
+        "creation_date": "2023-11-24T18:00:37.446Z",
+        "name": "Portfolio No. 1",
+        "user": 2,
+        "is_current": true
+    }
+},
+{
+    "model": "users.portfolio",
+    "pk": 3,
+    "fields": {
+        "creation_date": "2023-11-24T18:00:59.142Z",
+        "name": "Portfolio No. 1",
+        "user": 3,
+        "is_current": true
+    }
+},
+{
+    "model": "users.portfolio",
+    "pk": 4,
+    "fields": {
+        "creation_date": "2023-11-24T18:01:16.362Z",
+        "name": "Portfolio No. 1",
+        "user": 4,
+        "is_current": true
+    }
+}
+]

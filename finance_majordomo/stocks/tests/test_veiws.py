@@ -12,8 +12,8 @@ from ..models import Stock, StocksOfUser
 class TestStocksViews(SettingsStocks):
 
     def setUp(self):
-        self.list_url = reverse('stocks')
-        self.add_stock = reverse('add_stock')
+        self.list_url = reverse('stocks:stocks')
+        self.add_stock = reverse('stocks:add_stock')
 
     def test_urls_to_views(self):
         self.assertEqual(resolve(self.list_url).func.view_class,
