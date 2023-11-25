@@ -4,7 +4,7 @@ from django.db.models import QuerySet
 
 from finance_majordomo.stocks.models.asset import Asset
 from finance_majordomo.stocks.utils.currencies_utils import get_usd_rate
-from finance_majordomo.stocks.models.accrual_models import DividendsOfPortfolio
+from finance_majordomo.stocks.models.accrual_models import AccrualsOfPortfolio
 from finance_majordomo.stocks.services.transaction_services.transaction_calculation_services import \
     get_asset_quantity_for_portfolio
 from finance_majordomo.users.models import Portfolio
@@ -15,7 +15,7 @@ def get_accrual_result_of_portfolio(
         currency: str = None,
         taxes_excluded: bool = True) -> Decimal:
 
-    portfolio_dividends_received = DividendsOfPortfolio.objects.filter(
+    portfolio_dividends_received = AccrualsOfPortfolio.objects.filter(
         portfolio=portfolio, is_received=True)
 
     return get_portfolio_dividends_result(
@@ -30,7 +30,7 @@ def get_accrual_result_of_asset(
         currency: str = None,
         taxes_excluded: bool = True) -> Decimal:
 
-    portfolio_dividends_received = DividendsOfPortfolio.objects.filter(
+    portfolio_dividends_received = AccrualsOfPortfolio.objects.filter(
         portfolio=portfolio, is_received=True, dividend__asset=asset)
 
     return get_portfolio_dividends_result(

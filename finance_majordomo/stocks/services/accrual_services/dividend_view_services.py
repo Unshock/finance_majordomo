@@ -8,7 +8,7 @@ from django.db.models import QuerySet
 from service_objects.fields import ModelField
 from service_objects.services import Service
 
-from finance_majordomo.stocks.models.accrual_models import DividendsOfPortfolio
+from finance_majordomo.stocks.models.accrual_models import AccrualsOfPortfolio
 from finance_majordomo.stocks.services.transaction_services.transaction_calculation_services import \
     get_asset_quantity_for_portfolio
 from finance_majordomo.users.models import Portfolio
@@ -26,22 +26,43 @@ class AccrualItem:
     is_upcoming: bool
 
 
+def portfolio_accrual_view_context_service(
+        portfolio: Portfolio, days_delta: int):
+    return PortfolioAccrualViewContextService.execute(
+        {'portfolio': portfolio,
+         'days_delta': days_delta
+         }
+    )
+
+
 class PortfolioAccrualViewContextService(Service):
     portfolio = ModelField(Portfolio)
     days_delta = forms.IntegerField()
+
+    portfolio_assets_data = {'total_results': {},
+                             'accrual_list': []
+                             }
 
     def process(self):
 
         self.portfolio = self.cleaned_data.get('portfolio')
 
         portfolio_accruals = self._get_portfolio_accruals()
+        if not portfolio_accruals:
+            return self.portfolio_assets_data
 
+        self._get_accrual_context_data(portfolio_accruals)
+        return self.portfolio_assets_data
+
+    def _get_accrual_context_data(self, portfolio_accruals):
         accrual_list = self._get_accrual_list(portfolio_accruals)
-        total_divs_payable = self._get_total_divs_payable(accrual_list)
-        total_divs_received = self._get_total_divs_received(accrual_list)
-        total_divs_upcoming = self._get_total_divs_upcoming(accrual_list)
-
-        return accrual_list, total_divs_payable, total_divs_received, total_divs_upcoming
+        self.portfolio_assets_data['accrual_list'] = accrual_list
+        self.portfolio_assets_data['total_results']['total_divs_payable'] =\
+            self._get_total_divs_payable(accrual_list)
+        self.portfolio_assets_data['total_results']['total_divs_received'] =\
+            self._get_total_divs_received(accrual_list)
+        self.portfolio_assets_data['total_results']['total_divs_upcoming'] =\
+            self._get_total_divs_upcoming(accrual_list)
 
     def _get_portfolio_accruals(self):
 
@@ -53,7 +74,7 @@ class PortfolioAccrualViewContextService(Service):
         #     date__lte=self._get_today_date() + days_delta
         # ).order_by('-date')
 
-        portfolio_accruals = DividendsOfPortfolio.objects.filter(
+        portfolio_accruals = AccrualsOfPortfolio.objects.filter(
             portfolio=self.portfolio,
             dividend__date__lte=self._get_today_date() + days_delta
         ).order_by('-dividend__date')

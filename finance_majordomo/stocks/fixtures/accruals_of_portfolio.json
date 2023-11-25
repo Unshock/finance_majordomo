@@ -1,6 +1,6 @@
 [
 {
-    "model": "stocks.dividendsofportfolio",
+    "model": "stocks.accrualsofportfolio",
     "pk": 1,
     "fields": {
         "portfolio": 2,
@@ -9,7 +9,7 @@
     }
 },
 {
-    "model": "stocks.dividendsofportfolio",
+    "model": "stocks.accrualsofportfolio",
     "pk": 2,
     "fields": {
         "portfolio": 2,
@@ -18,12 +18,12 @@
     }
 },
 {
-    "model": "stocks.dividendsofportfolio",
+    "model": "stocks.accrualsofportfolio",
     "pk": 3,
     "fields": {
         "portfolio": 2,
         "dividend": 3,
-        "is_received": true
+        "is_received": false
     }
 }
 ]

@@ -54,8 +54,6 @@ def create_asset_obj_from_description(asset_description: dict) -> Asset:
     groupname = asset_description.get('GROUPNAME')
     primary_boardid = asset_description.get('primary_boardid')
 
-    #asset_type = get_normalized_asset_type(type)
-
     startdatemoex = asset_description.get('STARTDATEMOEX')
     buybackdate = asset_description.get('BUYBACKDATE')
     matdate = asset_description.get('MATDATE')

@@ -1,0 +1,47 @@
+[
+{
+    "model": "stocks.transaction",
+    "pk": 1,
+    "fields": {
+        "creation_date": "2023-11-24T18:02:47.760Z",
+        "transaction_type": "BUY",
+        "portfolio": 2,
+        "asset": 30,
+        "date": "2023-04-15",
+        "price": "1000.00",
+        "accrued_interest": null,
+        "fee": "0.00",
+        "quantity": "5.00"
+    }
+},
+{
+    "model": "stocks.transaction",
+    "pk": 2,
+    "fields": {
+        "creation_date": "2023-11-24T18:03:32.827Z",
+        "transaction_type": "BUY",
+        "portfolio": 2,
+        "asset": 31,
+        "date": "2023-04-15",
+        "price": "500.00",
+        "accrued_interest": null,
+        "fee": "0.00",
+        "quantity": "5.00"
+    }
+},
+{
+    "model": "stocks.transaction",
+    "pk": 3,
+    "fields": {
+        "creation_date": "2023-11-24T18:17:54.729Z",
+        "transaction_type": "BUY",
+        "portfolio": 2,
+        "asset": 32,
+        "date": "2023-04-15",
+        "price": "1000.00",
+        "accrued_interest": "20.00",
+        "fee": "0.00",
+        "quantity": "1.00"
+    }
+}
+]

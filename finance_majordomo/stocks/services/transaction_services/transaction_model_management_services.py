@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from service_objects.fields import ModelField
 from service_objects.services import Service
 from django import forms
@@ -32,6 +34,12 @@ class CreateTransactionService(Service):
         quantity = self.cleaned_data['quantity']
         asset = self.cleaned_data['asset']
         accrued_interest = self.cleaned_data.get('accrued_interest')
+
+        if fee is None:
+            fee = Decimal('0')
+
+        if accrued_interest is None:
+            accrued_interest = Decimal('0')
 
         user = self.cleaned_data.get('user')
         current_portfolio = get_current_portfolio(user)

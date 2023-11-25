@@ -4,7 +4,7 @@ import django.db.utils
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from finance_majordomo.stocks.models.models import Dividend, DividendsOfUser
-from .setting import SettingsDividends
+from finance_majordomo.stocks.tests_accruals.setting import SettingsDividends
 
 
 class DividendsModelsTest(SettingsDividends):

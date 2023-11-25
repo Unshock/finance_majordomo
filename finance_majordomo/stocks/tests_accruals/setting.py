@@ -19,6 +19,7 @@ class A(TestCase):
         self.client: Client = Client()
 
     def test_user(self):
+        pass
 
 
 class SettingsDividends(TestCase):

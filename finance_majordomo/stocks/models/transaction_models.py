@@ -75,7 +75,6 @@ class Transaction(models.Model):
         verbose_name=_('Transaction quantity'),
     )
 
-
     def get_delete_url(self):
         return reverse("stocks:delete_transaction", kwargs={'pk': self.pk})
 

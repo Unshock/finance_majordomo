@@ -3,7 +3,7 @@ from datetime import datetime
 from service_objects.fields import ModelField
 from service_objects.services import Service
 
-from finance_majordomo.stocks.models.accrual_models import Dividend, DividendsOfPortfolio
+from finance_majordomo.stocks.models.accrual_models import Dividend, AccrualsOfPortfolio
 from finance_majordomo.stocks.models.asset import Asset
 from finance_majordomo.stocks.models.transaction_models import Transaction
 from finance_majordomo.stocks.services.transaction_services.transaction_calculation_services import \
@@ -20,7 +20,7 @@ class TogglePortfolioDividendService(Service):
         dividend = self.cleaned_data['dividend']
         portfolio = self.cleaned_data['portfolio']
 
-        dividend_of_portfolio = DividendsOfPortfolio.objects.get(
+        dividend_of_portfolio = AccrualsOfPortfolio.objects.get(
             portfolio=portfolio, dividend=dividend
         )
 
@@ -112,7 +112,7 @@ class UpdateAccrualsOfPortfolio(Service):
 
     def _create_accrual_of_portfolio(self, accrual):
 
-        DividendsOfPortfolio.objects.create(
+        AccrualsOfPortfolio.objects.create(
             portfolio=self.portfolio,
             dividend=accrual,
             is_received=False
@@ -133,14 +133,14 @@ class UpdateAccrualsOfPortfolio(Service):
             trans_date_quantity += quantity if tr_type == 'BUY' else -quantity
 
             try:
-                dividend_of_portfolio = DividendsOfPortfolio.objects.get(
+                dividend_of_portfolio = AccrualsOfPortfolio.objects.get(
                     portfolio=self.portfolio,
                     dividend=accrual)
 
                 if quantity <= 0:
                     dividend_of_portfolio.is_received = False
 
-            except DividendsOfPortfolio.DoesNotExist:
+            except AccrualsOfPortfolio.DoesNotExist:
                 self._create_accrual_of_portfolio(accrual)
 
                 
@@ -165,15 +165,15 @@ def update_dividends_of_portfolio(
               quantity - tr_quantity)
 
         try:
-            dividend_of_portfolio = DividendsOfPortfolio.objects.get(
+            dividend_of_portfolio = AccrualsOfPortfolio.objects.get(
                 portfolio=portfolio,
                 dividend=div)
 
             if quantity <= 0:
                 dividend_of_portfolio.is_received = False
 
-        except DividendsOfPortfolio.DoesNotExist:
-            dividend_of_portfolio = DividendsOfPortfolio.objects.create(
+        except AccrualsOfPortfolio.DoesNotExist:
+            dividend_of_portfolio = AccrualsOfPortfolio.objects.create(
                 portfolio=portfolio,
                 dividend=div,
                 is_received=False

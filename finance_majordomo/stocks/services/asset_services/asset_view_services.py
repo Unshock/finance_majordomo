@@ -5,7 +5,8 @@ from service_objects.fields import ModelField
 from service_objects.services import Service
 
 from common.utils.values_formatters import set_money_fmt, set_percentage_fmt
-from finance_majordomo.stocks.utils.currencies_utils import update_currency_rates, update_usd
+from finance_majordomo.stocks.utils.currencies_utils import \
+    update_currency_rates, update_usd
 from finance_majordomo.stocks.services.accrual_services.accrual_calc_services import \
     get_accrual_result_of_portfolio, get_accrual_result_of_asset
 from finance_majordomo.stocks.models.asset import Asset
@@ -19,7 +20,6 @@ from finance_majordomo.users.models import User, Portfolio
 
 
 class GetAssetsOfUser(Service):
-
     user = ModelField(User)
 
     def process(self) -> QuerySet(Asset):
@@ -30,13 +30,11 @@ class GetAssetsOfUser(Service):
         return self.user.portfolio_set.all()
 
     def _get_assets_of_user(self):
-
         portfolios_of_user = self._get_portfolios_of_user()
 
         assets_of_user = Asset.objects.none()
 
         for portfolio in portfolios_of_user:
-
             assets_of_user |= Asset.objects.filter(
                 id__in=portfolio.assetofportfolio_set.values('asset'))
 
@@ -45,7 +43,6 @@ class GetAssetsOfUser(Service):
 
 class PortfolioAssetItem:
     def __init__(self, portfolio: Portfolio, asset: Asset):
-
         if self._validate_arguments(portfolio, asset):
             self.portfolio = portfolio
             self.asset = asset
@@ -67,7 +64,7 @@ class PortfolioAssetItem:
                 currency='usd')
             self.purchase_price_usd = self._get_purchase_price(
                 currency='usd')
-            self.current_price_per_asset_usd =\
+            self.current_price_per_asset_usd = \
                 self._get_current_price_per_asset(currency='usd')
             self.current_price_usd = self._get_current_price_total()
             self.accruals_received_usd = self._get_accrual_received(
@@ -98,7 +95,7 @@ class PortfolioAssetItem:
         avg_purchase_price = get_average_purchase_price(
             self.portfolio.id, self.asset_id, currency=currency)
 
-        return formatter(avg_purchase_price) if\
+        return formatter(avg_purchase_price) if \
             formatter else avg_purchase_price
 
     def _get_purchase_price(self, currency=None, formatter=None):
@@ -117,13 +114,13 @@ class PortfolioAssetItem:
     def _get_current_price_total(self, formatter=None):
         current_price_total = self.current_price_per_asset * self.quantity
 
-        return formatter(current_price_total)\
+        return formatter(current_price_total) \
             if formatter else current_price_total
 
     def _get_current_price_total_usd(self, formatter=None):
         current_price_total = self.current_price_per_asset_usd * self.quantity
 
-        return formatter(current_price_total)\
+        return formatter(current_price_total) \
             if formatter else current_price_total
 
     def _get_accrual_received(self, currency=None, formatter=None):
@@ -158,10 +155,9 @@ class PortfolioAssetItem:
 class AssetResult:
     def __init__(
             self, initial_price, final_price, accruals_received=Decimal('0')):
-        if self._validate_price(initial_price)\
-                and self._validate_price(final_price)\
+        if self._validate_price(initial_price) \
+                and self._validate_price(final_price) \
                 and self._validate_price(accruals_received):
-
             self.initial_price = initial_price
             self.final_price = final_price
             self.accruals_received = accruals_received
@@ -170,7 +166,7 @@ class AssetResult:
         if self.initial_price == 0 and self.final_price == 0:
             result = Decimal('0')
         elif self.final_price > 0 and self.initial_price > 0:
-            result = (Decimal(self.final_price) - Decimal(self.initial_price))\
+            result = (Decimal(self.final_price) - Decimal(self.initial_price)) \
                      / Decimal(self.initial_price)
         else:
             raise ValueError('initial_price and final_price must be >= 0')
@@ -178,18 +174,18 @@ class AssetResult:
         return formatter(result) if formatter else result
 
     def get_percentage_result_with_accruals(self, formatter=None):
-        if self.initial_price == 0 and\
+        if self.initial_price == 0 and \
                 (self.final_price + self.accruals_received) == 0:
             result = Decimal('0')
-        elif (self.final_price + self.accruals_received) > 0 and\
+        elif (self.final_price + self.accruals_received) > 0 and \
                 self.initial_price > 0:
             result = (
                     (
                             Decimal(self.final_price)
-                            + Decimal(self.accruals_received) 
+                            + Decimal(self.accruals_received)
                             - Decimal(self.initial_price)
-                     ) / Decimal(self.initial_price)
-                   )
+                    ) / Decimal(self.initial_price)
+            )
         else:
             raise ValueError('initial_price and final_price must be >= 0')
 
@@ -201,8 +197,8 @@ class AssetResult:
         return formatter(result) if formatter else result
 
     def get_financial_result_with_accruals(self, formatter=None):
-        result = Decimal(self.final_price)\
-                 + Decimal(self.accruals_received)\
+        result = Decimal(self.final_price) \
+                 + Decimal(self.accruals_received) \
                  - Decimal(self.initial_price)
 
         return formatter(result) if formatter else result
@@ -212,21 +208,31 @@ class AssetResult:
         return price >= 0 and type(price) in [Decimal, int, float]
 
 
-class PortfolioAssetsViewContextService(Service):
+def portfolio_asset_view_context_service(portfolio):
+    return PortfolioAssetsViewContextService.execute({
+        'portfolio': portfolio
+    })
 
+
+class PortfolioAssetsViewContextService(Service):
     portfolio = ModelField(Portfolio)
 
-    def process(self) -> dict:
+    portfolio_assets_data = {'total_results': {},
+                             'asset_list': []
+                             }
+
+    def process(self):
         self.portfolio = self.cleaned_data.get('portfolio')
+
         portfolio_assets = self._get_assets_of_portfolio()
         if not portfolio_assets:
-            return dict()
+            return self.portfolio_assets_data
         return self._get_assets_of_portfolio_view_context(portfolio_assets)
 
     def _get_assets_of_portfolio(self):
         return self.portfolio.get_assets_of_portfolio()
 
-    def _get_assets_of_portfolio_view_context(self, portfolio_assets) -> dict:
+    def _get_assets_of_portfolio_view_context(self, portfolio_assets):
         total_purchase_price = Decimal('0')
         total_current_price = Decimal('0')
         total_accruals_received = Decimal('0')
@@ -234,10 +240,6 @@ class PortfolioAssetsViewContextService(Service):
         total_purchase_price_usd = Decimal('0')
         total_current_price_usd = Decimal('0')
         total_accruals_received_usd = Decimal('0')
-
-        portfolio_assets_data = {'total_data': {},
-                                 'asset_list': []
-                                 }
 
         try:
             update_currency_rates()
@@ -271,7 +273,7 @@ class PortfolioAssetsViewContextService(Service):
             total_accruals_received_usd += portfolio_asset.accruals_received_usd
 
             portfolio_asset.format_all_fields()
-            portfolio_assets_data['asset_list'].append(portfolio_asset)
+            self.portfolio_assets_data['asset_list'].append(portfolio_asset)
 
             # # create
             # current_price = self.get_current_price(asset)
@@ -332,7 +334,7 @@ class PortfolioAssetsViewContextService(Service):
             total_accruals_received
         )
 
-        portfolio_assets_data['total_results'] = {
+        self.portfolio_assets_data['total_results'] = {
             'total_purchase_price': set_money_fmt(total_purchase_price),
             'total_current_price': set_money_fmt(total_current_price),
             'total_percent_result':
@@ -352,4 +354,4 @@ class PortfolioAssetsViewContextService(Service):
                 total_results_usd.get_financial_result_with_accruals())
         }
 
-        return portfolio_assets_data
+        return self.portfolio_assets_data

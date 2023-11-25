@@ -25,10 +25,10 @@ class Dividend(models.Model):
         decimal_places=2,
         verbose_name=_("Dividend amount for one share"))
 
-    users = models.ManyToManyField(
-        User,
-        through='DividendsOfUser',
-        through_fields=('dividend', 'user'),
+    portfolios = models.ManyToManyField(
+        Portfolio,
+        through='AccrualsOfPortfolio',
+        through_fields=('dividend', 'portfolio'),
         blank=True,
         related_name='dividend',
     )
@@ -40,33 +40,33 @@ class Dividend(models.Model):
         ordering = ['creation_date', 'asset', 'amount']
 
 
-class DividendsOfUser(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        null=True
-    )
+# class DividendsOfUser(models.Model):
+#     user = models.ForeignKey(
+#         User,
+#         on_delete=models.CASCADE,
+#         null=True
+#     )
+# 
+#     dividend = models.ForeignKey(
+#         Dividend,
+#         on_delete=models.CASCADE,
+#         null=True
+#     )
+# 
+#     is_received = models.BooleanField(
+#         default=False,
+#         help_text='shows if user got dividend',
+#         verbose_name='Dividend status')
+# 
+#     class Meta:
+# 
+#         unique_together = ('user', 'dividend')
+#         verbose_name = "Дивиденд пользователя"
+#         verbose_name_plural = "Дивиденды пользователей"
+#         ordering = ['dividend']
 
-    dividend = models.ForeignKey(
-        Dividend,
-        on_delete=models.CASCADE,
-        null=True
-    )
 
-    is_received = models.BooleanField(
-        default=False,
-        help_text='shows if user got dividend',
-        verbose_name='Dividend status')
-
-    class Meta:
-
-        unique_together = ('user', 'dividend')
-        verbose_name = "Дивиденд пользователя"
-        verbose_name_plural = "Дивиденды пользователей"
-        ordering = ['dividend']
-
-
-class DividendsOfPortfolio(models.Model):
+class AccrualsOfPortfolio(models.Model):
     portfolio = models.ForeignKey(
         Portfolio,
         on_delete=models.CASCADE,
@@ -82,7 +82,8 @@ class DividendsOfPortfolio(models.Model):
     is_received = models.BooleanField(
         default=False,
         help_text='shows if portfolio got dividend',
-        verbose_name='Dividend status')
+        verbose_name='Dividend status'
+    )
 
     class Meta:
 

@@ -1,0 +1,56 @@
+[
+{
+    "model": "users.usersettings",
+    "pk": 2,
+    "fields": {
+        "user": 2,
+        "show_ticker": true,
+        "show_name": true,
+        "show_currency": true,
+        "show_quantity": true,
+        "show_purchase_price": true,
+        "show_current_price": true,
+        "show_dividends_received": true,
+        "show_money_result_without_divs": true,
+        "show_money_result_with_divs": true,
+        "show_percent_result": true,
+        "show_rate_of_return": true
+    }
+},
+{
+    "model": "users.usersettings",
+    "pk": 3,
+    "fields": {
+        "user": 3,
+        "show_ticker": true,
+        "show_name": true,
+        "show_currency": true,
+        "show_quantity": true,
+        "show_purchase_price": true,
+        "show_current_price": true,
+        "show_dividends_received": true,
+        "show_money_result_without_divs": true,
+        "show_money_result_with_divs": true,
+        "show_percent_result": true,
+        "show_rate_of_return": true
+    }
+},
+{
+    "model": "users.usersettings",
+    "pk": 4,
+    "fields": {
+        "user": 4,
+        "show_ticker": true,
+        "show_name": true,
+        "show_currency": true,
+        "show_quantity": true,
+        "show_purchase_price": true,
+        "show_current_price": true,
+        "show_dividends_received": true,
+        "show_money_result_without_divs": true,
+        "show_money_result_with_divs": true,
+        "show_percent_result": true,
+        "show_rate_of_return": true
+    }
+}
+]

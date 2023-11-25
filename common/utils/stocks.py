@@ -12,6 +12,16 @@ import apimoex
 # from finance_majordomo.stocks.models import Bond
 
 
+def exception_printer(func):
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            print(e)
+            raise e
+    return wrapper
+
+
 def validate_ticker(ticker: str):
     if not ticker:
         return None

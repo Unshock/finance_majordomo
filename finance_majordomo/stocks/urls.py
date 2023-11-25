@@ -18,7 +18,7 @@ urlpatterns = [
     ),
     path(
         'stocks/my/',
-        views.asset_views.UsersStocks.as_view(),
+        views.asset_views.PortfolioAssets.as_view(),
         name='users_stocks'
     ),
     path(

@@ -1,0 +1,26 @@
+[
+{
+    "model": "stocks.assetofportfolio",
+    "pk": 14,
+    "fields": {
+        "asset": 30,
+        "portfolio": 2
+    }
+},
+{
+    "model": "stocks.assetofportfolio",
+    "pk": 15,
+    "fields": {
+        "asset": 31,
+        "portfolio": 2
+    }
+},
+{
+    "model": "stocks.assetofportfolio",
+    "pk": 16,
+    "fields": {
+        "asset": 32,
+        "portfolio": 2
+    }
+}
+]

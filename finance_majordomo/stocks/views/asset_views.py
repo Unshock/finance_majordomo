@@ -14,7 +14,8 @@ from django.utils.translation import gettext_lazy as _
 
 from finance_majordomo.stocks.services.asset_services.asset_model_management_services import \
     create_asset_obj_from_description
-from finance_majordomo.stocks.services.asset_services.asset_view_services import PortfolioAssetsViewContextService
+from finance_majordomo.stocks.services.asset_services.asset_view_services import \
+    PortfolioAssetsViewContextService, portfolio_asset_view_context_service
 from finance_majordomo.stocks.services.asset_services.user_assets_services import get_current_portfolio
 
 
@@ -33,19 +34,7 @@ class Stocks(LoginRequiredMixin, ListView):
 
 class PortfolioAssets(LoginRequiredMixin, ListView):
     login_url = 'login'
-    model = Stock
-    transaction = Transaction
-    template_name = 'stocks/user_stock_list.html'
-    context_object_name = 'stock'
-
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-
-class UsersStocks(LoginRequiredMixin, ListView):
-    login_url = 'login'
-    model = Stock
-    transaction = Transaction
+    model = Asset
     template_name = 'stocks/user_stock_list.html'
     context_object_name = 'stock'
 
@@ -53,19 +42,17 @@ class UsersStocks(LoginRequiredMixin, ListView):
 
         context = super().get_context_data(**kwargs)
 
-        context['page_title'] = self.request.user.username + " " + _(
-            "stock list")
-        #user_stock_data = self.get_user_stock_data()
-
-        portfolio_assets_data = PortfolioAssetsViewContextService.execute(
-            {'portfolio': get_current_portfolio(self.request.user)})
+        portfolio_assets_data = portfolio_asset_view_context_service(
+            self.request.user.get_current_portfolio())
 
         asset_list = portfolio_assets_data.get('asset_list')
         total_results = portfolio_assets_data.get('total_results')
 
+        context['page_title'] = self.request.user.username + " " + _(
+            "stock list")
         context['fields_to_display'] = self.request.user.usersettings
         context['current_portfolio'] = get_current_portfolio(self.request.user)
-        context['stock_list'] = asset_list
+        context['asset_list'] = asset_list
         context['total_results'] = total_results
 
         return context
@@ -578,19 +565,6 @@ class UsersStocks(LoginRequiredMixin, ListView):
 #         return minutes
 
 
-def get_normalized_asset_type(type: str) -> str:
-    types_dict = {
-        'preferred_share': 'stocks',
-        'common_share': 'stocks',
-        'ofz_bond': 'bonds',
-        'corporate_bond': 'bonds',
-        'exchange_bond': 'bonds'
-
-    }
-
-    return types_dict.get(type)
-
-
 class AddStock(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     login_url = 'login'
     form_class = StockForm
@@ -678,8 +652,7 @@ class DeleteStock(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
         try:
             return super().post(request, *args, **kwargs)
         except ProtectedError:
-            messages.error(request, _(
-                'error'))
+            messages.error(request, _('error'))
             return redirect('stocks:stocks')
 
     def get_context_data(self, *, object_list=None, **kwargs):
