@@ -88,7 +88,8 @@ class FillAccrualModel(Service):
             amount=amount
         )
         dividend.save()
-        
+
+
 def execute_update_accruals_of_portfolio(
         portfolio: Portfolio, transaction: Transaction):
 
@@ -150,41 +151,3 @@ class UpdateAccrualsOfPortfolio(Service):
 
             except AccrualsOfPortfolio.DoesNotExist:
                 self._create_accrual_of_portfolio(accrual)
-
-                
-
-
-def update_dividends_of_portfolio(
-        portfolio, asset_id, date=None, transaction=None):
-    asset_dividends = Dividend.objects.filter(asset=asset_id)
-
-    if date:
-        asset_dividends = asset_dividends.filter(date__gte=date)
-
-    for div in asset_dividends:
-
-        tr_quantity = transaction.quantity if transaction.transaction_type == \
-                                              'BUY' else transaction.quantity * -1
-
-        quantity = get_asset_quantity_for_portfolio(
-            portfolio.id, asset_id, date=div.date) + tr_quantity
-
-        print('DIVIDEND QUANTITTY', quantity, tr_quantity,
-              quantity - tr_quantity)
-
-        try:
-            dividend_of_portfolio = AccrualsOfPortfolio.objects.get(
-                portfolio=portfolio,
-                dividend=div)
-
-            if quantity <= 0:
-                dividend_of_portfolio.is_received = False
-
-        except AccrualsOfPortfolio.DoesNotExist:
-            dividend_of_portfolio = AccrualsOfPortfolio.objects.create(
-                portfolio=portfolio,
-                dividend=div,
-                is_received=False
-            )
-        print(dividend_of_portfolio)
-        dividend_of_portfolio.save()

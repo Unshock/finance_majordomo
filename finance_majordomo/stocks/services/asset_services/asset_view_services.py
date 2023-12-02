@@ -124,8 +124,8 @@ class PortfolioAssetItem:
             if formatter else current_price_total
 
     def _get_accrual_received(self, currency=None, formatter=None):
-        accrual_received = get_accrual_result_of_asset(
-            self.portfolio, self.asset, currency=currency)
+        accrual_received = get_accrual_result_of_portfolio(
+            self.portfolio, asset=self.asset, currency=currency)
         print('accral_rec', accrual_received)
         return formatter(accrual_received) if formatter else accrual_received
 

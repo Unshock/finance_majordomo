@@ -4,8 +4,8 @@ from decimal import Decimal
 from django.urls import reverse, resolve
 from django.utils.translation import gettext_lazy as _
 from http import HTTPStatus
-from .setting import SettingsTransactions
-from ..views import views
+from finance_majordomo.stocks.tests_transactions.setting import SettingsTransactions
+from finance_majordomo.stocks.views import views
 from finance_majordomo.stocks.models.models import Transaction
 
 
