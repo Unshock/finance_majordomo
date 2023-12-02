@@ -20,7 +20,7 @@ class TransactionForm(forms.Form):
         #self.accrued_interest = kwargs.pop('accrued_interest', None)
         self.accrued_interest_err_message = kwargs.pop(
             'accrued_interest_err_message', None)
-        super(TransactionForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # if self.request.method == "GET":
         #     #print(self.accrued_interest, '1')

@@ -65,7 +65,7 @@ def get_usd_rate(date_dt):
         if day_status == 'Working':
             try:
                 result = CurrencyRate.objects.get(tradedate=delta_date_dt)
-                print('resik', result)
+                #print('resik', result)
                 return result.price_usd
             except CurrencyRate.DoesNotExist:
                 print(f'currency rate {delta_date_dt} doesnot exist')

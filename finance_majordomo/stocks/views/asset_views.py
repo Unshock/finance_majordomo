@@ -15,7 +15,7 @@ from django.utils.translation import gettext_lazy as _
 from finance_majordomo.stocks.services.asset_services.asset_model_management_services import \
     create_asset_obj_from_description
 from finance_majordomo.stocks.services.asset_services.asset_view_services import \
-    PortfolioAssetsViewContextService, portfolio_asset_view_context_service
+    PortfolioAssetsViewContextService, execute_portfolio_asset_view_context_service
 from finance_majordomo.stocks.services.asset_services.user_assets_services import get_current_portfolio
 
 
@@ -42,11 +42,13 @@ class PortfolioAssets(LoginRequiredMixin, ListView):
 
         context = super().get_context_data(**kwargs)
 
-        portfolio_assets_data = portfolio_asset_view_context_service(
+        portfolio_assets_data = execute_portfolio_asset_view_context_service(
             self.request.user.get_current_portfolio())
 
         asset_list = portfolio_assets_data.get('asset_list')
         total_results = portfolio_assets_data.get('total_results')
+
+        print(asset_list)
 
         context['page_title'] = self.request.user.username + " " + _(
             "stock list")

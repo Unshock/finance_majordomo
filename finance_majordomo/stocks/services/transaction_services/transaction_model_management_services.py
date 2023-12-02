@@ -1,3 +1,4 @@
+from datetime import datetime
 from decimal import Decimal
 
 from service_objects.fields import ModelField
@@ -11,6 +12,30 @@ from finance_majordomo.stocks.models.transaction_models import Transaction
 
 from finance_majordomo.users.models import User
 from finance_majordomo.users.utils.utils import get_current_portfolio
+
+
+def execute_create_transaction_service(
+        transaction_type: str = None,
+        date: datetime.date = None,
+        price: Decimal = None,
+        fee: Decimal = None,
+        quantity: Decimal = None,
+        asset: Asset = None,
+        accrued_interest: Decimal = None,
+        user: User = None
+):
+
+    CreateTransactionService.execute({
+        'transaction_type': transaction_type,
+        'date': date,
+        'price': price,
+        'fee': fee,
+        'quantity': quantity,
+        'asset': asset,
+        'accrued_interest': accrued_interest,
+
+        'user': user
+    })
 
 
 class CreateTransactionService(Service):

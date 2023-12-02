@@ -208,18 +208,17 @@ class AssetResult:
         return price >= 0 and type(price) in [Decimal, int, float]
 
 
-def portfolio_asset_view_context_service(portfolio):
-    return PortfolioAssetsViewContextService.execute({
-        'portfolio': portfolio
-    })
+def execute_portfolio_asset_view_context_service(portfolio):
+    return PortfolioAssetsViewContextService().execute({'portfolio': portfolio})
 
 
 class PortfolioAssetsViewContextService(Service):
-    portfolio = ModelField(Portfolio)
 
-    portfolio_assets_data = {'total_results': {},
-                             'asset_list': []
-                             }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.portfolio_assets_data = {'total_results': {}, 'asset_list': []}
+
+    portfolio = ModelField(Portfolio)
 
     def process(self):
         self.portfolio = self.cleaned_data.get('portfolio')
@@ -233,6 +232,7 @@ class PortfolioAssetsViewContextService(Service):
         return self.portfolio.get_assets_of_portfolio()
 
     def _get_assets_of_portfolio_view_context(self, portfolio_assets):
+
         total_purchase_price = Decimal('0')
         total_current_price = Decimal('0')
         total_accruals_received = Decimal('0')

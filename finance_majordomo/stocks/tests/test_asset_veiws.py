@@ -56,7 +56,7 @@ class TestStocksViews(BaseTest):
         self.assertTemplateUsed(response, 'stocks/user_stock_list.html')
 
     @patch("finance_majordomo.stocks.views.asset_views."
-           "portfolio_asset_view_context_service",
+           "execute_portfolio_asset_view_context_service",
            lambda *args: {'total_results': {'total': '10'},
                           'asset_list': ['AssetObj']})
     def test_portfolio_assets_list_GET(self):

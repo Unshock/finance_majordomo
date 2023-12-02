@@ -9,13 +9,13 @@ from django.utils.translation import gettext_lazy as _
 
 from finance_majordomo.stocks.models.transaction_models import Transaction
 from finance_majordomo.stocks.services.transaction_services.transaction_form_creation_service import \
-    CreateTransactionFormService
+    execute_transaction_form_service
 from finance_majordomo.stocks.services.transaction_services.transaction_model_management_services import \
-    CreateTransactionService
+    CreateTransactionService, execute_create_transaction_service
 from finance_majordomo.stocks.services.transaction_services.transaction_validation_services import validate_transaction, \
     TransactionValidator
 from finance_majordomo.stocks.services.accrual_services.dividend_model_management_services import \
-    UpdateAccrualsOfPortfolio
+    UpdateAccrualsOfPortfolio, execute_update_accruals_of_portfolio
 
 from finance_majordomo.stocks.services.asset_services.user_assets_services import get_current_portfolio
 
@@ -44,8 +44,8 @@ class UsersTransactionList(LoginRequiredMixin, ListView):
         context['page_title'] = self.request.user.username + " " + _(
             "transaction list")
         context['transaction_list'] = Transaction.objects.filter(
-            portfolio=get_current_portfolio(self.request.user))\
-            .order_by('-date')
+            portfolio=self.request.user.get_current_portfolio()
+        ).order_by('-date')
 
         return context
 
@@ -75,15 +75,13 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     def get(self, request, *args, **kwargs):
 
         try:
-            form = CreateTransactionFormService.execute({
-                'asset_id': request.GET.get('asset_id'),
-                'asset_secid': request.GET.get('asset_secid'),
-                'asset_group': request.GET.get('asset_group'),
-                'primary_boardid': request.GET.get('primary_boardid'),
-                'user': request.user,
-                'accrued_interest_err_message':
-                    self.accrued_interest_err_message
-            },
+            form = execute_transaction_form_service(
+                asset_id=request.GET.get('asset_id'),
+                asset_secid=request.GET.get('asset_secid'),
+                asset_group=request.GET.get('asset_group'),
+                primary_boardid=request.GET.get('primary_boardid'),
+                user=request.user,
+                accrued_interest_err_message=self.accrued_interest_err_message,
                 request=request
             )
 
@@ -105,39 +103,37 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
     def post(self, request, *args, **kwargs):
 
-        form = CreateTransactionFormService.execute(
-            {
-                'asset_id': request.POST.get('asset'),
-                'user': request.user,
-                'accrued_interest_err_message':
-                    self.accrued_interest_err_message
-            },
+        form = execute_transaction_form_service(
+            asset_id=request.POST.get('asset'),
+            user=request.user,
+            accrued_interest_err_message=self.accrued_interest_err_message,
             request=request
         )
 
         if form.is_valid():
-            try:
-                CreateTransactionService.execute({
-                    'transaction_type': form.cleaned_data['transaction_type'],
-                    'date': form.cleaned_data['date'],
-                    'price': form.cleaned_data['price'],
-                    'fee': form.cleaned_data['fee'],
-                    'quantity': form.cleaned_data['quantity'],
-                    'asset': form.cleaned_data['asset'],
-                    'accrued_interest': form.cleaned_data.get(
-                        'accrued_interest'),
 
-                    'user': request.user
-                })
+            try:
+                execute_create_transaction_service(
+                    transaction_type=form.cleaned_data.get('transaction_type'),
+                    date=form.cleaned_data.get('date'),
+                    price=form.cleaned_data.get('price'),
+                    fee=form.cleaned_data.get('fee'),
+                    quantity=form.cleaned_data.get('quantity'),
+                    asset=form.cleaned_data.get('asset'),
+                    accrued_interest=form.cleaned_data.get('accrued_interest'),
+                    user=request.user
+                )
 
                 messages.success(request, self.success_message)
                 return redirect(self.success_url)
 
             except Exception as e:
+                print(e)
                 messages.error(self.request, e)
                 return redirect('stocks:transactions')
 
-        elif self.accrued_interest_err_message in form.errors.get('__all__'):
+        if form.errors.get('__all__') and self.accrued_interest_err_message \
+                in form.errors.get('__all__'):
             form.add_accrued_interest_field()
 
         return render(
@@ -175,17 +171,10 @@ class DeleteTransaction(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
 
         if validate_transaction(self.request.user, transaction_validator):
 
-            UpdateAccrualsOfPortfolio.execute({
-                'portfolio': get_current_portfolio(request.user),
-                'transaction': transaction
-            })
-
-            # update_dividends_of_portfolio(
-            #     portfolio=get_current_portfolio(request.user),
-            #     asset_id=asset_obj.id,
-            #     date=transaction.date,
-            #     transaction=transaction
-            # )
+            execute_update_accruals_of_portfolio(
+                portfolio=request.user.get_current_portfolio(),
+                transaction=transaction
+            )
 
             return super().post(request, *args, **kwargs)
 

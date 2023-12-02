@@ -26,7 +26,7 @@ class AccrualItem:
     is_upcoming: bool
 
 
-def portfolio_accrual_view_context_service(
+def execute_portfolio_accrual_view_context_service(
         portfolio: Portfolio, days_delta: int):
     return PortfolioAccrualViewContextService.execute(
         {'portfolio': portfolio,

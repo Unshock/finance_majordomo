@@ -1,3 +1,4 @@
+import requests
 from service_objects.fields import ModelField
 from service_objects.services import Service
 from django import forms
@@ -12,11 +13,36 @@ from finance_majordomo.stocks.forms.transaction_forms import TransactionForm
 from finance_majordomo.users.models import User
 
 
+def execute_transaction_form_service(
+        asset_id: int = None,
+        asset_secid: str = None,
+        asset_group: str = None,
+        primary_boardid: str = None,
+        accrued_interest_err_message: str = None,
+        user: User = None,
+        request: requests.Request = None):
+
+    print('bbb)', asset_group, asset_id, asset_secid)
+    form = CreateTransactionFormService.execute({
+        'asset_id': asset_id,
+        'asset_secid': asset_secid,
+        'asset_group': asset_group,
+        'primary_boardid': primary_boardid,
+        'user': user,
+        'accrued_interest_err_message':
+            accrued_interest_err_message
+    },
+        request=request
+    )
+
+    return form
+
+
 class CreateTransactionFormService(Service):
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request')
-        super(CreateTransactionFormService, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     asset_id = forms.IntegerField(required=False)
     asset_secid = forms.CharField(required=False)

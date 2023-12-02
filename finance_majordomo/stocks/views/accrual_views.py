@@ -8,7 +8,7 @@ from finance_majordomo.stocks.models.accrual_models import Dividend
 from finance_majordomo.stocks.services.accrual_services.dividend_model_management_services import \
     TogglePortfolioDividendService
 from finance_majordomo.stocks.services.accrual_services.dividend_view_services import \
-    PortfolioAccrualViewContextService, portfolio_accrual_view_context_service
+    execute_portfolio_accrual_view_context_service
 from django.utils.translation import gettext_lazy as _
 
 from finance_majordomo.users.utils.utils import get_current_portfolio
@@ -26,7 +26,8 @@ class Dividends(LoginRequiredMixin, ListView):
 
         portfolio = self.request.user.get_current_portfolio()
 
-        accruals_data = portfolio_accrual_view_context_service(portfolio, 90)
+        accruals_data = \
+            execute_portfolio_accrual_view_context_service(portfolio, 90)
 
         context['accrual_list'] = accruals_data.get('accrual_list')
         context['total_results'] = accruals_data.get('total_results')

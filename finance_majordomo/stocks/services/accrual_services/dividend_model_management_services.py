@@ -88,6 +88,14 @@ class FillAccrualModel(Service):
             amount=amount
         )
         dividend.save()
+        
+def execute_update_accruals_of_portfolio(
+        portfolio: Portfolio, transaction: Transaction):
+
+    UpdateAccrualsOfPortfolio.execute({
+        'portfolio': portfolio,
+        'transaction': transaction
+    })
 
 
 class UpdateAccrualsOfPortfolio(Service):

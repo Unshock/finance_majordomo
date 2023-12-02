@@ -8,6 +8,10 @@ from .base_settings import BaseTest
 from ..models.accrual_models import Dividend, AccrualsOfPortfolio
 from ..views import accrual_views
 
+EXECUTE_PORTFOLIO_ACCRUAL_VIEW_CONTEXT_SERVICE = \
+    "finance_majordomo.stocks.views.accrual_views." \
+    "execute_portfolio_accrual_view_context_service"
+
 
 class TestAccrualViews(BaseTest):
 
@@ -39,8 +43,7 @@ class TestAccrualViews(BaseTest):
 
         self.assertTemplateUsed(response, 'dividends/dividend_list.html')
 
-    @patch("finance_majordomo.stocks.views.accrual_views."
-           "portfolio_accrual_view_context_service",
+    @patch(EXECUTE_PORTFOLIO_ACCRUAL_VIEW_CONTEXT_SERVICE,
            lambda *args: {'total_results': {'total': '10'},
                           'accrual_list': [Dividend.objects.last()]})
     def test_accruals_list_GET(self):
