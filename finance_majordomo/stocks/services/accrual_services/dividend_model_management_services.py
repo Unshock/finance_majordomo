@@ -11,6 +11,21 @@ from finance_majordomo.stocks.services.transaction_services.transaction_calculat
 from finance_majordomo.users.models import Portfolio
 
 
+def execute_toggle_portfolio_accrual_service(accrual: Dividend,
+                                             portfolio: Portfolio):
+    """
+    :param accrual: Accrual model object
+    :param portfolio: Portfolio model object
+    :return: returns nothing but toggles receiving (received/not received) of 
+        specified Accrual in specified Portfolio
+    """
+
+    TogglePortfolioDividendService.execute({
+        'accrual': accrual,
+        'portfolio': portfolio
+    })
+
+
 class TogglePortfolioDividendService(Service):
 
     dividend = ModelField(Dividend)
@@ -33,11 +48,24 @@ class TogglePortfolioDividendService(Service):
             dividend_of_portfolio.save()
 
 
-class FillAccrualModel(Service):
+def execute_accrual_model_filling_service(asset: Asset, accrual_dict: dict):
+    """
+    :param asset: Asset model object
+    :param accrual_dict: dictionary of accruals
+    :return: returns nothing fills Accrual model of Asset with accruals from
+        specified accrual dictionary
+    """
+    AccrualModelFillingService.execute({
+        'asset': asset,
+        'accrual_dict': accrual_dict
+    })
+
+
+class AccrualModelFillingService(Service):
 
     def __init__(self, *args, **kwargs):
         self.accruals_dict = kwargs.pop('accruals_dict')
-        super(FillAccrualModel, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     asset = ModelField(Asset)
 
@@ -72,6 +100,7 @@ class FillAccrualModel(Service):
                 if not existing_div.amount == amount:
                     print('Dividend has been changed while updating. '
                           'Probably mistake!')
+                    # logging!
                 continue
 
             except Dividend.DoesNotExist:
@@ -92,7 +121,12 @@ class FillAccrualModel(Service):
 
 def execute_update_accruals_of_portfolio(
         portfolio: Portfolio, transaction: Transaction):
-
+    """
+    :param portfolio: Asset model object
+    :param transaction: Transaction model object
+    :return: adding of deleting Transaction offers changes of accruals of
+        the specified portfolio so the func updates portfolio accrual data
+    """
     UpdateAccrualsOfPortfolio.execute({
         'portfolio': portfolio,
         'transaction': transaction

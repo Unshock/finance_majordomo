@@ -6,7 +6,7 @@ from django.views.generic import ListView
 
 from finance_majordomo.stocks.models.accrual_models import Dividend
 from finance_majordomo.stocks.services.accrual_services.dividend_model_management_services import \
-    TogglePortfolioDividendService
+    execute_toggle_portfolio_accrual_service 
 from finance_majordomo.stocks.services.accrual_services.dividend_view_services import \
     execute_portfolio_accrual_view_context_service
 from django.utils.translation import gettext_lazy as _
@@ -46,13 +46,10 @@ class TogglePortfolioDiv(SuccessMessageMixin, LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
 
         portfolio = request.user.get_current_portfolio()
-        dividend = Dividend.objects.get(id=kwargs.get('pk_dividend'))
+        accrual = Dividend.objects.get(id=kwargs.get('pk_dividend'))
 
         try:
-            TogglePortfolioDividendService.execute({
-                'portfolio': portfolio,
-                'dividend': dividend,
-            })
+            execute_toggle_portfolio_accrual_service(accrual, portfolio)
 
         except Exception as e:
             print(e)

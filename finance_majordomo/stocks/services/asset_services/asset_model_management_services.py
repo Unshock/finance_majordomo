@@ -3,7 +3,8 @@ from service_objects.services import Service
 from django import forms
 
 from common.utils.stocks import get_asset_description, get_bond_coupon_history
-from finance_majordomo.stocks.services.accrual_services.dividend_model_management_services import FillAccrualModel
+from finance_majordomo.stocks.services.accrual_services.dividend_model_management_services import \
+    execute_accrual_model_filling_service 
 from finance_majordomo.stocks.services.accrual_services.dividends_parser_services import \
     get_share_dividends
 
@@ -242,24 +243,15 @@ class CreateAssetService(Service):
 
         if asset_obj.group == 'stock_shares':
 
-            accruals_dict = get_share_dividends(asset_obj)
-            FillAccrualModel.execute(
-                {
-                    'asset': asset_obj
-                 },
-                accruals_dict=accruals_dict)
-
-            # add_dividends_to_model(asset_obj, accruals_dict)
+            accrual_dict = get_share_dividends(asset_obj)
+            execute_accrual_model_filling_service(
+                asset=asset_obj, accrual_dict=accrual_dict)
 
         elif asset_obj.group == 'stock_bonds':
 
-            accruals_dict = get_bond_coupon_history(asset_obj.secid)
-            FillAccrualModel.execute(
-                {
-                    'asset': asset_obj
-                 },
-                accruals_dict=accruals_dict)
-            # add_dividends_to_model(asset_obj, accrual_dict)
+            accrual_dict = get_bond_coupon_history(asset_obj.secid)
+            execute_accrual_model_filling_service(
+                asset=asset_obj, accrual_dict=accrual_dict)
 
         else:
             raise Exception(f'unsupported group: {asset_obj.group}')
@@ -269,11 +261,7 @@ class CreateShareService(Service):
     asset = ModelField(Asset)
 
     def process(self):
-
-        asset = self.cleaned_data['asset']
-
-        print(asset.secid)
-        print(asset.isqualifiedinvestors)
+        asset = self.cleaned_data.get('asset')
 
         share_obj = Stock.objects.create(
             asset_ptr=asset,

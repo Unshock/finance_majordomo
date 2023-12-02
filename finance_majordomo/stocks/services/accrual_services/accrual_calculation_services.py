@@ -44,7 +44,7 @@ def get_accrual_result_of_portfolio(
         quantity = get_asset_quantity_for_portfolio(
             portfolio.id, asset_id, date=date)
 
-        if currency == 'usd':
+        if currency.lower() == 'usd':
             currency_rate = get_usd_rate(accrual.dividend.date)
 
         sum_accruals_received += quantity * amount / currency_rate
