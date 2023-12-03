@@ -1,10 +1,10 @@
 import requests_mock
 
-from .setting import SettingsTransactions
-from finance_majordomo.stocks.forms.forms import TransactionForm
+from finance_majordomo.stocks.tests_transactions.setting import SettingsTransactions
+from finance_majordomo.stocks.forms.transaction_forms import TransactionForm
 from django.utils.translation import gettext_lazy as _
 
-from finance_majordomo.stocks.models import Stock
+from finance_majordomo.stocks.models.asset import Stock
 
 
 class UserFormTest(SettingsTransactions):

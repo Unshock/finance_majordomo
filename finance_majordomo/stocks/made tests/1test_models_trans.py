@@ -2,7 +2,7 @@ import decimal
 
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
-from finance_majordomo.stocks.models.models import Transaction
+from finance_majordomo.stocks.models.transaction_models import Transaction
 from finance_majordomo.stocks.tests_transactions.setting import SettingsTransactions
 
 

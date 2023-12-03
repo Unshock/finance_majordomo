@@ -1,0 +1,62 @@
+[
+{
+    "model": "stocks.currencyrate",
+    "pk": 1,
+    "fields": {
+        "tradedate": "2023-04-14",
+        "price_usd": "81.6758",
+        "is_closed": true,
+        "update_time": null
+    }
+},
+{
+    "model": "stocks.currencyrate",
+    "pk": 2,
+    "fields": {
+        "tradedate": "2023-04-15",
+        "price_usd": "81.5045",
+        "is_closed": true,
+        "update_time": null
+    }
+},
+{
+    "model": "stocks.currencyrate",
+    "pk": 3,
+    "fields": {
+        "tradedate": "2023-04-18",
+        "price_usd": "81.6279",
+        "is_closed": true,
+        "update_time": null
+    }
+},
+{
+    "model": "stocks.currencyrate",
+    "pk": 4,
+    "fields": {
+        "tradedate": "2023-04-19",
+        "price_usd": "81.6028",
+        "is_closed": true,
+        "update_time": null
+    }
+},
+{
+    "model": "stocks.currencyrate",
+    "pk": 5,
+    "fields": {
+        "tradedate": "2023-05-18",
+        "price_usd": "80.7642",
+        "is_closed": true,
+        "update_time": null
+    }
+},     
+{
+    "model": "stocks.currencyrate",
+    "pk": 100,
+    "fields": {
+        "tradedate": "2023-12-01",
+        "price_usd": "88.5819",
+        "is_closed": true,
+        "update_time": null
+    }
+}
+]

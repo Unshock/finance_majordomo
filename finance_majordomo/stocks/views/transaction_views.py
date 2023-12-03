@@ -95,7 +95,7 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
             )
 
         except ValueError:
-            return redirect('search')
+            return redirect('stocks:search')
 
         except Exception as e:
             messages.error(self.request, e)

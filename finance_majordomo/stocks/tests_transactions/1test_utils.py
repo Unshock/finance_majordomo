@@ -1,9 +1,9 @@
 from _decimal import Decimal
 import requests_mock
 
-from finance_majordomo.stocks.models.models import Transaction
+
 from .setting import SettingsTransactions
-from finance_majordomo.transactions.utils import get_quantity, get_purchase_price, get_average_purchase_price
+
 
 
 class TestTransactionsUtils(SettingsTransactions):

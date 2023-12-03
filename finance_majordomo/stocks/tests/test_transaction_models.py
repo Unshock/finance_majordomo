@@ -18,7 +18,7 @@ class TransactionsModelsTest(BaseTest):
         transaction_3 = Transaction.objects.get(id=3)
 
         self.assertEqual(transaction_1.asset.id, 30)
-        self.assertEqual(transaction_1.date, date(2023, 4, 15))
+        self.assertEqual(transaction_1.date, date(2023, 4, 16))
         self.assertEqual(transaction_1.price, Decimal('1000'))
         self.assertEqual(transaction_1.transaction_type, 'BUY')
         self.assertEqual(transaction_1.fee, Decimal('0'))
@@ -38,7 +38,7 @@ class TransactionsModelsTest(BaseTest):
 
         self.assertEqual(
             str(transaction_1),
-            'BUY x5.00 POSI for 1000.00 on 2023-04-15'
+            'BUY x5.00 POSI for 1000.00 on 2023-04-16'
         )
 
     def test_price_validation_fail_1(self):

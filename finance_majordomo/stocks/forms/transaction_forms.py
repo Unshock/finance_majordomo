@@ -14,9 +14,9 @@ from bootstrap4.widgets import RadioSelectButtonGroup
 class TransactionForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop('user', None) #  user
-        self.request = kwargs.pop('request', None) #  user
-        self.assets_to_display = kwargs.pop('assets_to_display', None)
+        self.user = kwargs.pop('user', None)
+        self.request = kwargs.pop('request', None)
+        #self.assets_to_display = kwargs.pop('assets_to_display', None)
         #self.accrued_interest = kwargs.pop('accrued_interest', None)
         self.accrued_interest_err_message = kwargs.pop(
             'accrued_interest_err_message', None)
@@ -118,7 +118,6 @@ class TransactionForm(forms.Form):
         cleaned_data = super().clean()
 
         print('cleaned_data', self.cleaned_data)
-        print('cleaned_data', cleaned_data)
 
         asset_obj = cleaned_data.get('asset')
         transaction_type = cleaned_data.get('transaction_type')
@@ -141,15 +140,14 @@ class TransactionForm(forms.Form):
                     'Such a SELL would raise a short sale situation. '
                     'Short sales are not supported! '
                     'Please check the transaction type, date and quantity'))
-            
-            
+
             print('=-=========================================')
             print(is_accrued_interest_required(asset_obj), cleaned_data.get('accrued_interest'), asset_obj)
             print('=-=========================================')
-            
+
             if is_accrued_interest_required(asset_obj) and cleaned_data.get(
                         'accrued_interest') is None:
-                
+
                 raise forms.ValidationError(self.accrued_interest_err_message)
 
         return cleaned_data
@@ -184,13 +182,12 @@ class TransactionForm(forms.Form):
         date = self.cleaned_data.get('date')
         asset = self.cleaned_data.get('asset')
         #print(type(date), type(asset.issuedate))
-        
-        issuedate = asset.issuedate
+
         #issuedate = datetime.datetime.strftime(issuedate, '%Y-%m-%d')
-        if issuedate and date < issuedate:
+        if asset and asset.issuedate and date < asset.issuedate:
             raise ValidationError(
                 _("The stock started trading after the specified date") +
-                f" ({issuedate})"
+                f" ({asset.issuedate})"
             )
         return date
 

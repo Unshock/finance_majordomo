@@ -1,21 +1,14 @@
-import json
-
 from django.db import models
 from django.urls import reverse
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
-from .utils.fields_to_display import get_default_display_options
+
 
 
 class User(AbstractUser):
     creation_date = models.DateTimeField(
         auto_now_add=True, verbose_name=_("Creation_date")
     )
-
-    # fields_to_display = models.JSONField(
-    #     verbose_name='Поля для отображения',
-    #     default=json.dumps(get_default_display_options())
-    # )
 
     def get_current_portfolio(self):
         return self.portfolio_set.filter(is_current=True).last()

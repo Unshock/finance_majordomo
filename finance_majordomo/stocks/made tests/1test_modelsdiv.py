@@ -3,7 +3,7 @@ import decimal
 import django.db.utils
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
-from finance_majordomo.stocks.models.models import Dividend, DividendsOfUser
+from finance_majordomo.stocks.models.accrual_models import Dividend, AccrualsOfPortfolio
 from finance_majordomo.stocks.tests_accruals.setting import SettingsDividends
 
 

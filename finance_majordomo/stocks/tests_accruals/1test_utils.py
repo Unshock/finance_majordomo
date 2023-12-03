@@ -6,7 +6,7 @@ from django.test.client import RequestFactory
 import requests_mock
 from finance_majordomo.stocks.models.accrual_models import Dividend
 from finance_majordomo.stocks.tests_accruals.setting import SettingsDividends
-from finance_majordomo.stocks.services.accrual_services.dividend_services import get_stock_dividends, add_dividends_to_model
+
 
 
 FIXTURES_FOLDER = 'fixtures'

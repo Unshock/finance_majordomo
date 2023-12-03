@@ -3,9 +3,9 @@ import datetime
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
 
-from finance_majordomo.stocks.models.models import Dividend, DividendsOfUser
-from finance_majordomo.stocks.models import Stock, StocksOfUser
-from finance_majordomo.stocks.models.models import Transaction
+from finance_majordomo.stocks.models.accrual_models import Dividend, AccrualsOfPortfolio
+from finance_majordomo.stocks.models.asset import Stock, StocksOfUser
+from finance_majordomo.stocks.models.transaction_models import Transaction
 
 
 class SettingsTransactions(TestCase):

@@ -63,11 +63,11 @@ class CreateTransactionFormService(Service):
     def _get_and_set_initial_asset_id(self):
 
         self.asset_id = self.cleaned_data.get('asset_id')
-        asset_secid = self.cleaned_data.get('asset_secid')
-        primary_boardid = self.cleaned_data.get('primary_boardid')
+        self.asset_secid = self.cleaned_data.get('asset_secid')
+        self.primary_boardid = self.cleaned_data.get('primary_boardid')
 
-        if asset_secid:
-            asset = get_or_create_asset_obj(asset_secid, primary_boardid)
+        if self.asset_secid and self.primary_boardid:
+            asset = get_or_create_asset_obj(self.asset_secid, self.primary_boardid)
             self.asset_id = asset.id
 
         self.form.fields['asset'].initial = self.asset_id

@@ -28,24 +28,24 @@ def execute_toggle_portfolio_accrual_service(accrual: Dividend,
 
 class TogglePortfolioDividendService(Service):
 
-    dividend = ModelField(Dividend)
+    accrual = ModelField(Dividend)
     portfolio = ModelField(Portfolio)
 
     def process(self):
-        dividend = self.cleaned_data['dividend']
+        accrual = self.cleaned_data['accrual']
         portfolio = self.cleaned_data['portfolio']
 
-        dividend_of_portfolio = AccrualsOfPortfolio.objects.get(
-            portfolio=portfolio, dividend=dividend
+        accrual_of_portfolio = AccrualsOfPortfolio.objects.get(
+            portfolio=portfolio, dividend=accrual
         )
 
-        if dividend_of_portfolio.is_received:
-            dividend_of_portfolio.is_received = False
-            dividend_of_portfolio.save()
+        if accrual_of_portfolio.is_received:
+            accrual_of_portfolio.is_received = False
+            accrual_of_portfolio.save()
 
         else:
-            dividend_of_portfolio.is_received = True
-            dividend_of_portfolio.save()
+            accrual_of_portfolio.is_received = True
+            accrual_of_portfolio.save()
 
 
 def execute_accrual_model_filling_service(asset: Asset, accrual_dict: dict):

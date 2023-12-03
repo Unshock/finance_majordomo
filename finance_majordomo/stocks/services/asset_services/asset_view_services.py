@@ -7,8 +7,8 @@ from service_objects.services import Service
 from common.utils.values_formatters import set_money_fmt, set_percentage_fmt
 from finance_majordomo.stocks.utils.currencies_utils import \
     update_currency_rates, update_usd
-from finance_majordomo.stocks.services.accrual_services.accrual_calc_services import \
-    get_accrual_result_of_portfolio, get_accrual_result_of_asset
+from finance_majordomo.stocks.services.accrual_services.accrual_calculation_services import \
+    get_accrual_result_of_portfolio
 from finance_majordomo.stocks.models.asset import Asset
 from finance_majordomo.stocks.services.asset_services.asset_services import \
     get_current_asset_price_per_asset

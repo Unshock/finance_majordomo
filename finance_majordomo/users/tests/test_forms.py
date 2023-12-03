@@ -1,9 +1,10 @@
 from .setting import SettingsUsers
 from ..forms import RegisterUserForm, FieldsUserForm
 from ..utils.fields_to_display import FIELDS_TO_DISPLAY
+from ...stocks.tests.base_settings import BaseTest
 
 
-class UserFormTest(SettingsUsers):
+class UserFormTest(BaseTest):
 
     def test_valid_register_form(self):
         form = RegisterUserForm(data={

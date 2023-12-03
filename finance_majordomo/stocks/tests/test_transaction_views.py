@@ -40,6 +40,7 @@ class TestTransactionsViews(BaseTest):
             'stocks:delete_transaction', kwargs={'pk': 3}
         )
         self.login = reverse('login')
+        self.search = reverse('stocks:search')
         self.add_transaction_with_id = \
             reverse('stocks:add_transaction') + '?asset_id=31'
         self.add_transaction_with_asset_secid_existing = \
@@ -155,6 +156,13 @@ class TestTransactionsViews(BaseTest):
         self.assertEqual(
             response.context.get('button_text'), _("Add"))
         self.assertTemplateUsed(response, 'base_create_and_update.html')
+
+    def test_add_transaction_no_data_user_has_no_assets_GET(self):
+        response = self.client_authenticated_no_assets\
+            .get(self.add_transaction)
+
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        self.assertRedirects(response, self.search)
 
     @patch(EXECUTE_TRANSACTION_FORM_SERVICE, lambda **kwargs: forms.Form)
     def test_add_transaction_GET_with_asset_id(self):
