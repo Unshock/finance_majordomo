@@ -24,7 +24,7 @@ class TestAccrualViews(BaseTest):
 
         portfolio = self.user_authenticated.get_current_portfolio()
         result = get_accrual_result_of_portfolio(
-            portfolio, asset=self.share1
+            portfolio, asset=self.share_POSI
         )
         self.assertEqual(result, Decimal('0') * Decimal('0.87'))
 

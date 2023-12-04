@@ -36,8 +36,8 @@ class BaseTest(TestCase):
         cls.client_authenticated_no_assets.force_login(User.objects.get(id=3))
         cls.user_authenticated_no_assets = User.objects.get(id=3)
 
-        cls.share1 = Asset.objects.get(id=30)
-        cls.share2 = Asset.objects.get(id=31)
+        cls.share_POSI = Asset.objects.get(id=30)
+        cls.share_LSRG = Asset.objects.get(id=31)
         cls.bond1 = Asset.objects.get(id=32)
 
         cls.accrual1 = Dividend.objects.get(id=1)

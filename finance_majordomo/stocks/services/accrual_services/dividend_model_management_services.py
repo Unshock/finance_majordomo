@@ -48,23 +48,45 @@ class TogglePortfolioDividendService(Service):
             accrual_of_portfolio.save()
 
 
-def execute_accrual_model_filling_service(asset: Asset, accrual_dict: dict):
+def execute_accrual_model_data_filling_service(
+        asset: Asset, accrual_data_dict: dict):
     """
     :param asset: Asset model object
-    :param accrual_dict: dictionary of accruals
+    :param accrual_data_dict: dictionary of accruals data like:
+        {
+          '2023-12-03': {
+            'common_share': {
+              'div': True,
+              'value': Decimal('15.80')
+            },
+            'preferred_share': {
+              'div': False,
+              'value': Decimal('0')
+            }
+          },
+          '2022-05-08': {
+            'common_share': {
+              'div': True,
+              'value': Decimal('14.4')
+            },
+          'preferred_share': {
+              'div': True,
+              'value': Decimal('14.4')
+            }
+          }
+        }
     :return: returns nothing fills Accrual model of Asset with accruals from
         specified accrual dictionary
     """
-    AccrualModelFillingService.execute({
+    AccrualModelDataFillingService.execute({
         'asset': asset,
-        'accrual_dict': accrual_dict
-    })
+    }, accrual_data_dict=accrual_data_dict)
 
 
-class AccrualModelFillingService(Service):
+class AccrualModelDataFillingService(Service):
 
     def __init__(self, *args, **kwargs):
-        self.accruals_dict = kwargs.pop('accruals_dict')
+        self.accrual_data_dict = kwargs.pop('accrual_data_dict')
         super().__init__(*args, **kwargs)
 
     asset = ModelField(Asset)
@@ -86,18 +108,18 @@ class AccrualModelFillingService(Service):
     def _fill_accrual_model(self):
         asset_type = self._get_self_asset_type()
 
-        for date, accrual_value in self.accruals_dict.items():
+        for date, accrual_value in self.accrual_data_dict.items():
 
-            if accrual_value[asset_type]['div']:
-                amount = accrual_value[asset_type]['value']
-
-            else:
+            if not accrual_value[asset_type]['div']:
                 continue
 
-            try:
-                existing_div = Dividend.objects.get(asset=self.asset, date=date)
+            amount = accrual_value[asset_type]['value']
 
-                if not existing_div.amount == amount:
+            try:
+                existing_accrual = Dividend.objects.get(
+                    asset=self.asset, date=date)
+
+                if existing_accrual.amount != amount:
                     print('Dividend has been changed while updating. '
                           'Probably mistake!')
                     # logging!

@@ -1,10 +1,12 @@
+import json
+import simplejson
 from service_objects.fields import ModelField
 from service_objects.services import Service
 from django import forms
 
 from common.utils.stocks import get_asset_description, get_bond_coupon_history
 from finance_majordomo.stocks.services.accrual_services.dividend_model_management_services import \
-    execute_accrual_model_filling_service 
+    execute_accrual_model_data_filling_service
 from finance_majordomo.stocks.services.accrual_services.dividends_parser_services import \
     get_share_dividends
 
@@ -24,9 +26,9 @@ def get_or_create_asset_obj(
     except Asset.DoesNotExist:
         asset_description = get_asset_description(asset_secid)
         asset_description['primary_boardid'] = primary_boardid
-        print(asset_description)
+
         asset_obj = create_asset_obj_from_description(asset_description)
-        print(2)
+
     return asset_obj
 
 
@@ -79,7 +81,7 @@ def create_asset_obj_from_description(asset_description: dict) -> Asset:
         'group': group,
         'groupname': groupname,
         'primary_boardid': primary_boardid,
-        'asset_type': group, # mb to delete
+        'asset_type': group,  # mb to delete +++++++++++++++++++++++
         'startdatemoex': startdatemoex,
         'buybackdate': buybackdate,
         'matdate': matdate,
@@ -89,7 +91,7 @@ def create_asset_obj_from_description(asset_description: dict) -> Asset:
         'days_to_redemption': days_to_redemption,
         'face_value': face_value,
     })
-    print('aset')
+
     return asset
 
 
@@ -124,13 +126,9 @@ class CreateAssetService(Service):
     face_value = forms.DecimalField(required=False)
 
     def process(self):
-        print('2')
         asset_obj = self._create_base_asset()
-        print('3')
         self._create_sub_asset(asset_obj)
-        print('4')
         self._fill_with_historical_data(asset_obj)
-        print('5')
         self._fill_with_accrual(asset_obj)
 
         return asset_obj
@@ -243,15 +241,22 @@ class CreateAssetService(Service):
 
         if asset_obj.group == 'stock_shares':
 
-            accrual_dict = get_share_dividends(asset_obj)
-            execute_accrual_model_filling_service(
-                asset=asset_obj, accrual_dict=accrual_dict)
+            accrual_data_dict = get_share_dividends(asset_obj)
+            a = simplejson.dumps(accrual_data_dict)
+            print(a)
+            print('-----------------')
+            print(simplejson.loads(a, use_decimal=True))
+
+            execute_accrual_model_data_filling_service(
+                asset=asset_obj, accrual_data_dict=accrual_data_dict)
 
         elif asset_obj.group == 'stock_bonds':
 
-            accrual_dict = get_bond_coupon_history(asset_obj.secid)
-            execute_accrual_model_filling_service(
-                asset=asset_obj, accrual_dict=accrual_dict)
+            accrual_data_dict = get_bond_coupon_history(asset_obj.secid)
+
+            execute_accrual_model_data_filling_service(
+                asset=asset_obj, accrual_data_dict=accrual_data_dict
+            )
 
         else:
             raise Exception(f'unsupported group: {asset_obj.group}')

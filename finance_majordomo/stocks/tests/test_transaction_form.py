@@ -58,7 +58,7 @@ class TransactionFormTest(BaseTest):
                 user=self.user_authenticated,
                 data={
                     'transaction_type': 'BUY',
-                    'asset': self.share1,
+                    'asset': self.share_POSI,
                     'date': '2023-10-31',
                     'price': Decimal('2000.3'),
                     'fee': Decimal('2.3'),
@@ -78,7 +78,7 @@ class TransactionFormTest(BaseTest):
                 user=request.user,
                 data={
                     'transaction_type': 'BUY',
-                    'asset': self.share1,
+                    'asset': self.share_POSI,
                     'date': '2023-10-31',
                     'price': Decimal('2000.3'),
                     'fee': Decimal('2.3'),
@@ -98,7 +98,7 @@ class TransactionFormTest(BaseTest):
                 user=self.user_authenticated,
                 data={
                     'transaction_type': 'SELL',
-                    'asset': self.share1,
+                    'asset': self.share_POSI,
                     'date': '2023-05-17',
                     'price': 1000,
                     'fee': None,
@@ -118,7 +118,7 @@ class TransactionFormTest(BaseTest):
                 user=self.user_authenticated,
                 data={
                     'transaction_type': 'SELL',
-                    'asset': self.share1,
+                    'asset': self.share_POSI,
                     'date': '2023-05-17',
                     'price': 1000,
                     'fee': None,
@@ -172,7 +172,7 @@ class TransactionFormTest(BaseTest):
                 user=self.user_authenticated,
                 data={
                     'transaction_type': 'SELL',
-                    'asset': self.share1,
+                    'asset': self.share_POSI,
                     'date': '2023-10-31',
                     'price': '1000',
                     'quantity': 1000  # The sale on this quantity make total < 0
@@ -197,7 +197,7 @@ class TransactionFormTest(BaseTest):
                 user=self.user_authenticated,
                 data={
                     'transaction_type': 'SELL',
-                    'asset': self.share2,
+                    'asset': self.share_LSRG,
                     'date': '2019-12-31',  # The sale on the date make total < 0
                     'price': '1000',
                     'quantity': 1

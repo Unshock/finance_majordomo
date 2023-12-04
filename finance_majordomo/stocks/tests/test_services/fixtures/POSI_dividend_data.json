@@ -1,0 +1,42 @@
+{
+  "2023-12-03": {
+    "common_share": {
+      "div": true,
+      "value": 15.8
+    },
+    "preferred_share": {
+      "div": false,
+      "value": 0
+    }
+  },
+  "2023-04-16": {
+    "common_share": {
+      "div": true,
+      "value": 37.87
+    },
+    "preferred_share": {
+      "div": false,
+      "value": 0
+    }
+  },
+  "2022-11-14": {
+    "common_share": {
+      "div": true,
+      "value": 5.16
+    },
+    "preferred_share": {
+      "div": false,
+      "value": 0
+    }
+  },
+  "2022-05-08": {
+    "common_share": {
+      "div": true,
+      "value": 14.4
+    },
+    "preferred_share": {
+      "div": true,
+      "value": 14.4
+    }
+  }
+}
