@@ -142,20 +142,38 @@ class AccrualModelDataFillingService(Service):
 
 
 def execute_update_accruals_of_portfolio(
-        portfolio: Portfolio, transaction: Transaction):
+        portfolio: Portfolio, transaction: Transaction, action_type: str):
     """
-    :param portfolio: Asset model object
+    :param portfolio: Portfolio model object
     :param transaction: Transaction model object
+    :param action_type: type of the action that calls the service
     :return: adding of deleting Transaction offers changes of accruals of
-        the specified portfolio so the func updates portfolio accrual data
+        the specified portfolio so the func updates portfolio accrual data.
+        If during the transaction the number of assets on the day of the
+        accrual becomes zero, then the status of receiving the accrual
+        becomes negative; otherwise, if the transaction adds an asset,
+        the portfolio dividend appears but its status remains negative
     """
+
+    action_type_list = ['add_transaction',
+                        'del_transaction',
+                        'update_transaction'
+                        ]
+
+    if action_type not in action_type_list:
+        raise ValueError('Invalid action type')
+
     UpdateAccrualsOfPortfolio.execute({
         'portfolio': portfolio,
         'transaction': transaction
-    })
+    }, action_type=action_type)
 
 
 class UpdateAccrualsOfPortfolio(Service):
+
+    def __init__(self, *args, **kwargs):
+        self.action_type = kwargs.pop('action_type')
+        super().__init__(*args, **kwargs)
 
     portfolio = ModelField(Portfolio)
     transaction = ModelField(Transaction)
@@ -166,10 +184,10 @@ class UpdateAccrualsOfPortfolio(Service):
         self.transaction = self.cleaned_data.get('transaction')
 
         self._update_accruals_of_portfolio(
-            self._get_accruals_transaction_affects()
+            self._get_accruals_the_transaction_affects()
         )
 
-    def _get_accruals_transaction_affects(self):
+    def _get_accruals_the_transaction_affects(self):
         asset = self.transaction.asset
         date = self.transaction.date
 
@@ -185,25 +203,29 @@ class UpdateAccrualsOfPortfolio(Service):
 
     def _update_accruals_of_portfolio(self, accruals):
 
-        for accrual in accruals:
-            tr_type = self.transaction.transaction_type
-            quantity = self.transaction.quantity
-            asset = self.transaction.asset
-            date = self.transaction.date
+        tr_type = self.transaction.transaction_type
+        quantity = self.transaction.quantity
+        asset = self.transaction.asset
 
-            trans_date_quantity = get_asset_quantity_for_portfolio(
-                self.portfolio, asset, date
+        for accrual in accruals:
+
+            # asset quantity for the accrual date
+            accrual_date_quantity = get_asset_quantity_for_portfolio(
+                self.portfolio, asset, accrual.date
             )
 
-            trans_date_quantity += quantity if tr_type == 'BUY' else -quantity
+            # if we DELETE "BUY" transaction that can cause zero asset quantity
+            if tr_type == 'BUY' and self.action_type == 'del_transaction':
+                accrual_date_quantity -= quantity
 
             try:
                 dividend_of_portfolio = AccrualsOfPortfolio.objects.get(
                     portfolio=self.portfolio,
                     dividend=accrual)
 
-                if quantity <= 0:
+                if accrual_date_quantity == 0:
                     dividend_of_portfolio.is_received = False
+                    dividend_of_portfolio.save()
 
             except AccrualsOfPortfolio.DoesNotExist:
                 self._create_accrual_of_portfolio(accrual)

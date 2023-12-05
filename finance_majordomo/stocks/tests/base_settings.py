@@ -1,9 +1,12 @@
+from decimal import Decimal
+
 from django.test import TestCase, Client
 
 from finance_majordomo.stocks.models import Asset
 from finance_majordomo.stocks.models.accrual_models import Dividend, \
     AccrualsOfPortfolio
 from finance_majordomo.stocks.models.currency import CurrencyRate
+from finance_majordomo.stocks.models.transaction_models import Transaction
 from finance_majordomo.users.models import User
 
 
@@ -54,8 +57,9 @@ class BaseTest(TestCase):
         cls.accrual_of_portfolio1 = AccrualsOfPortfolio.objects.get(id=1)
         cls.accrual_of_portfolio2 = AccrualsOfPortfolio.objects.get(id=2)
         cls.accrual_of_portfolio3 = AccrualsOfPortfolio.objects.get(id=3)
-        
-        
 
+        cls.transaction1 = Transaction.objects.get(id=1)
+        cls.transaction2 = Transaction.objects.get(id=2)
+        cls.transaction3 = Transaction.objects.get(id=3)
 
 

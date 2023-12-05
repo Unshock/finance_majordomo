@@ -173,7 +173,8 @@ class DeleteTransaction(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
 
             execute_update_accruals_of_portfolio(
                 portfolio=request.user.get_current_portfolio(),
-                transaction=transaction
+                transaction=transaction,
+                action_type='del_transaction'
             )
 
             return super().post(request, *args, **kwargs)

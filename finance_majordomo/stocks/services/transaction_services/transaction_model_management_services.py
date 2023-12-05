@@ -97,7 +97,8 @@ class CreateTransactionService(Service):
 
             execute_update_accruals_of_portfolio(
                 portfolio=current_portfolio,
-                transaction=transaction_obj
+                transaction=transaction_obj,
+                action_type="add_transaction",
             )
 
         return transaction_obj
