@@ -39,7 +39,7 @@ class TestDividendUtils(SettingsDividends):
                 lsng_result = json.load(
                     open(os.path.join(os.path.dirname(__file__),
                                       FIXTURES_FOLDER,
-                                      "LSNG_divs.json"), 'r'))
+                                      "fixtures/LSNG_divs.json"), 'r'))
 
                 assert result == lsng_result
 
@@ -60,7 +60,7 @@ class TestDividendUtils(SettingsDividends):
                 lsng_result = json.load(
                     open(os.path.join(os.path.dirname(__file__),
                                       FIXTURES_FOLDER,
-                                      "LSNG_divs.json"), 'r'))
+                                      "fixtures/LSNG_divs.json"), 'r'))
 
                 assert result == lsng_result
 
@@ -82,7 +82,7 @@ class TestDividendUtils(SettingsDividends):
                 tatn_result = json.load(
                     open(os.path.join(os.path.dirname(__file__),
                                       FIXTURES_FOLDER,
-                                      "TATN_divs.json"), 'r'))
+                                      "fixtures/TATN_divs.json"), 'r'))
 
                 assert result == tatn_result
 
@@ -104,7 +104,7 @@ class TestDividendUtils(SettingsDividends):
                 tatn_result = json.load(
                     open(os.path.join(os.path.dirname(__file__),
                                       FIXTURES_FOLDER,
-                                      "TATN_divs.json"), 'r'))
+                                      "fixtures/TATN_divs.json"), 'r'))
 
                 assert result == tatn_result
                 assert isinstance(result, dict)
@@ -114,7 +114,7 @@ class TestDividendUtils(SettingsDividends):
         valid_dividend_dict = json.load(
                     open(os.path.join(os.path.dirname(__file__),
                                       FIXTURES_FOLDER,
-                                      "TATN_divs.json"), 'r'))
+                                      "fixtures/TATN_divs.json"), 'r'))
 
         add_dividends_to_model(self.stock_id_3, valid_dividend_dict)
 
