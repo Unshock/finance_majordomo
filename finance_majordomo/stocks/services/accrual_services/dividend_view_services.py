@@ -16,6 +16,9 @@ from finance_majordomo.users.models import Portfolio
 
 @dataclass
 class AccrualItem:
+    """
+    Instance to collect accruals data and indicators to show in view
+    """
     asset_name: str
     asset_quantity: Decimal
     id: int
@@ -28,6 +31,18 @@ class AccrualItem:
 
 def execute_portfolio_accrual_view_context_service(
         portfolio: Portfolio, days_delta: int):
+    """
+    :param portfolio: Portfolio model object
+    :param days_delta: shows the latest day on which accruals are paid
+        (by default 90 days (1Q) is used). Used to limit future payments.
+    :return: dictionary like:
+        {'total_results': {'total_divs_payable': Decimal,
+                           'total_divs_received': Decimal,
+                           'total_divs_upcoming': Decimal
+                           }
+         'accrual_list': [AccrualItem]
+         }
+    """
     return PortfolioAccrualViewContextService.execute(
         {'portfolio': portfolio,
          'days_delta': days_delta
@@ -36,12 +51,20 @@ def execute_portfolio_accrual_view_context_service(
 
 
 class PortfolioAccrualViewContextService(Service):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.portfolio_accrual_data = {
+            'total_results': {
+                'total_divs_payable': None,
+                'total_divs_received': None,
+                'total_divs_upcoming': None
+            },
+            'accrual_list': []
+        }
+
     portfolio = ModelField(Portfolio)
     days_delta = forms.IntegerField()
-
-    portfolio_assets_data = {'total_results': {},
-                             'accrual_list': []
-                             }
 
     def process(self):
 
@@ -49,30 +72,25 @@ class PortfolioAccrualViewContextService(Service):
 
         portfolio_accruals = self._get_portfolio_accruals()
         if not portfolio_accruals:
-            return self.portfolio_assets_data
+            print(self.portfolio_accrual_data)
+            return self.portfolio_accrual_data
 
-        self._get_accrual_context_data(portfolio_accruals)
-        return self.portfolio_assets_data
+        self._fill_context_with_accrual_context_data(portfolio_accruals)
+        return self.portfolio_accrual_data
 
-    def _get_accrual_context_data(self, portfolio_accruals):
-        accrual_list = self._get_accrual_list(portfolio_accruals)
-        self.portfolio_assets_data['accrual_list'] = accrual_list
-        self.portfolio_assets_data['total_results']['total_divs_payable'] =\
-            self._get_total_divs_payable(accrual_list)
-        self.portfolio_assets_data['total_results']['total_divs_received'] =\
-            self._get_total_divs_received(accrual_list)
-        self.portfolio_assets_data['total_results']['total_divs_upcoming'] =\
-            self._get_total_divs_upcoming(accrual_list)
+    def _fill_context_with_accrual_context_data(self, portfolio_accruals):
+        accrual_item_list = self._get_accrual_item_list(portfolio_accruals)
+        self.portfolio_accrual_data['accrual_list'] = accrual_item_list
+        self.portfolio_accrual_data['total_results']['total_divs_payable'] =\
+            self._get_total_divs_payable(accrual_item_list)
+        self.portfolio_accrual_data['total_results']['total_divs_received'] =\
+            self._get_total_divs_received(accrual_item_list)
+        self.portfolio_accrual_data['total_results']['total_divs_upcoming'] =\
+            self._get_total_divs_upcoming(accrual_item_list)
 
     def _get_portfolio_accruals(self):
 
         days_delta = timedelta(days=self.cleaned_data.get('days_delta'))
-
-        # portfolio_accruals = Dividend.objects.filter(
-        #     id__in=self.portfolio.dividendsofportfolio_set.values_list(
-        #         'dividend'),
-        #     date__lte=self._get_today_date() + days_delta
-        # ).order_by('-date')
 
         portfolio_accruals = AccrualsOfPortfolio.objects.filter(
             portfolio=self.portfolio,
@@ -81,7 +99,7 @@ class PortfolioAccrualViewContextService(Service):
 
         return portfolio_accruals
 
-    def _get_accrual_list(
+    def _get_accrual_item_list(
             self, portfolio_accruals: QuerySet) -> List[AccrualItem]:
 
         portfolio_accruals_list = []
@@ -104,16 +122,18 @@ class PortfolioAccrualViewContextService(Service):
             accrual_is_upcoming = False if accrual_date <= \
                                            self._get_today_date() else True
 
-            portfolio_accruals_list.append(AccrualItem(
-                id=accrual_id,
-                asset_name=asset_name,
-                asset_quantity=asset_quantity,
-                date=accrual_date,
-                amount=accrual_amount,
-                sum=accrual_total,
-                is_received=accrual_is_received,
-                is_upcoming=accrual_is_upcoming
-            ))
+            portfolio_accruals_list.append(
+                AccrualItem(
+                    id=accrual_id,
+                    asset_name=asset_name,
+                    asset_quantity=asset_quantity,
+                    date=accrual_date,
+                    amount=accrual_amount,
+                    sum=accrual_total,
+                    is_received=accrual_is_received,
+                    is_upcoming=accrual_is_upcoming
+                )
+            )
 
         return portfolio_accruals_list
 

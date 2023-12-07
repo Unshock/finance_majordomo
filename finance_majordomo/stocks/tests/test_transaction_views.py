@@ -56,7 +56,7 @@ class TestTransactionsViews(BaseTest):
         self.assertEqual(resolve(self.add_transaction).func.view_class,
                          transaction_views.AddTransaction)
         # print(self.add_transaction_with_id)
-        # self.assertEqual(resolve(self.add_transaction_with_id).func.view_class,
+        # self.assertEqual(resolve(argsself.add_transaction_with_id).func.view_class,
         #                 transaction_views.AddTransaction)
         self.assertEqual(resolve(self.delete_transaction).func.view_class,
                          transaction_views.DeleteTransaction)

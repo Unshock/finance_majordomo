@@ -19,7 +19,7 @@ def get_share_dividends(asset_obj):
         return GetShareDividendsSite1.execute({'share': asset_obj})
 
     except Exception as e:
-        print(e)
+        print(f'{e} in {get_share_dividends}')
 
 
 class GetShareDividendsSite1(Service):
