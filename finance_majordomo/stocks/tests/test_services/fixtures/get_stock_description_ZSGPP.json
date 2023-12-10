@@ -1,0 +1,16 @@
+{
+  "SECID": "zsgpp",
+  "NAME": "Открытое акционерное общество \"Запсибгазпром\" открытого акционерного общества \"Газпром\"",
+  "SHORTNAME": "ОАО \"Запсибгазпром\"",
+  "ISIN": "RU0006752862",
+  "REGNUMBER": "2-01-00132-F",
+  "ISSUESIZE": "12436704",
+  "FACEVALUE": "1",
+  "FACEUNIT": "RUB",
+  "LATNAME": "Public Joint-Stock Company \"Zapsibgazprom\" otkrytogo akcionernogo obshhestva \"Gazprom\"",
+  "TYPENAME": "Акция привилегированная ",
+  "GROUP": "stock_shares",
+  "TYPE": "preferred_share",
+  "GROUPNAME": "Акции",
+  "EMITTER_ID": "487117"
+}

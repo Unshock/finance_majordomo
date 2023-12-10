@@ -11,21 +11,21 @@ from finance_majordomo.stocks.services.accrual_services.dividends_parser_service
     get_share_dividends
 
 from finance_majordomo.stocks.models.asset import Asset, Bond, Stock
-from finance_majordomo.stocks.utils.assets_utils import get_asset_history_data, \
+from finance_majordomo.stocks.utils.assets_utils import get_asset_history_data,\
     add_share_history_data_to_model2, add_bond_history_data_to_model2
 
 
 def get_or_create_asset_obj(
-        asset_secid: str, primary_boardid: str = None) -> Asset:
+        asset_sec_id: str, primary_board_id: str = None) -> Asset:
 
-    print('[[[[[[[[[[[[[[[[[[[[[[', asset_secid)
+    print('[[[[[[[[[[[[[[[[[[[[[[', asset_sec_id)
 
     try:
-        asset_obj = Asset.objects.get(secid=asset_secid)
+        asset_obj = Asset.objects.get(secid=asset_sec_id)
 
     except Asset.DoesNotExist:
-        asset_description = get_asset_description(asset_secid)
-        asset_description['primary_boardid'] = primary_boardid
+        asset_description = get_asset_description(asset_sec_id)
+        asset_description['primary_boardid'] = primary_board_id
 
         asset_obj = create_asset_obj_from_description(asset_description)
 
@@ -33,40 +33,52 @@ def get_or_create_asset_obj(
 
 
 def create_asset_obj_from_description(asset_description: dict) -> Asset:
-    secid = asset_description.get('SECID')
-    isin = asset_description.get('ISIN')
+    create_asset_service_kwargs = {
+        'secid': asset_description.get('SECID'),
+        'isin': asset_description.get('ISIN'),
+        'name': asset_description.get('SHORTNAME'),
+        'latname': asset_description.get('LATNAME'),
 
-    name = asset_description.get('SHORTNAME')
-    latname = asset_description.get('LATNAME')
+        'currency': 'RUR' if asset_description.get(
+            'FACEUNIT') == 'SUR' else asset_description.get('FACEUNIT'),
+        'issuedate': asset_description.get('ISSUEDATE'),
+        'isqualifiedinvestors': True if asset_description.get(
+            'ISQUALIFIEDINVESTORS') == '1' else False,
+        'morningsession':
+            True if asset_description.get('MORNINGSESSION') == '1' else False,
+        'eveningsession':
+            True if asset_description.get('EVENINGSESSION') == '1' else False,
 
-    currency = 'RUR' if asset_description.get(
-        'FACEUNIT') == 'SUR' else asset_description.get('FACEUNIT')
-    issuedate = asset_description.get('ISSUEDATE')
+        'type': asset_description.get('TYPE'),
+        'typename': asset_description.get('TYPENAME'),
 
-    isqualifiedinvestors = True if \
-        asset_description.get('ISQUALIFIEDINVESTORS') == '1' else False
-    morningsession = True if \
-        asset_description.get('MORNINGSESSION') == '1' else False
-    eveningsession = True if \
-        asset_description.get('EVENINGSESSION') == '1' else False
+        'group': asset_description.get('GROUP'),
+        'groupname': asset_description.get('GROUPNAME'),
+        'primary_boardid': asset_description.get('primary_boardid'),
 
-    type = asset_description.get('TYPE')
-    typename = asset_description.get('TYPENAME')
+        'startdatemoex': asset_description.get('STARTDATEMOEX'),
+        'buybackdate': asset_description.get('BUYBACKDATE'),
+        'matdate': asset_description.get('MATDATE'),
+        'couponfrequency': asset_description.get('COUPONFREQUENCY'),
+        'couponpercent': asset_description.get('COUPONPERCENT'),
+        'couponvalue': asset_description.get('COUPONVALUE'),
+        'days_to_redemption': asset_description.get('DAYSTOREDEMPTION'),
+        'face_value': asset_description.get('FACEVALUE')
+    }
 
-    group = asset_description.get('GROUP')
-    groupname = asset_description.get('GROUPNAME')
-    primary_boardid = asset_description.get('primary_boardid')
+    return execute_create_asset_service(**create_asset_service_kwargs)
 
-    startdatemoex = asset_description.get('STARTDATEMOEX')
-    buybackdate = asset_description.get('BUYBACKDATE')
-    matdate = asset_description.get('MATDATE')
-    couponfrequency = asset_description.get('COUPONFREQUENCY')
-    couponpercent = asset_description.get('COUPONPERCENT')
-    couponvalue = asset_description.get('COUPONVALUE')
-    days_to_redemption = asset_description.get('DAYSTOREDEMPTION')
-    face_value = asset_description.get('FACEVALUE')
 
-    asset = CreateAssetService.execute({
+def execute_create_asset_service(
+        *, secid=None, isin=None, name=None, latname=None, currency=None,
+        issuedate=None, isqualifiedinvestors=None, morningsession=None,
+        eveningsession=None, type=None, typename=None, group=None,
+        groupname=None, primary_boardid=None, asset_type=None,
+        startdatemoex=None, buybackdate=None, matdate=None,
+        couponfrequency=None, couponpercent=None, couponvalue=None,
+        days_to_redemption=None, face_value=None):
+
+    return CreateAssetService.execute({
         'secid': secid,
         'isin': isin,
         'name': name,
@@ -91,8 +103,6 @@ def create_asset_obj_from_description(asset_description: dict) -> Asset:
         'days_to_redemption': days_to_redemption,
         'face_value': face_value,
     })
-
-    return asset
 
 
 class CreateAssetService(Service):
@@ -129,83 +139,57 @@ class CreateAssetService(Service):
         asset_obj = self._create_base_asset()
         self._create_sub_asset(asset_obj)
         self._fill_with_historical_data(asset_obj)
-        self._fill_with_accrual(asset_obj)
+        self._fill_with_accrual_data(asset_obj)
 
         return asset_obj
 
     def _create_base_asset(self):
-        secid = self.cleaned_data['secid']
-        isin = self.cleaned_data['isin']
-        name = self.cleaned_data['name']
-        latname = self.cleaned_data['latname']
-
-        currency = self.cleaned_data['currency']
-        issuedate = self.cleaned_data['issuedate']
-
-        isqualifiedinvestors = self.cleaned_data['isqualifiedinvestors']
-        morningsession = self.cleaned_data['morningsession']
-        eveningsession = self.cleaned_data['eveningsession']
-
-        type = self.cleaned_data['type']
-        typename = self.cleaned_data['typename']
-
-        group = self.cleaned_data['group']
-        groupname = self.cleaned_data['groupname']
-        primary_boardid = self.cleaned_data['primary_boardid']
-
-        user = self.cleaned_data.get('user')
 
         asset_obj = Asset.objects.create(
-            secid=secid,
-            isin=isin,
-            name=name,
-            latname=latname,
-            currency=currency,
-            issuedate=issuedate,
-            isqualifiedinvestors=isqualifiedinvestors,
-            morningsession=morningsession,
-            eveningsession=eveningsession,
-            type=type,
-            typename=typename,
-            group=group,
-            groupname=groupname,
-            primary_boardid=primary_boardid,
+            secid=self.cleaned_data.get('secid'),
+            isin=self.cleaned_data.get('isin'),
+            name=self.cleaned_data.get('name'),
+            latname=self.cleaned_data.get('latname'),
+
+            currency=self.cleaned_data.get('currency'),
+            issuedate=self.cleaned_data.get('issuedate'),
+
+            isqualifiedinvestors=self.cleaned_data.get('isqualifiedinvestors'),
+            morningsession=self.cleaned_data.get('morningsession'),
+            eveningsession=self.cleaned_data.get('eveningsession'),
+
+            type=self.cleaned_data.get('type'),
+            typename=self.cleaned_data.get('typename'),
+            group=self.cleaned_data.get('group'),
+            groupname=self.cleaned_data.get('groupname'),
+
+            primary_boardid=self.cleaned_data.get('primary_boardid')
         )
 
         return asset_obj
 
     def _create_sub_asset(self, asset):
         if asset.group == 'stock_shares':
-            CreateShareService.execute({
-                'asset': asset,
-            })
+            execute_create_share_service(asset)
 
         elif asset.group == 'stock_bonds':
 
-            startdatemoex = self.cleaned_data['startdatemoex']
-            buybackdate = self.cleaned_data['buybackdate']
-            matdate = self.cleaned_data['matdate']
-            couponfrequency = self.cleaned_data['couponfrequency']
-            couponpercent = self.cleaned_data['couponpercent']
-            couponvalue = self.cleaned_data['couponvalue']
-            days_to_redemption = self.cleaned_data['days_to_redemption']
-            face_value = self.cleaned_data['face_value']
+            create_bond_service_kwargs = {
+                'startdatemoex': self.cleaned_data.get('startdatemoex'),
+                'buybackdate': self.cleaned_data.get('buybackdate'),
+                'matdate': self.cleaned_data.get('matdate'),
+                'couponfrequency': self.cleaned_data.get('couponfrequency'),
+                'couponpercent': self.cleaned_data.get('couponpercent'),
+                'couponvalue': self.cleaned_data.get('couponvalue'),
+                'days_to_redemption': self.cleaned_data.get(
+                    'days_to_redemption'),
+                'face_value': self.cleaned_data.get('face_value')
+            }
 
-            CreateBondService.execute({
-                'asset': asset,
-
-                'startdatemoex': startdatemoex,
-                'buybackdate': buybackdate,
-                'matdate': matdate,
-                'couponfrequency': couponfrequency,
-                'couponpercent': couponpercent,
-                'couponvalue': couponvalue,
-                'days_to_redemption': days_to_redemption,
-                'face_value': face_value,
-            })
+            execute_create_bond_service(asset, **create_bond_service_kwargs)
 
         else:
-            raise Exception('type is incorrect')
+            raise Exception(f'group is incorrect or unsupported: {asset.group}')
 
     def _fill_with_historical_data(self, asset_obj):
         historical_data = get_asset_history_data(asset_obj)
@@ -217,7 +201,9 @@ class CreateAssetService(Service):
             self._fill_bond_with_historical_data(asset_obj, historical_data)
 
         else:
-            raise Exception('type is incorrect')
+            raise Exception(
+                f'group is incorrect or unsupported: {asset_obj.group}'
+            )
 
     @staticmethod
     def _fill_share_with_historical_data(asset_obj, historical_data):
@@ -237,23 +223,17 @@ class CreateAssetService(Service):
             pass
 
     @staticmethod
-    def _fill_with_accrual(asset_obj):
+    def _fill_with_accrual_data(asset_obj):
 
         if asset_obj.group == 'stock_shares':
 
             accrual_data_dict = get_share_dividends(asset_obj)
-            a = simplejson.dumps(accrual_data_dict)
-            print(a)
-            print('-----------------')
-            print(simplejson.loads(a, use_decimal=True))
-
             execute_accrual_model_data_filling_service(
                 asset=asset_obj, accrual_data_dict=accrual_data_dict)
 
         elif asset_obj.group == 'stock_bonds':
 
             accrual_data_dict = get_bond_coupon_history(asset_obj.secid)
-
             execute_accrual_model_data_filling_service(
                 asset=asset_obj, accrual_data_dict=accrual_data_dict
             )
@@ -262,20 +242,47 @@ class CreateAssetService(Service):
             raise Exception(f'unsupported group: {asset_obj.group}')
 
 
+def execute_create_share_service(asset: Asset) -> Stock:
+    return CreateShareService.execute({
+        'asset': asset
+    })
+
+
 class CreateShareService(Service):
     asset = ModelField(Asset)
 
     def process(self):
-        asset = self.cleaned_data.get('asset')
+        self.asset = self.cleaned_data.get('asset')
+        return self._create_share_object()
+
+    def _create_share_object(self):
 
         share_obj = Stock.objects.create(
-            asset_ptr=asset,
-            creation_date=asset.creation_date,
-            isqualifiedinvestors=asset.isqualifiedinvestors,
-            morningsession=asset.morningsession,
-            eveningsession=asset.eveningsession,
+            asset_ptr=self.asset,
+            creation_date=self.asset.creation_date,
+            isqualifiedinvestors=self.asset.isqualifiedinvestors,
+            morningsession=self.asset.morningsession,
+            eveningsession=self.asset.eveningsession,
         )
         return share_obj
+
+
+def execute_create_bond_service(
+        asset: Asset, *, startdatemoex=None, buybackdate=None, matdate=None,
+        couponfrequency=None, couponpercent=None, couponvalue=None,
+        days_to_redemption=None, face_value=None) -> Bond:
+
+    return CreateBondService.execute({
+        'asset': asset,
+        'startdatemoex': startdatemoex,
+        'buybackdate': buybackdate,
+        'matdate': matdate,
+        'couponfrequency': couponfrequency,
+        'couponpercent': couponpercent,
+        'couponvalue': couponvalue,
+        'days_to_redemption': days_to_redemption,
+        'face_value': face_value
+    })
 
 
 class CreateBondService(Service):
@@ -292,23 +299,26 @@ class CreateBondService(Service):
     asset = ModelField(Asset)
 
     def process(self):
-        asset = self.cleaned_data['asset']
+        self.asset = self.cleaned_data.get('asset')
+        return self._create_bond_object()
 
-        startdatemoex = self.cleaned_data['startdatemoex']
-        buybackdate = self.cleaned_data['buybackdate']
-        matdate = self.cleaned_data['matdate']
-        couponfrequency = self.cleaned_data['couponfrequency']
-        couponpercent = self.cleaned_data['couponpercent']
-        couponvalue = self.cleaned_data['couponvalue']
-        days_to_redemption = self.cleaned_data['days_to_redemption']
-        face_value = self.cleaned_data['face_value']
+    def _create_bond_object(self):
+
+        startdatemoex = self.cleaned_data.get('startdatemoex')
+        buybackdate = self.cleaned_data.get('buybackdate')
+        matdate = self.cleaned_data.get('matdate')
+        couponfrequency = self.cleaned_data.get('couponfrequency')
+        couponpercent = self.cleaned_data.get('couponpercent')
+        couponvalue = self.cleaned_data.get('couponvalue')
+        days_to_redemption = self.cleaned_data.get('days_to_redemption')
+        face_value = self.cleaned_data.get('face_value')
 
         bond_obj = Bond.objects.create(
-            asset_ptr=asset,
-            creation_date=asset.creation_date,
-            isqualifiedinvestors=asset.isqualifiedinvestors,
-            morningsession=asset.morningsession,
-            eveningsession=asset.eveningsession,
+            asset_ptr=self.asset,
+            creation_date=self.asset.creation_date,
+            isqualifiedinvestors=self.asset.isqualifiedinvestors,
+            morningsession=self.asset.morningsession,
+            eveningsession=self.asset.eveningsession,
 
             startdatemoex=startdatemoex,
             buybackdate=buybackdate,

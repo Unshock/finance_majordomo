@@ -172,7 +172,7 @@ def execute_update_accruals_of_portfolio(
 class UpdateAccrualsOfPortfolio(Service):
 
     def __init__(self, *args, **kwargs):
-        self.action_type = kwargs.pop('action_type') # переделать на forms
+        self.action_type = kwargs.pop('action_type') # переделать на forms.choice
         super().__init__(*args, **kwargs)
 
     portfolio = ModelField(Portfolio)

@@ -45,96 +45,101 @@ def get_first_trade_date_index(asset_history_data: list[dict]) -> int:
     raise Exception('No tradedate found')
 
 
-def add_share_history_data_to_model(stock_obj, asset_history_data):
-    for day_data in asset_history_data:
-        AssetsHistoricalData.objects.create(
-            asset=Asset.objects.get(id=stock_obj.asset_ptr_id),
-
-            tradedate=day_data.get('TRADEDATE'),
-            numtrades=day_data.get('NUMTRADES'),
-            value=day_data.get('VALUE'),
-            open=day_data.get('OPEN'),
-            low=day_data.get('LOW'),
-            high=day_data.get('HIGH'),
-            legalcloseprice=day_data.get('LEGALCLOSEPRICE'),
-            waprice=day_data.get('WAPRICE'),
-            close=day_data.get('CLOSE'),
-            volume=day_data.get('VOLUME'),
-            waval=day_data.get('WAVAL'),
-            trendclspr=day_data.get('TRENDCLSPR'),
-
-            is_closed=True
-        )
+# def add_share_history_data_to_model(stock_obj, asset_history_data):
+#     for day_data in asset_history_data:
+#         AssetsHistoricalData.objects.create(
+#             asset=Asset.objects.get(id=stock_obj.asset_ptr_id),
+# 
+#             tradedate=day_data.get('TRADEDATE'),
+#             numtrades=day_data.get('NUMTRADES'),
+#             value=day_data.get('VALUE'),
+#             open=day_data.get('OPEN'),
+#             low=day_data.get('LOW'),
+#             high=day_data.get('HIGH'),
+#             legalcloseprice=day_data.get('LEGALCLOSEPRICE'),
+#             waprice=day_data.get('WAPRICE'),
+#             close=day_data.get('CLOSE'),
+#             volume=day_data.get('VOLUME'),
+#             waval=day_data.get('WAVAL'),
+#             trendclspr=day_data.get('TRENDCLSPR'),
+# 
+#             is_closed=True
+#         )
 
 
 def add_share_history_data_to_model2(asset, asset_history_data):
-    for day_data in asset_history_data:
+
+    for day_data, day_value in asset_history_data.items():
+
         AssetsHistoricalData.objects.create(
             asset=Asset.objects.get(id=asset.id),
 
-            tradedate=day_data.get('TRADEDATE'),
-            numtrades=day_data.get('NUMTRADES'),
-            value=day_data.get('VALUE'),
-            open=day_data.get('OPEN'),
-            low=day_data.get('LOW'),
-            high=day_data.get('HIGH'),
-            legalcloseprice=day_data.get('LEGALCLOSEPRICE'),
-            waprice=day_data.get('WAPRICE'),
-            close=day_data.get('CLOSE'),
-            volume=day_data.get('VOLUME'),
-            waval=day_data.get('WAVAL'),
-            trendclspr=day_data.get('TRENDCLSPR'),
+            tradedate=day_value.get('TRADEDATE'),
+            numtrades=day_value.get('NUMTRADES'),
+            value=day_value.get('VALUE'),
+            open=day_value.get('OPEN'),
+            low=day_value.get('LOW'),
+            high=day_value.get('HIGH'),
+            legalcloseprice=day_value.get('LEGALCLOSEPRICE'),
+            waprice=day_value.get('WAPRICE'),
+            close=day_value.get('CLOSE'),
+            volume=day_value.get('VOLUME'),
+
+            # unique for shares
+            waval=day_value.get('WAVAL'),
+            trendclspr=day_value.get('TRENDCLSPR'),
 
             is_closed=True
         )
 
 
-def add_bond_history_data_to_model(bond_obj, asset_history_data):
-    #print(asset_history_data)
-
-    for day_data in asset_history_data:
-        AssetsHistoricalData.objects.create(
-            asset=Asset.objects.get(id=bond_obj.asset_ptr_id),
-
-            tradedate=day_data.get('TRADEDATE'),
-            numtrades=day_data.get('NUMTRADES'),
-            value=day_data.get('VALUE'),
-            open=day_data.get('OPEN'),
-            low=day_data.get('LOW'),
-            high=day_data.get('HIGH'),
-            legalcloseprice=day_data.get('LEGALCLOSEPRICE'),
-            waprice=day_data.get('WAPRICE'),
-            close=day_data.get('CLOSE'),
-            volume=day_data.get('VOLUME'),
-
-            yieldclose=day_data.get("YIELDCLOSE"),
-            couponpercent=day_data.get("COUPONPERCENT"),
-            couponvalue=day_data.get("COUPONVALUE"),
-
-            is_closed=True
-        )
+# def add_bond_history_data_to_model(bond_obj, asset_history_data):
+#     #print(asset_history_data)
+# 
+#     for day_data in asset_history_data:
+#         AssetsHistoricalData.objects.create(
+#             asset=Asset.objects.get(id=bond_obj.asset_ptr_id),
+# 
+#             tradedate=day_data.get('TRADEDATE'),
+#             numtrades=day_data.get('NUMTRADES'),
+#             value=day_data.get('VALUE'),
+#             open=day_data.get('OPEN'),
+#             low=day_data.get('LOW'),
+#             high=day_data.get('HIGH'),
+#             legalcloseprice=day_data.get('LEGALCLOSEPRICE'),
+#             waprice=day_data.get('WAPRICE'),
+#             close=day_data.get('CLOSE'),
+#             volume=day_data.get('VOLUME'),
+# 
+#             yieldclose=day_data.get("YIELDCLOSE"),
+#             couponpercent=day_data.get("COUPONPERCENT"),
+#             couponvalue=day_data.get("COUPONVALUE"),
+# 
+#             is_closed=True
+#         )
 
 
 def add_bond_history_data_to_model2(asset, asset_history_data):
 
-    for day_data in asset_history_data:
+    for day_data, day_value in asset_history_data.items():
         AssetsHistoricalData.objects.create(
             asset=Asset.objects.get(id=asset.id),
 
-            tradedate=day_data.get('TRADEDATE'),
-            numtrades=day_data.get('NUMTRADES'),
-            value=day_data.get('VALUE'),
-            open=day_data.get('OPEN'),
-            low=day_data.get('LOW'),
-            high=day_data.get('HIGH'),
-            legalcloseprice=day_data.get('LEGALCLOSEPRICE'),
-            waprice=day_data.get('WAPRICE'),
-            close=day_data.get('CLOSE'),
-            volume=day_data.get('VOLUME'),
+            tradedate=day_value.get('TRADEDATE'),
+            numtrades=day_value.get('NUMTRADES'),
+            value=day_value.get('VALUE'),
+            open=day_value.get('OPEN'),
+            low=day_value.get('LOW'),
+            high=day_value.get('HIGH'),
+            legalcloseprice=day_value.get('LEGALCLOSEPRICE'),
+            waprice=day_value.get('WAPRICE'),
+            close=day_value.get('CLOSE'),
+            volume=day_value.get('VOLUME'),
 
-            yieldclose=day_data.get("YIELDCLOSE"),
-            couponpercent=day_data.get("COUPONPERCENT"),
-            couponvalue=day_data.get("COUPONVALUE"),
+            # unique for bonds
+            yieldclose=day_value.get("YIELDCLOSE"),
+            couponpercent=day_value.get("COUPONPERCENT"),
+            couponvalue=day_value.get("COUPONVALUE"),
 
             is_closed=True
         )

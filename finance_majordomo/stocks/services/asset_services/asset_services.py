@@ -8,8 +8,7 @@ from finance_majordomo.stocks.models.currency import CurrencyRate
 from finance_majordomo.stocks.models.asset import Asset, Stock, Bond, \
     AssetOfPortfolio, AssetsHistoricalData
 
-from finance_majordomo.stocks.utils.assets_utils import add_share_history_data_to_model, \
-    add_bond_history_data_to_model, get_asset_history_data, get_asset_board
+from finance_majordomo.stocks.utils.assets_utils import get_asset_history_data, get_asset_board
 #from finance_majordomo.stocks.views import get_normalized_asset_type
 from finance_majordomo.users.models import User
 

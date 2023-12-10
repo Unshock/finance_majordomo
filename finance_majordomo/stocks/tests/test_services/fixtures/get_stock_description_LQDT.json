@@ -1,0 +1,17 @@
+{
+  "SECID": "LQDT",
+  "NAME": "БПИФ Ликвидность УК ВИМ",
+  "SHORTNAME": "LQDT ETF",
+  "REGNUMBER": "3915",
+  "ISIN": "RU000A1014L8",
+  "LATNAME": "LQDT ETF Money Market Fund",
+  "ISSUEDATE": "2020-01-20",
+  "LISTLEVEL": "1",
+  "ISQUALIFIEDINVESTORS": "0",
+  "EVENINGSESSION": "1",
+  "TYPENAME": "Пай биржевого ПИФа",
+  "GROUP": "stock_ppif",
+  "TYPE": "exchange_ppif",
+  "GROUPNAME": "Паи ПИФов",
+  "EMITTER_ID": "2380"
+}

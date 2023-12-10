@@ -1,3 +1,5 @@
+import json
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
@@ -18,6 +20,7 @@ from finance_majordomo.stocks.services.accrual_services.dividend_model_managemen
     UpdateAccrualsOfPortfolio, execute_update_accruals_of_portfolio
 
 from finance_majordomo.stocks.services.asset_services.user_assets_services import get_current_portfolio
+from finance_majordomo.stocks.utils.assets_utils import get_asset_history_data
 
 
 class TransactionList(LoginRequiredMixin, ListView):
@@ -113,6 +116,7 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         if form.is_valid():
 
             try:
+
                 execute_create_transaction_service(
                     transaction_type=form.cleaned_data.get('transaction_type'),
                     date=form.cleaned_data.get('date'),

@@ -1,10 +1,8 @@
 import json
 import datetime
 import pprint
-
 import requests
 from urllib3.util.retry import Retry
-
 import apimoex
 
 
@@ -88,7 +86,7 @@ def get_asset_board_history(ticker: str,
 #print(get_asset_board_history('RU000A101QM3', board="TQCB", market='bonds')[-1])
 
 
-# print('1')
+
 
 def get_current(ticker, board=None, group=None):
     if group == 'stock_shares':
@@ -178,9 +176,10 @@ def get_bond_current_price(secid: str, board):
 #get_stock_current_price('gazp')
 
 def get_asset_description(secid: str):
+    print(1)
     with requests.Session() as session:
         data = apimoex.find_security_description(session, secid.upper())
-        # print(data)
+
         result_data = {}
         # print(111)
         for elem in data:
@@ -188,22 +187,26 @@ def get_asset_description(secid: str):
         return result_data
 
 
-import pprint
+if __name__ == '__main__':
 
-# p1 = pprint.pformat(get_asset_description('LQDT'), indent=2)
-# p2 = pprint.pformat(get_asset_description('sber'), indent=2)
-#p3 = pprint.pformat(get_asset_description('zsgpp'), indent=2)
-#p4 = pprint.pformat(get_asset_description('lqdt'), indent=2)
-#p5 = pprint.pformat(get_asset_description('SU26222RMFS8'), indent=2)
-
-
-# p6 = pprint.pformat(get_asset_description('RU000A0JTW83'), indent=2)
-# print(p1)
-# print(p2)
-#print(p3)
-#print(p4)
-# print(p5)
-# print(p6)
+    p1 = pprint.pformat(get_asset_description('LQDT'), indent=2)
+    p2 = pprint.pformat(get_asset_description('sber'), indent=2)
+    p3 = pprint.pformat(get_asset_description('zsgpp'), indent=2)
+    p4 = pprint.pformat(get_asset_description('lqdt'), indent=2)
+    p5 = pprint.pformat(get_asset_description('SU26222RMFS8'), indent=2)
+    p6 = pprint.pformat(get_asset_description('RU000A0JTW83'), indent=2)
+    print(p1)
+    print(p2)
+    print(p3)
+    print(p4)
+    print(p5)
+    print(p6)
+    print(json.dumps(get_asset_description('LQDT'), ensure_ascii=False))
+    print(json.dumps(get_asset_description('sber'), ensure_ascii=False))
+    print(json.dumps(get_asset_description('zsgpp'), ensure_ascii=False))
+    print(json.dumps(get_asset_description('lqdt'), ensure_ascii=False))
+    print(json.dumps(get_asset_description('SU26222RMFS8'), ensure_ascii=False))
+    print(json.dumps(get_asset_description('RU000A0JTW83'), ensure_ascii=False))
 
 
 def get_bond_coupon_history(secid):
