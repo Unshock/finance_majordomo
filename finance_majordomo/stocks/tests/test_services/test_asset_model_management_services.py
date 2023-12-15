@@ -14,6 +14,7 @@ from django.core.exceptions import ValidationError
 from finance_majordomo.stocks.models import Asset
 from finance_majordomo.stocks.models.accrual_models import Dividend, \
     AccrualsOfPortfolio
+from finance_majordomo.stocks.models.asset import Bond, Stock
 from finance_majordomo.stocks.models.transaction_models import Transaction
 from finance_majordomo.stocks.services.accrual_services.dividend_model_management_services import \
     execute_toggle_portfolio_accrual_service, \
@@ -59,6 +60,170 @@ class AssetModelManagementServicesTest(BaseTest, AssetServicesFixtureSetUp):
     @mock.patch(GET_BOND_COUPON_HISTORY)
     @mock.patch(GET_ASSET_HISTORY_DATA)
     @mock.patch(GET_ASSET_DESCRIPTION)
+    def test_get_or_create_asset_obj_RU000A0JTW83(
+            self, mocked_get_asset_description, mocked_get_asset_history_data,
+            mocked_get_bond_coupon_history, mocked_get_share_dividends
+    ):
+        mocked_get_asset_description.return_value = self.description_RU000A0JTW83
+        mocked_get_asset_history_data.return_value = self.bond_history_data
+        mocked_get_bond_coupon_history.return_value = self.bond_accrual_data
+        mocked_get_share_dividends.return_value = None
+
+        asset = get_or_create_asset_obj('Ticker', 'expected_board_id')
+        sub_asset = asset.get_related_object()
+
+        self.assertTrue(isinstance(asset, Asset))
+        self.assertEqual(asset.get_related_object().id, asset.id)
+        self.assertTrue(isinstance(sub_asset, Bond))
+
+        self.assertEqual(asset.latname, 'DOM.RF - 25')
+        self.assertEqual(asset.secid, 'RU000A0JTW83')
+        self.assertEqual(asset.isin, 'RU000A0JTW83')
+        self.assertEqual(asset.name, 'ДОМ.РФ25об')
+
+        self.assertEqual(asset.currency, 'RUR')
+        self.assertEqual(
+            asset.issuedate, datetime(year=2013, month=4, day=29).date())
+
+        self.assertEqual(asset.isqualifiedinvestors, False)
+        self.assertEqual(asset.morningsession, False)
+        self.assertEqual(asset.eveningsession, False)
+
+        self.assertEqual(asset.type, 'corporate_bond')
+        self.assertEqual(asset.typename, 'Корпоративная облигация')
+        self.assertEqual(asset.group, 'stock_bonds')
+        self.assertEqual(asset.groupname, 'Облигации')
+
+        self.assertEqual(asset.primary_boardid, 'expected_board_id')
+
+        self.assertEqual(sub_asset.startdatemoex, datetime(
+            year=2013, month=5, day=13).date())
+        self.assertEqual(sub_asset.buybackdate, datetime(
+            year=2024, month=1, day=1).date())
+        self.assertEqual(sub_asset.matdate, datetime(
+            year=2026, month=10, day=1).date())
+        self.assertEqual(sub_asset.couponfrequency, Decimal('4'))
+        self.assertEqual(sub_asset.couponpercent, Decimal('13.1'))
+        self.assertEqual(sub_asset.couponvalue, Decimal('26.42'))
+        self.assertEqual(sub_asset.days_to_redemption, 1026)
+        self.assertEqual(sub_asset.face_value, 800)
+
+        self.assertTrue(asset.latest_accrual_update)
+        self.assertEqual(len(asset.dividend_set.all()), 2)
+        self.assertEqual(
+            asset.dividend_set.get(date='2024-10-16').amount, Decimal('35.4'))
+
+        self.assertEqual(len(asset.assetshistoricaldata_set.all()), 6)
+
+    @mock.patch(GET_SHARE_DIVIDENDS)
+    @mock.patch(GET_BOND_COUPON_HISTORY)
+    @mock.patch(GET_ASSET_HISTORY_DATA)
+    @mock.patch(GET_ASSET_DESCRIPTION)
+    def test_get_or_create_asset_obj_SU26222RMFS8(
+            self, mocked_get_asset_description, mocked_get_asset_history_data,
+            mocked_get_bond_coupon_history, mocked_get_share_dividends
+    ):
+        mocked_get_asset_description.return_value = \
+            self.description_SU26222RMFS8
+        mocked_get_asset_history_data.return_value = self.bond_history_data
+        mocked_get_bond_coupon_history.return_value = self.bond_accrual_data
+        mocked_get_share_dividends.return_value = None
+
+        asset = get_or_create_asset_obj('Ticker', 'expected_board_id')
+        sub_asset = asset.get_related_object()
+
+        self.assertTrue(isinstance(asset, Asset))
+        self.assertTrue(isinstance(sub_asset, Bond))
+        self.assertEqual(asset.get_related_object().id, asset.id)
+
+        self.assertEqual(asset.latname, 'OFZ-PD 26222')
+        self.assertEqual(asset.secid, 'SU26222RMFS8Unique')
+        self.assertEqual(asset.isin, 'RU000A0JXQF2Unique')
+        self.assertEqual(asset.name, 'ОФЗ 26222')
+
+        self.assertEqual(asset.currency, 'RUR')
+        self.assertEqual(
+            asset.issuedate, datetime(year=2017, month=5, day=3).date())
+
+        self.assertEqual(asset.isqualifiedinvestors, False)
+        self.assertEqual(asset.morningsession, False)
+        self.assertEqual(asset.eveningsession, True)
+
+        self.assertEqual(asset.type, 'ofz_bond')
+        self.assertEqual(asset.typename, 'Государственная облигация')
+        self.assertEqual(asset.group, 'stock_bonds')
+        self.assertEqual(asset.groupname, 'Облигации')
+
+        self.assertEqual(asset.primary_boardid, 'expected_board_id')
+
+        self.assertEqual(sub_asset.startdatemoex, datetime(
+            year=2017, month=5, day=3).date())
+        self.assertEqual(sub_asset.buybackdate, None)
+        self.assertEqual(sub_asset.matdate, datetime(
+            year=2024, month=10, day=16).date())
+        self.assertEqual(sub_asset.couponfrequency, Decimal('2'))
+        self.assertEqual(sub_asset.couponpercent, Decimal('7.1'))
+        self.assertEqual(sub_asset.couponvalue, Decimal('35.4'))
+        self.assertEqual(sub_asset.days_to_redemption, 311)
+        self.assertEqual(sub_asset.face_value, 1000)
+
+        self.assertTrue(asset.latest_accrual_update)
+        self.assertEqual(len(asset.dividend_set.all()), 2)
+        self.assertEqual(
+            asset.dividend_set.get(date='2024-10-16').amount, Decimal('35.4'))
+
+        self.assertEqual(len(asset.assetshistoricaldata_set.all()), 6)
+
+    @mock.patch(GET_SHARE_DIVIDENDS)
+    @mock.patch(GET_BOND_COUPON_HISTORY)
+    @mock.patch(GET_ASSET_HISTORY_DATA)
+    @mock.patch(GET_ASSET_DESCRIPTION)
+    def test_get_or_create_asset_obj_ZSGPP(
+            self, mocked_get_asset_description, mocked_get_asset_history_data,
+            mocked_get_bond_coupon_history, mocked_get_share_dividends
+    ):
+        mocked_get_asset_description.return_value = self.description_ZSGPP
+        mocked_get_asset_history_data.return_value = self.share_history_data
+        mocked_get_bond_coupon_history.return_value = None
+        mocked_get_share_dividends.return_value = self.share_accrual_data
+
+        asset = get_or_create_asset_obj('Ticker', 'expected_board_id')
+        sub_asset = asset.get_related_object()
+
+        self.assertTrue(isinstance(asset, Asset))
+        self.assertTrue(isinstance(sub_asset, Stock))
+        self.assertEqual(asset.get_related_object().id, asset.id)
+
+        self.assertEqual(asset.latname, 'Public Joint-Stock Company "Zapsibgazprom" otkrytogo akcionernogo obshhestva "Gazprom"')
+        self.assertEqual(asset.secid, 'zsgpp')
+        self.assertEqual(asset.isin, 'RU0006752862')
+        self.assertEqual(asset.name, 'ОАО "Запсибгазпром"')
+
+        self.assertEqual(asset.currency, 'RUB')
+        self.assertEqual(asset.issuedate, None)
+
+        self.assertEqual(asset.isqualifiedinvestors, False)
+        self.assertEqual(asset.morningsession, False)
+        self.assertEqual(asset.eveningsession, False)
+
+        self.assertEqual(asset.type, 'preferred_share')
+        self.assertEqual(asset.typename, 'Акция привилегированная')
+        self.assertEqual(asset.group, 'stock_shares')
+        self.assertEqual(asset.groupname, 'Акции')
+
+        self.assertEqual(asset.primary_boardid, 'expected_board_id')
+
+        self.assertTrue(asset.latest_accrual_update)
+        self.assertEqual(len(asset.dividend_set.all()), 1)
+        self.assertEqual(
+            asset.dividend_set.get(date='2022-05-08').amount, Decimal('14.4'))
+
+        self.assertEqual(len(asset.assetshistoricaldata_set.all()), 6)
+
+    @mock.patch(GET_SHARE_DIVIDENDS)
+    @mock.patch(GET_BOND_COUPON_HISTORY)
+    @mock.patch(GET_ASSET_HISTORY_DATA)
+    @mock.patch(GET_ASSET_DESCRIPTION)
     def test_get_or_create_asset_obj_SBER(
             self, mocked_get_asset_description, mocked_get_asset_history_data,
             mocked_get_bond_coupon_history, mocked_get_share_dividends
@@ -96,6 +261,7 @@ class AssetModelManagementServicesTest(BaseTest, AssetServicesFixtureSetUp):
         self.assertTrue(asset.latest_accrual_update)
         self.assertEqual(len(asset.dividend_set.all()), 4)
         self.assertEqual(
-            asset.dividend_set.get(date='2022-11-14').amount, Decimal('5.16'))
+            asset.dividend_set.get(date='2022-11-14').amount,
+            Decimal('5.16'))
 
         self.assertEqual(len(asset.assetshistoricaldata_set.all()), 6)

@@ -8,7 +8,7 @@
   "FACEVALUE": "1",
   "FACEUNIT": "RUB",
   "LATNAME": "Public Joint-Stock Company \"Zapsibgazprom\" otkrytogo akcionernogo obshhestva \"Gazprom\"",
-  "TYPENAME": "Акция привилегированная ",
+  "TYPENAME": "Акция привилегированная",
   "GROUP": "stock_shares",
   "TYPE": "preferred_share",
   "GROUPNAME": "Акции",

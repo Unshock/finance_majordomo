@@ -17,13 +17,18 @@ from finance_majordomo.stocks.utils.assets_utils import get_asset_history_data,\
 
 def get_or_create_asset_obj(
         asset_sec_id: str, primary_board_id: str = None) -> Asset:
-
-    print('[[[[[[[[[[[[[[[[[[[[[[', asset_sec_id)
+    """
+    :param asset_sec_id: asset security id
+    :param primary_board_id: primary_board_id from asset data
+    :return: either finds asset in Assets or gets the description and
+        executes func that creates asset and returns asset object.
+    """
 
     try:
         asset_obj = Asset.objects.get(secid=asset_sec_id)
 
     except Asset.DoesNotExist:
+        print(f'Start creating asset - {asset_sec_id}')
         asset_description = get_asset_description(asset_sec_id)
         asset_description['primary_boardid'] = primary_board_id
 
@@ -33,6 +38,11 @@ def get_or_create_asset_obj(
 
 
 def create_asset_obj_from_description(asset_description: dict) -> Asset:
+    """
+    :param asset_description: asset description from apimoex
+    :return: returns nothing but normalizes some fields and executes asset
+        creation service
+    """
     create_asset_service_kwargs = {
         'secid': asset_description.get('SECID'),
         'isin': asset_description.get('ISIN'),
@@ -77,6 +87,11 @@ def execute_create_asset_service(
         startdatemoex=None, buybackdate=None, matdate=None,
         couponfrequency=None, couponpercent=None, couponvalue=None,
         days_to_redemption=None, face_value=None):
+    """
+     - Gets asset model parameters.
+    :return: executes CreateAssetService and returns asset object created using
+        provided parameters
+    """
 
     return CreateAssetService.execute({
         'secid': secid,
@@ -113,7 +128,7 @@ class CreateAssetService(Service):
     latname = forms.CharField()
 
     currency = forms.CharField()
-    issuedate = forms.DateField()
+    issuedate = forms.DateField(required=False)
 
     isqualifiedinvestors = forms.BooleanField(required=False)
     morningsession = forms.BooleanField(required=False)
@@ -243,6 +258,11 @@ class CreateAssetService(Service):
 
 
 def execute_create_share_service(asset: Asset) -> Stock:
+    """
+     - Gets asset object and share unique parameters.
+    :return: executes CreateShareService and returns share object created using
+        provided parameters
+    """
     return CreateShareService.execute({
         'asset': asset
     })
@@ -271,7 +291,11 @@ def execute_create_bond_service(
         asset: Asset, *, startdatemoex=None, buybackdate=None, matdate=None,
         couponfrequency=None, couponpercent=None, couponvalue=None,
         days_to_redemption=None, face_value=None) -> Bond:
-
+    """
+     - Gets asset object and bond unique parameters.
+    :return: executes CreateBondService and returns bond object created using
+        provided parameters
+    """
     return CreateBondService.execute({
         'asset': asset,
         'startdatemoex': startdatemoex,
