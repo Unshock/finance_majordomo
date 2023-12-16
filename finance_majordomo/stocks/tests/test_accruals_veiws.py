@@ -30,7 +30,7 @@ class TestAccrualViews(BaseTest):
 
     def test_get_accrual_result_of_portfolio_asset_specified_usd(self):
 
-        # uses get_usd_rate()
+        # uses get_currency_rate()
 
         portfolio = self.user_authenticated.get_current_portfolio()
         result = get_accrual_result_of_portfolio(

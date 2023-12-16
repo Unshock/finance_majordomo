@@ -5,7 +5,8 @@ from typing import List
 
 from django.db.models import QuerySet, Sum
 
-from finance_majordomo.stocks.services.currency_services.currency_management_services import get_usd_rate
+from finance_majordomo.stocks.services.currency_services.currency_management_services import \
+    get_currency_rate_
 from finance_majordomo.stocks.models.transaction_models import Transaction
 
 
@@ -99,7 +100,8 @@ def _get_purchase_price(purchase_list: List[TransactionItem],
             total_sold -= sold
 
         if currency == 'usd':
-            currency_rate = get_usd_rate(elem.date)
+            currency_rate = get_currency_rate_(
+                date_dt=elem.date, currency='usd')
 
         purchase_price += elem.quantity * elem.price / currency_rate
 

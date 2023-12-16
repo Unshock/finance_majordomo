@@ -9,17 +9,14 @@ from datetime import timedelta as td
 import requests
 
 
-def get_currency_rate(currency: str = None):
-    if currency and currency.lower() == 'usd':
-        currency_rate = CurrencyRate.objects.last().price_usd
-    else:
-        currency_rate = Decimal('1')
-
-    return currency_rate
-
 def update_currency_rates(date=None):
 
     # Постоянно шлет реквесты - переделать на update
+
+    currency_code = {
+        'usd': 'R01235',
+        'euro': 'R01239'
+    }
 
     if date:
         date_req1 = date
@@ -28,8 +25,10 @@ def update_currency_rates(date=None):
 
     date_req2 = dt.strftime(dt.today(), '%d/%m/%Y')
 
-    url = f'https://www.cbr.ru/scripts/XML_dynamic.asp?date_req1={date_req1}' \
-          f'&date_req2={date_req2}&VAL_NM_RQ=R01235'
+    url = f'https://www.cbr.ru/scripts/XML_dynamic.asp?' \
+          f'date_req1={date_req1}&' \
+          f'date_req2={date_req2}&' \
+          f'VAL_NM_RQ={currency_code["usd"]}'
 
     data = requests.get(url)
 
@@ -52,29 +51,42 @@ def update_currency_rates(date=None):
 
 def update_usd():
     last_date = CurrencyRate.objects.last()
-    print(last_date)
+    print(f"last_date in usd table: {last_date}")
     last_date_str = dt.strftime(last_date.tradedate, '%d/%m/%Y')
     update_currency_rates(date=last_date_str)
 
 
-def get_usd_rate(date_dt):
+def get_currency_rate_(date_dt=None, *, currency=None):
 
-    for gap in range(0, 40):
+    RANGE = 40  # max non-working range - mb to rework
+
+    if not currency:
+        return Decimal('1')
+
+    if currency.lower() not in ('usd', 'euro'):
+        raise ValueError(f'{currency} is not in ("usd", "euro")')
+
+    if not date_dt:
+        date_dt = dt.today().date()
+
+    for gap in range(RANGE):
         delta_date_dt = (date_dt - td(gap))
 
         date_str = dt.strftime(
-            dt(delta_date_dt.year,
-                     delta_date_dt.month,
-                     delta_date_dt.day), '%Y-%m-%d')
+            dt(delta_date_dt.year, delta_date_dt.month, delta_date_dt.day),
+            '%Y-%m-%d')
 
         day_status = ProdCalendar.get_date(date_str).date_status
-
-        #print(day_status)
 
         if day_status == 'Working':
             try:
                 result = CurrencyRate.objects.get(tradedate=delta_date_dt)
-                #print('resik', result)
-                return result.price_usd
+
+                if currency.lower() == 'usd':
+                    return result.price_usd
+                if currency.lower() == 'euro':
+                    return result.price_euro
+
             except CurrencyRate.DoesNotExist:
                 print(f'currency rate {delta_date_dt} does not exist')
+                print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')

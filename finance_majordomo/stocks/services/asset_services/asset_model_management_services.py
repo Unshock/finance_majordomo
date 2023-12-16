@@ -15,7 +15,7 @@ from finance_majordomo.stocks.services.accrual_services.dividends_parser_service
 from finance_majordomo.stocks.models.asset import Asset, Bond, Stock, \
     AssetsHistoricalData
 from finance_majordomo.stocks.services.currency_services.currency_management_services import \
-    get_currency_rate
+    get_currency_rate_
 from finance_majordomo.stocks.utils.assets_utils import get_asset_history_data,\
     add_share_history_data_to_model2, add_bond_history_data_to_model2
 
@@ -364,7 +364,7 @@ class CreateBondService(Service):
 
 def get_current_asset_price_per_asset(asset: Asset, currency: str) -> Decimal:
 
-    currency_rate = get_currency_rate(currency)
+    currency_rate = get_currency_rate_(currency=currency)  # last date rate usd - rework
 
     last_date_price = AssetsHistoricalData.objects.filter(
         asset=asset).order_by('-tradedate')[0].legalcloseprice
