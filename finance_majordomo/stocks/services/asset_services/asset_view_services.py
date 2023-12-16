@@ -20,6 +20,11 @@ from finance_majordomo.users.models import User, Portfolio
 
 
 def get_assets_of_user_qs(user: User) -> QuerySet:
+    """
+    :param user: User model object
+    :return: returns distinct QuerySet of Assets that User has in all of his
+        portfolios
+    """
     return GetAssetsOfUser.execute({
         'user': user
     })
@@ -48,6 +53,9 @@ class GetAssetsOfUser(Service):
 
 
 class PortfolioAssetItem:
+    """
+    Instance to collect assets data and indicators to show in view
+    """
     def __init__(self, portfolio: Portfolio, asset: Asset):
         if self._validate_arguments(portfolio, asset):
             self.portfolio = portfolio
@@ -106,21 +114,17 @@ class PortfolioAssetItem:
 
     def _get_purchase_price(self, currency=None, formatter=None):
         purchase_price = get_purchase_price(
-            self.portfolio.id, self.asset_id, currency=currency
-        )
-
+            self.portfolio.id, self.asset_id, currency=currency)
         return formatter(purchase_price) if formatter else purchase_price
 
     def _get_current_price_per_asset(self, currency=None, formatter=None):
         current_price = get_current_asset_price_per_asset(
             self.asset, currency=currency)
-
         return formatter(current_price) if formatter else current_price
 
     def _get_current_price_total(self, formatter=None):
         current_price_total = self.current_price_per_asset * self.quantity
-
-        return formatter(current_price_total) \
+        return formatter(current_price_total)\
             if formatter else current_price_total
 
     def _get_current_price_total_usd(self, formatter=None):
@@ -132,7 +136,6 @@ class PortfolioAssetItem:
     def _get_accrual_received(self, currency=None, formatter=None):
         accrual_received = get_accrual_result_of_portfolio(
             self.portfolio, asset=self.asset, currency=currency)
-        #print('accral_rec', accrual_received)
         return formatter(accrual_received) if formatter else accrual_received
 
     def format_all_fields(self):
@@ -215,6 +218,22 @@ class AssetResult:
 
 
 def execute_portfolio_asset_view_context_service(portfolio):
+    """
+    :param portfolio: Portfolio model object
+    :return: dictionary like:
+        {'total_results': {'total_purchase_price': formatted_str,
+                           'total_current_price': formatted_str,
+                           'total_percent_result': formatted_str,
+                           'total_accruals_received': formatted_str,
+                           'total_financial_result_no_divs': formatted_str,
+                           'total_financial_result_with_divs': formatted_str,
+                           'total_rate_of_return': formatted_str,
+                           'total_current_price_usd': formatted_str,
+                           'total_financial_result_with_divs_usd': formatted_str
+                           }
+         'accrual_list': [PortfolioAssetItem]
+         }
+    """
     return PortfolioAssetsViewContextService().execute({'portfolio': portfolio})
 
 
@@ -252,16 +271,14 @@ class PortfolioAssetsViewContextService(Service):
             update_usd()
 
         except Exception as e:
-            print(e)
+            print(e, ' during ', update_currency_rates, update_usd)
 
         for asset in portfolio_assets:
 
-            # update_history_data(stock)
-            # update_today_data(stock)
             try:
                 update_historical_data(asset)
             except Exception as e:
-                print(e)
+                print(e, ' during ', update_historical_data)
 
             current_quantity = get_asset_quantity_for_portfolio(
                 self.portfolio.id, asset.id)
@@ -280,57 +297,6 @@ class PortfolioAssetsViewContextService(Service):
 
             portfolio_asset.format_all_fields()
             self.portfolio_assets_data['asset_list'].append(portfolio_asset)
-
-            # # create
-            # current_price = self.get_current_price(asset)
-            # current_price_usd = self.get_current_price(asset, currency='usd')
-            # 
-            # total_current_price += current_price
-            # total_current_price_usd += current_price_usd
-            # 
-            # percent_result = self.get_percent_result(
-            #     purchase_price, current_price)
-            # 
-            # money_result_without_divs = moneyfmt(
-            #     get_money_result(current_price, purchase_price), sep=' ')
-            # 
-            # dividends_received = \
-            #     get_accrual_result_of_portfolio(current_portfolio)
-            # total_divs += dividends_received
-            # 
-            # dividends_received_usd = get_accrual_result_of_portfolio(
-            #     current_portfolio, currency='usd')
-            # 
-            # total_divs_usd += dividends_received_usd
-            # 
-            # money_result_with_divs = moneyfmt(
-            #     get_money_result(
-            #         current_price + dividends_received,
-            #         purchase_price),
-            #     sep=' ')
-            # 
-            # rate_of_return = self.get_percent_result(
-            #     purchase_price, current_price + dividends_received)
-            # 
-            # user_stock_data['stock_list'].append(
-            #     {'id': asset.id,
-            #      'ticker': asset.secid,
-            #      'name': asset.name,
-            #      'currency': asset.currency,
-            #      'quantity': moneyfmt(
-            #          Decimal(current_quantity), sep=' ', places=0),
-            #      'purchase_price': moneyfmt(purchase_price, sep=' '),
-            #      'avg_purchase_price': moneyfmt(avg_purchase_price, sep=' ',
-            #                                     curr='$'),
-            #      'current_price': moneyfmt(current_price, sep=' '),
-            #      'percent_result': percent_result,
-            #      'dividends_received': moneyfmt(dividends_received, sep=' '),
-            #      'money_result_without_divs': money_result_without_divs,
-            #      'money_result_with_divs': money_result_with_divs,
-            #      'rate_of_return': rate_of_return,
-            #      })
-            # print(type(moneyfmt(
-            #     Decimal(current_quantity), sep=' ', places=0)))
 
         total_results = AssetResult(
             total_purchase_price, total_current_price, total_accruals_received)
