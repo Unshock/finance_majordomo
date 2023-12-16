@@ -44,7 +44,7 @@ class UsersTransactionList(LoginRequiredMixin, ListView):
         context['page_title'] = self.request.user.username + " " + _(
             "transaction list")
         context['transaction_list'] = Transaction.objects.filter(
-            portfolio=self.request.user.get_current_portfolio()
+            portfolio=self.request.user.current_portfolio
         ).order_by('-date')
 
         return context
@@ -173,7 +173,7 @@ class DeleteTransaction(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
         if validate_transaction(self.request.user, transaction_validator):
 
             execute_update_accruals_of_portfolio(
-                portfolio=request.user.get_current_portfolio(),
+                portfolio=request.user.current_portfolio,
                 transaction=transaction,
                 action_type='del_transaction'
             )

@@ -63,7 +63,7 @@ class AssetViewServicesTest(BaseTest):
         mocked_datetime.return_value = datetime(year=2023, month=5, day=18)
 
         portfolio_assets_data = execute_portfolio_asset_view_context_service(
-            self.user_authenticated.get_current_portfolio())
+            self.user_authenticated.current_portfolio)
 
         total_res = portfolio_assets_data['total_results']
         asset_list = portfolio_assets_data['asset_list']
@@ -149,7 +149,7 @@ class AssetViewServicesTest(BaseTest):
         mocked_datetime.return_value = datetime(year=2023, month=5, day=18)
 
         portfolio_assets_data = execute_portfolio_asset_view_context_service(
-            self.user_authenticated_no_assets.get_current_portfolio())
+            self.user_authenticated_no_assets.current_portfolio)
 
         total_res = portfolio_assets_data['total_results']
         asset_list = portfolio_assets_data['asset_list']

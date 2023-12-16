@@ -43,7 +43,7 @@ class PortfolioAssets(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
 
         portfolio_assets_data = execute_portfolio_asset_view_context_service(
-            self.request.user.get_current_portfolio())
+            self.request.user.current_portfolio)
 
         asset_list = portfolio_assets_data.get('asset_list')
         total_results = portfolio_assets_data.get('total_results')
@@ -53,7 +53,7 @@ class PortfolioAssets(LoginRequiredMixin, ListView):
         context['page_title'] = self.request.user.username + " " + _(
             "stock list")
         context['fields_to_display'] = self.request.user.usersettings
-        context['current_portfolio'] = self.request.user.get_current_portfolio()
+        context['current_portfolio'] = self.request.user.current_portfolio
         context['asset_list'] = asset_list
         context['total_results'] = total_results
 

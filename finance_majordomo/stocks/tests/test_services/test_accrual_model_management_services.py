@@ -21,7 +21,7 @@ FIXTURES_FOLDER = "fixtures"
 class AccrualModelManagementServicesTest(BaseTest):
 
     def test_execute_toggle_portfolio_accrual_service(self):
-        portfolio = self.user_authenticated.get_current_portfolio()
+        portfolio = self.user_authenticated.current_portfolio
         accrual = self.accrual1
 
         accrual_of_portfolio = AccrualsOfPortfolio.objects.get(
@@ -74,7 +74,7 @@ class AccrualModelManagementServicesTest(BaseTest):
 
     def test_execute_update_accruals_of_portfolio_invalid_action_type(self):
         transaction = self.transaction3
-        portfolio = self.user_authenticated.get_current_portfolio()
+        portfolio = self.user_authenticated.current_portfolio
 
         with self.assertRaises(ValueError):
             execute_update_accruals_of_portfolio(
@@ -82,7 +82,7 @@ class AccrualModelManagementServicesTest(BaseTest):
 
     def test_execute_update_accruals_of_portfolio_delete_buy(self):
         transaction = self.transaction3
-        portfolio = self.user_authenticated.get_current_portfolio()
+        portfolio = self.user_authenticated.current_portfolio
 
         Dividend.objects.create(
             asset_id=32,
@@ -117,7 +117,7 @@ class AccrualModelManagementServicesTest(BaseTest):
             quantity=Decimal('1')
         )
 
-        portfolio = self.user_authenticated.get_current_portfolio()
+        portfolio = self.user_authenticated.current_portfolio
 
         self.accrual_of_portfolio2.is_received = False
         self.accrual_of_portfolio2.save()
@@ -162,7 +162,7 @@ class AccrualModelManagementServicesTest(BaseTest):
             quantity=Decimal('1')
         )
 
-        portfolio = self.user_authenticated.get_current_portfolio()
+        portfolio = self.user_authenticated.current_portfolio
 
         Dividend.objects.create(
             asset_id=32,

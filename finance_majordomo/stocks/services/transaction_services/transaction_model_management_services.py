@@ -12,7 +12,7 @@ from finance_majordomo.stocks.models.asset import Asset
 from finance_majordomo.stocks.models.transaction_models import Transaction
 
 from finance_majordomo.users.models import User
-from finance_majordomo.users.utils.utils import get_current_portfolio
+
 
 
 def execute_create_transaction_service(
@@ -68,7 +68,7 @@ class CreateTransactionService(Service):
             accrued_interest = Decimal('0')
 
         user = self.cleaned_data.get('user')
-        current_portfolio = get_current_portfolio(user)
+        current_portfolio = user.current_portfolio
 
         transaction_obj = Transaction.objects.create(
             transaction_type=transaction_type,

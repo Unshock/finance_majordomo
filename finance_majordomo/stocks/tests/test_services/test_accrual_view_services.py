@@ -30,7 +30,7 @@ class AccrualViewServicesTest(BaseTest):
 
     def test_execute_portfolio_accrual_view_context_service_90_days(self):
         portfolio_accrual_data = execute_portfolio_accrual_view_context_service(
-            portfolio=self.user_authenticated.get_current_portfolio(),
+            portfolio=self.user_authenticated.current_portfolio,
             days_delta=90
         )
 
@@ -73,7 +73,7 @@ class AccrualViewServicesTest(BaseTest):
             year=2023, month=4, day=18)
 
         portfolio_accrual_data = execute_portfolio_accrual_view_context_service(
-            portfolio=self.user_authenticated.get_current_portfolio(),
+            portfolio=self.user_authenticated.current_portfolio,
             days_delta=3
         )
 
@@ -112,7 +112,7 @@ class AccrualViewServicesTest(BaseTest):
             self):
 
         portfolio_accrual_data = execute_portfolio_accrual_view_context_service(
-            portfolio=self.user_authenticated_no_assets.get_current_portfolio(),
+            portfolio=self.user_authenticated_no_assets.current_portfolio,
             days_delta=90
         )
 

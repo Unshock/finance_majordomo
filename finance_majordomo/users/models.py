@@ -10,7 +10,8 @@ class User(AbstractUser):
         auto_now_add=True, verbose_name=_("Creation_date")
     )
 
-    def get_current_portfolio(self):
+    @property
+    def current_portfolio(self):
         return self.portfolio_set.filter(is_current=True).last()
 
     @property

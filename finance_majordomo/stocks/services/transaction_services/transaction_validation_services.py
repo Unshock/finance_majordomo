@@ -6,7 +6,7 @@ from typing import Literal
 
 from finance_majordomo.stocks.models.transaction_models import Transaction
 from .transaction_calculation_services import get_asset_quantity_for_portfolio
-from finance_majordomo.users.utils.utils import get_current_portfolio
+
 from finance_majordomo.stocks.models.asset import Asset
 from finance_majordomo.users.models import User
 
@@ -35,7 +35,7 @@ def validate_transaction(user: User, transaction: TransactionValidator) -> bool:
        transaction_type == 'BUY' and validator == 'add_validation':
         return True
 
-    portfolio = get_current_portfolio(user)
+    portfolio = user.current_portfolio
 
     portfolio_transactions = Transaction.objects.filter(
         portfolio=portfolio,

@@ -2,7 +2,7 @@ import django
 import os
 
 from finance_majordomo.stocks.services.transaction_services.transaction_calculation_services import get_asset_quantity_for_portfolio
-from finance_majordomo.users.utils.utils import get_current_portfolio
+
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'finance_majordomo.settings')
 django.setup()
