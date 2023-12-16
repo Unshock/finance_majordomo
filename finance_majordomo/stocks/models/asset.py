@@ -280,7 +280,6 @@ class ProdCalendar(models.Model):
             prod_date = ProdCalendar.objects.get(date=date)
 
         except ProdCalendar.DoesNotExist:
-
             try:
                 prod_date = ProdCalendar.objects.create(
                     date=date,

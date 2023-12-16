@@ -16,6 +16,7 @@ class BaseTest(TestCase):
         'user.json',
         'user_settings.json',
         'AssetsHistoricalData.json',
+        'prod_calendar.json',
         'assets.json',
         'stocks.json',
         'bonds.json',

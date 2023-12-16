@@ -4,7 +4,6 @@ from ..services.accrual_services.accrual_calculation_services import \
     get_accrual_result_of_portfolio
 
 
-
 class TestAccrualViews(BaseTest):
 
     def test_get_accrual_result_of_portfolio(self):

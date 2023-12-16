@@ -1,14 +1,9 @@
-from decimal import Decimal
-from pprint import pprint
-
 from django.urls import reverse, resolve
-from django.utils.translation import gettext_lazy as _
 from http import HTTPStatus
 from unittest.mock import patch
 from .base_settings import BaseTest
-from .setting import SettingsStocks
 from ..views import asset_views
-from ..models.asset import Stock, StocksOfUser, Asset
+from ..models.asset import Asset
 from ...users.models import Portfolio, User
 
 

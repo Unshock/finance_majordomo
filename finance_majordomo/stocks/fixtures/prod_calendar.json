@@ -1,0 +1,1378 @@
+[
+{
+    "model": "stocks.prodcalendar",
+    "pk": 1,
+    "fields": {
+        "date": "2023-11-05",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 2,
+    "fields": {
+        "date": "2023-11-04",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 3,
+    "fields": {
+        "date": "2022-04-15",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 4,
+    "fields": {
+        "date": "2022-04-14",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 5,
+    "fields": {
+        "date": "2022-04-13",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 6,
+    "fields": {
+        "date": "2022-04-12",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 7,
+    "fields": {
+        "date": "2022-04-11",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 8,
+    "fields": {
+        "date": "2022-04-10",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 9,
+    "fields": {
+        "date": "2022-04-09",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 10,
+    "fields": {
+        "date": "2022-04-08",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 11,
+    "fields": {
+        "date": "2022-04-07",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 12,
+    "fields": {
+        "date": "2022-04-06",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 13,
+    "fields": {
+        "date": "2022-04-05",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 14,
+    "fields": {
+        "date": "2022-04-04",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 15,
+    "fields": {
+        "date": "2022-04-03",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 16,
+    "fields": {
+        "date": "2022-04-02",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 17,
+    "fields": {
+        "date": "2022-04-01",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 18,
+    "fields": {
+        "date": "2022-03-31",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 19,
+    "fields": {
+        "date": "2022-03-30",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 20,
+    "fields": {
+        "date": "2022-03-29",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 21,
+    "fields": {
+        "date": "2022-03-28",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 22,
+    "fields": {
+        "date": "2022-03-27",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 23,
+    "fields": {
+        "date": "2022-03-26",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 24,
+    "fields": {
+        "date": "2022-03-25",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 25,
+    "fields": {
+        "date": "2022-03-24",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 26,
+    "fields": {
+        "date": "2022-03-23",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 27,
+    "fields": {
+        "date": "2022-03-22",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 28,
+    "fields": {
+        "date": "2022-03-21",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 29,
+    "fields": {
+        "date": "2022-03-20",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 30,
+    "fields": {
+        "date": "2022-03-19",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 31,
+    "fields": {
+        "date": "2022-03-18",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 32,
+    "fields": {
+        "date": "2022-03-17",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 33,
+    "fields": {
+        "date": "2022-03-16",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 34,
+    "fields": {
+        "date": "2022-03-15",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 35,
+    "fields": {
+        "date": "2022-03-14",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 36,
+    "fields": {
+        "date": "2022-03-13",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 37,
+    "fields": {
+        "date": "2022-03-12",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 38,
+    "fields": {
+        "date": "2022-03-11",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 39,
+    "fields": {
+        "date": "2022-03-10",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 40,
+    "fields": {
+        "date": "2022-03-09",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 41,
+    "fields": {
+        "date": "2022-03-08",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 42,
+    "fields": {
+        "date": "2022-03-07",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 43,
+    "fields": {
+        "date": "2023-06-17",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 44,
+    "fields": {
+        "date": "2023-06-16",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 45,
+    "fields": {
+        "date": "2023-06-18",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 46,
+    "fields": {
+        "date": "2023-06-20",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 47,
+    "fields": {
+        "date": "2023-11-06",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 48,
+    "fields": {
+        "date": "2022-02-15",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 49,
+    "fields": {
+        "date": "2022-04-16",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 50,
+    "fields": {
+        "date": "2007-04-15",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 51,
+    "fields": {
+        "date": "2007-04-14",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 52,
+    "fields": {
+        "date": "2007-04-13",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 53,
+    "fields": {
+        "date": "2023-11-07",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 54,
+    "fields": {
+        "date": "2023-11-08",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 55,
+    "fields": {
+        "date": "2023-11-11",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 56,
+    "fields": {
+        "date": "2023-11-10",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 57,
+    "fields": {
+        "date": "2023-11-12",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 58,
+    "fields": {
+        "date": "2023-11-13",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 59,
+    "fields": {
+        "date": "2023-03-04",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 60,
+    "fields": {
+        "date": "2023-03-03",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 61,
+    "fields": {
+        "date": "2023-07-07",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 62,
+    "fields": {
+        "date": "2023-04-03",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 63,
+    "fields": {
+        "date": "2023-04-02",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 64,
+    "fields": {
+        "date": "2023-04-01",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 65,
+    "fields": {
+        "date": "2023-03-31",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 66,
+    "fields": {
+        "date": "2023-11-15",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 67,
+    "fields": {
+        "date": "2023-01-15",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 68,
+    "fields": {
+        "date": "2023-01-14",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 69,
+    "fields": {
+        "date": "2023-01-13",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 70,
+    "fields": {
+        "date": "2018-01-01",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 71,
+    "fields": {
+        "date": "2017-12-31",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 72,
+    "fields": {
+        "date": "2017-12-30",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 73,
+    "fields": {
+        "date": "2017-12-29",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 74,
+    "fields": {
+        "date": "2022-01-01",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 75,
+    "fields": {
+        "date": "2021-12-31",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 76,
+    "fields": {
+        "date": "2021-12-30",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 77,
+    "fields": {
+        "date": "2021-05-11",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 78,
+    "fields": {
+        "date": "2021-05-10",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 79,
+    "fields": {
+        "date": "2021-05-09",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 80,
+    "fields": {
+        "date": "2021-05-08",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 81,
+    "fields": {
+        "date": "2021-05-07",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 82,
+    "fields": {
+        "date": "2021-05-06",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 83,
+    "fields": {
+        "date": "2021-05-05",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 84,
+    "fields": {
+        "date": "2021-05-04",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 85,
+    "fields": {
+        "date": "2021-05-03",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 86,
+    "fields": {
+        "date": "2021-05-02",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 87,
+    "fields": {
+        "date": "2021-05-01",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 88,
+    "fields": {
+        "date": "2021-04-30",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 89,
+    "fields": {
+        "date": "2020-10-12",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 90,
+    "fields": {
+        "date": "2020-10-11",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 91,
+    "fields": {
+        "date": "2020-10-10",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 92,
+    "fields": {
+        "date": "2020-10-09",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 93,
+    "fields": {
+        "date": "2020-05-12",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 94,
+    "fields": {
+        "date": "2020-05-11",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 95,
+    "fields": {
+        "date": "2020-05-10",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 96,
+    "fields": {
+        "date": "2020-05-09",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 97,
+    "fields": {
+        "date": "2020-05-08",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 98,
+    "fields": {
+        "date": "2020-05-07",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 99,
+    "fields": {
+        "date": "2020-05-06",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 100,
+    "fields": {
+        "date": "2020-05-05",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 101,
+    "fields": {
+        "date": "2020-05-04",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 102,
+    "fields": {
+        "date": "2020-05-03",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 103,
+    "fields": {
+        "date": "2020-05-02",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 104,
+    "fields": {
+        "date": "2020-05-01",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 105,
+    "fields": {
+        "date": "2020-04-30",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 106,
+    "fields": {
+        "date": "2020-04-29",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 107,
+    "fields": {
+        "date": "2020-04-28",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 108,
+    "fields": {
+        "date": "2020-04-27",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 109,
+    "fields": {
+        "date": "2020-04-26",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 110,
+    "fields": {
+        "date": "2020-04-25",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 111,
+    "fields": {
+        "date": "2020-04-24",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 112,
+    "fields": {
+        "date": "2020-04-23",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 113,
+    "fields": {
+        "date": "2020-04-22",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 114,
+    "fields": {
+        "date": "2020-04-21",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 115,
+    "fields": {
+        "date": "2020-04-20",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 116,
+    "fields": {
+        "date": "2020-04-19",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 117,
+    "fields": {
+        "date": "2020-04-18",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 118,
+    "fields": {
+        "date": "2020-04-17",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 119,
+    "fields": {
+        "date": "2020-04-16",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 120,
+    "fields": {
+        "date": "2020-04-15",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 121,
+    "fields": {
+        "date": "2020-04-14",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 122,
+    "fields": {
+        "date": "2020-04-13",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 123,
+    "fields": {
+        "date": "2020-04-12",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 124,
+    "fields": {
+        "date": "2020-04-11",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 125,
+    "fields": {
+        "date": "2020-04-10",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 126,
+    "fields": {
+        "date": "2020-04-09",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 127,
+    "fields": {
+        "date": "2020-04-08",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 128,
+    "fields": {
+        "date": "2020-04-07",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 129,
+    "fields": {
+        "date": "2020-04-06",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 130,
+    "fields": {
+        "date": "2020-04-05",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 131,
+    "fields": {
+        "date": "2020-04-04",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 132,
+    "fields": {
+        "date": "2020-04-03",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 133,
+    "fields": {
+        "date": "2023-11-16",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 134,
+    "fields": {
+        "date": "2023-11-19",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 135,
+    "fields": {
+        "date": "2023-11-18",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 136,
+    "fields": {
+        "date": "2023-11-17",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 137,
+    "fields": {
+        "date": "2023-11-20",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 138,
+    "fields": {
+        "date": "2023-11-14",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 139,
+    "fields": {
+        "date": "2023-11-22",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 140,
+    "fields": {
+        "date": "2023-11-21",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 141,
+    "fields": {
+        "date": "2023-11-24",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 142,
+    "fields": {
+        "date": "2022-01-15",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 143,
+    "fields": {
+        "date": "2022-01-14",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 144,
+    "fields": {
+        "date": "2023-04-16",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 1440,
+    "fields": {
+        "date": "2023-04-19",
+        "date_status": "Working"
+    }
+}, 
+{
+    "model": "stocks.prodcalendar",
+    "pk": 1441,
+    "fields": {
+        "date": "2023-05-20",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 1442,
+    "fields": {
+        "date": "2023-05-18",
+        "date_status": "Working"
+    }
+},    
+{
+    "model": "stocks.prodcalendar",
+    "pk": 1443,
+    "fields": {
+        "date": "2023-05-19",
+        "date_status": "Working"
+    }
+},    
+{
+    "model": "stocks.prodcalendar",
+    "pk": 145,
+    "fields": {
+        "date": "2023-04-15",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 146,
+    "fields": {
+        "date": "2023-04-14",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 147,
+    "fields": {
+        "date": "2022-11-14",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 148,
+    "fields": {
+        "date": "2022-11-13",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 149,
+    "fields": {
+        "date": "2022-11-12",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 150,
+    "fields": {
+        "date": "2022-11-11",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 151,
+    "fields": {
+        "date": "2022-05-08",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 152,
+    "fields": {
+        "date": "2022-05-07",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 153,
+    "fields": {
+        "date": "2022-05-06",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 154,
+    "fields": {
+        "date": "2021-01-15",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 155,
+    "fields": {
+        "date": "2023-11-25",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 156,
+    "fields": {
+        "date": "2023-12-02",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 157,
+    "fields": {
+        "date": "2023-12-01",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 158,
+    "fields": {
+        "date": "2023-11-30",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 159,
+    "fields": {
+        "date": "2023-11-29",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 160,
+    "fields": {
+        "date": "2023-11-28",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 161,
+    "fields": {
+        "date": "2023-11-27",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 162,
+    "fields": {
+        "date": "2023-11-26",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 163,
+    "fields": {
+        "date": "2023-12-03",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 164,
+    "fields": {
+        "date": "2023-12-05",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 165,
+    "fields": {
+        "date": "2023-12-04",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 166,
+    "fields": {
+        "date": "2020-12-05",
+        "date_status": "Nonworking"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 167,
+    "fields": {
+        "date": "2020-12-04",
+        "date_status": "Working"
+    }
+},
+{
+    "model": "stocks.prodcalendar",
+    "pk": 168,
+    "fields": {
+        "date": "2023-12-10",
+        "date_status": "Nonworking"
+    }
+}
+]

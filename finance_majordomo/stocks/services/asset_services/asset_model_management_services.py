@@ -14,8 +14,8 @@ from finance_majordomo.stocks.services.accrual_services.dividends_parser_service
 
 from finance_majordomo.stocks.models.asset import Asset, Bond, Stock, \
     AssetsHistoricalData
-from finance_majordomo.stocks.services.currency_services.currency_management_services import \
-    get_currency_rate
+from finance_majordomo.stocks.services.currency_services.\
+    currency_management_services import get_currency_rate
 from finance_majordomo.stocks.utils.assets_utils import get_asset_history_data,\
     add_share_history_data_to_model2, add_bond_history_data_to_model2
 

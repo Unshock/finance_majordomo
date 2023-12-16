@@ -47,7 +47,6 @@ class AssetViewServicesTest(BaseTest):
         self.assertIn(self.share_LSRG, assets_of_user)
         self.assertIn(new_asset, assets_of_user)
 
-
     def test_get_assets_of_user_qs_no_assets(self):
         assets_of_user = get_assets_of_user_qs(
             self.user_authenticated_no_assets)
