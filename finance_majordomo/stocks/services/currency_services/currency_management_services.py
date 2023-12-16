@@ -2,6 +2,7 @@ from decimal import Decimal
 
 import xmltodict
 
+from common.utils.datetime_utils import get_today_date
 from finance_majordomo.stocks.models.asset import ProdCalendar
 from finance_majordomo.stocks.models.currency import CurrencyRate
 from datetime import datetime as dt
@@ -15,7 +16,7 @@ def update_currency_rates(date=None):
 
     currency_code = {
         'usd': 'R01235',
-        'euro': 'R01239'
+        'euro': 'R01239'  # с евро пока не работаем
     }
 
     if date:
@@ -56,7 +57,7 @@ def update_usd():
     update_currency_rates(date=last_date_str)
 
 
-def get_currency_rate_(date_dt=None, *, currency=None):
+def get_currency_rate(date_dt=None, *, currency=None):
 
     RANGE = 40  # max non-working range - mb to rework
 
@@ -67,7 +68,7 @@ def get_currency_rate_(date_dt=None, *, currency=None):
         raise ValueError(f'{currency} is not in ("usd", "euro")')
 
     if not date_dt:
-        date_dt = dt.today().date()
+        date_dt = get_today_date()
 
     for gap in range(RANGE):
         delta_date_dt = (date_dt - td(gap))

@@ -23,8 +23,7 @@ FIXTURES_FOLDER = "fixtures"
 
 EXECUTE_PORTFOLIO_ACCRUAL_VIEW_SERVICE_DATETIME = \
     "finance_majordomo.stocks.services.accrual_services." \
-    "dividend_view_services."\
-    "datetime"
+    "dividend_view_services.datetime"
 
 
 class AccrualViewServicesTest(BaseTest):

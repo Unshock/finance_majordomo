@@ -1,6 +1,6 @@
 from decimal import Decimal
 from finance_majordomo.stocks.models.asset import Asset
-from finance_majordomo.stocks.services.currency_services.currency_management_services import get_currency_rate_
+from finance_majordomo.stocks.services.currency_services.currency_management_services import get_currency_rate
 from finance_majordomo.stocks.models.accrual_models import AccrualsOfPortfolio
 from finance_majordomo.stocks.services.transaction_services.\
     transaction_calculation_services import get_asset_quantity_for_portfolio
@@ -45,7 +45,7 @@ def get_accrual_result_of_portfolio(
             portfolio.id, asset_id, date=date)
 
         if currency and currency.lower() == 'usd':
-            currency_rate = get_currency_rate_(
+            currency_rate = get_currency_rate(
                 date_dt=accrual.dividend.date, currency='usd')
             print(currency_rate, type(currency_rate))
         sum_accruals_received += quantity * amount / currency_rate

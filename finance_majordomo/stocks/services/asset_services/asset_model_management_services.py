@@ -1,5 +1,5 @@
 import json
-from decimal import Decimal
+from decimal import Decimal, getcontext
 
 import simplejson
 from service_objects.fields import ModelField
@@ -15,7 +15,7 @@ from finance_majordomo.stocks.services.accrual_services.dividends_parser_service
 from finance_majordomo.stocks.models.asset import Asset, Bond, Stock, \
     AssetsHistoricalData
 from finance_majordomo.stocks.services.currency_services.currency_management_services import \
-    get_currency_rate_
+    get_currency_rate
 from finance_majordomo.stocks.utils.assets_utils import get_asset_history_data,\
     add_share_history_data_to_model2, add_bond_history_data_to_model2
 
@@ -362,9 +362,10 @@ class CreateBondService(Service):
         return bond_obj
 
 
-def get_current_asset_price_per_asset(asset: Asset, currency: str) -> Decimal:
+def get_current_asset_price_per_asset(
+        asset: Asset, currency: str = None) -> Decimal:
 
-    currency_rate = get_currency_rate_(currency=currency)  # last date rate usd - rework
+    currency_rate = get_currency_rate(currency=currency)  # last date rate usd - rework
 
     last_date_price = AssetsHistoricalData.objects.filter(
         asset=asset).order_by('-tradedate')[0].legalcloseprice
@@ -375,4 +376,4 @@ def get_current_asset_price_per_asset(asset: Asset, currency: str) -> Decimal:
         bond = asset.get_related_object()
         current_price = current_price * bond.face_value / 100
 
-    return Decimal(current_price)
+    return Decimal(current_price).quantize(Decimal("0.0001"))

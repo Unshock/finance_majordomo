@@ -1,44 +1,36 @@
-import json
-import os
-from datetime import date, datetime
-from decimal import Decimal, InvalidOperation
-
-import requests_mock
-from django.db.models import Sum
-import django.db.utils
-import simplejson
+from datetime import datetime
+from decimal import Decimal
+from unittest.mock import patch
 from unittest import mock
-from django.core.exceptions import ValidationError
-
-
 from finance_majordomo.stocks.models import Asset
-from finance_majordomo.stocks.models.accrual_models import Dividend, \
-    AccrualsOfPortfolio
 from finance_majordomo.stocks.models.asset import Bond, Stock
-from finance_majordomo.stocks.models.transaction_models import Transaction
-from finance_majordomo.stocks.services.accrual_services.dividend_model_management_services import \
-    execute_toggle_portfolio_accrual_service, \
-    execute_accrual_model_data_filling_service, \
-    execute_update_accruals_of_portfolio
-from finance_majordomo.stocks.services.asset_services.asset_model_management_services import \
-    get_or_create_asset_obj
+from finance_majordomo.stocks.services.asset_services.\
+    asset_model_management_services import \
+    get_or_create_asset_obj, get_current_asset_price_per_asset
 from finance_majordomo.stocks.tests.base_settings import BaseTest
 from finance_majordomo.stocks.tests.test_services.conftest import \
     AssetServicesFixtureSetUp
-from finance_majordomo.users.models import Portfolio
+
 
 FIXTURES_FOLDER = "fixtures"
 
-GET_ASSET_HISTORY_DATA = "finance_majordomo.stocks.services.asset_services." \
+GET_CURRENCY_RATE_DATETIME = \
+    "finance_majordomo.stocks.services.currency_services." \
+    "currency_management_services.get_today_date"
+GET_ASSET_HISTORY_DATA = \
+    "finance_majordomo.stocks.services.asset_services." \
     "asset_model_management_services.get_asset_history_data"
 
-GET_BOND_COUPON_HISTORY = "finance_majordomo.stocks.services.asset_services." \
+GET_BOND_COUPON_HISTORY =\
+    "finance_majordomo.stocks.services.asset_services." \
     "asset_model_management_services.get_bond_coupon_history"
 
-GET_SHARE_DIVIDENDS = "finance_majordomo.stocks.services.asset_services." \
+GET_SHARE_DIVIDENDS =\
+    "finance_majordomo.stocks.services.asset_services." \
     "asset_model_management_services.get_share_dividends"
 
-GET_ASSET_DESCRIPTION = "finance_majordomo.stocks.services.asset_services." \
+GET_ASSET_DESCRIPTION =\
+    "finance_majordomo.stocks.services.asset_services." \
     "asset_model_management_services.get_asset_description"
 
 DESCRIPTION_LQDT = 'get_stock_description_LQDT.json'
@@ -64,7 +56,8 @@ class AssetModelManagementServicesTest(BaseTest, AssetServicesFixtureSetUp):
             self, mocked_get_asset_description, mocked_get_asset_history_data,
             mocked_get_bond_coupon_history, mocked_get_share_dividends
     ):
-        mocked_get_asset_description.return_value = self.description_RU000A0JTW83
+        mocked_get_asset_description.return_value =\
+            self.description_RU000A0JTW83
         mocked_get_asset_history_data.return_value = self.bond_history_data
         mocked_get_bond_coupon_history.return_value = self.bond_accrual_data
         mocked_get_share_dividends.return_value = None
@@ -194,7 +187,9 @@ class AssetModelManagementServicesTest(BaseTest, AssetServicesFixtureSetUp):
         self.assertTrue(isinstance(sub_asset, Stock))
         self.assertEqual(asset.get_related_object().id, asset.id)
 
-        self.assertEqual(asset.latname, 'Public Joint-Stock Company "Zapsibgazprom" otkrytogo akcionernogo obshhestva "Gazprom"')
+        self.assertEqual(asset.latname,
+                         'Public Joint-Stock Company "Zapsibgazprom" otkrytogo '
+                         'akcionernogo obshhestva "Gazprom"')
         self.assertEqual(asset.secid, 'zsgpp')
         self.assertEqual(asset.isin, 'RU0006752862')
         self.assertEqual(asset.name, 'ОАО "Запсибгазпром"')
@@ -265,3 +260,29 @@ class AssetModelManagementServicesTest(BaseTest, AssetServicesFixtureSetUp):
             Decimal('5.16'))
 
         self.assertEqual(len(asset.assetshistoricaldata_set.all()), 6)
+
+    def test_get_current_asset_price_share_rub(self):
+        result = get_current_asset_price_per_asset(self.share_POSI)
+        self.assertEqual(result, Decimal('1715.4'))
+
+    @patch(GET_CURRENCY_RATE_DATETIME)
+    def test_get_current_asset_price_share_usd(self, mocked_datetime):
+        mocked_datetime.return_value = datetime(
+            year=2023, month=5, day=18)
+
+        result = get_current_asset_price_per_asset(
+            self.share_POSI, currency='USD')
+        self.assertEqual(result, Decimal('21.2396'))
+
+    def test_get_current_asset_price_bond_rub(self):
+        result = get_current_asset_price_per_asset(self.bond1)
+        self.assertEqual(result, Decimal('993.47'))
+
+    @patch(GET_CURRENCY_RATE_DATETIME)
+    def test_get_current_asset_price_bond_usd(self, mocked_datetime):
+        mocked_datetime.return_value = datetime(
+            year=2023, month=5, day=20)
+
+        result = get_current_asset_price_per_asset(
+            self.bond1, currency='USD')
+        self.assertEqual(result, Decimal('12.3009'))

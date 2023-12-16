@@ -18,6 +18,7 @@ class BaseTest(TestCase):
         'AssetsHistoricalData.json',
         'assets.json',
         'stocks.json',
+        'bonds.json',
         'transaction.json',
         'asset_of_portfolio.json',
         'portfolio.json',
