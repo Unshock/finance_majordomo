@@ -19,9 +19,6 @@ from finance_majordomo.stocks.services.transaction_services.transaction_validati
 from finance_majordomo.stocks.services.accrual_services.dividend_model_management_services import \
     UpdateAccrualsOfPortfolio, execute_update_accruals_of_portfolio
 
-from finance_majordomo.stocks.services.asset_services.user_assets_services import get_current_portfolio
-from finance_majordomo.stocks.utils.assets_utils import get_asset_history_data
-
 
 class TransactionList(LoginRequiredMixin, ListView):
     login_url = 'login'

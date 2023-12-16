@@ -16,7 +16,7 @@ from finance_majordomo.stocks.services.asset_services.asset_model_management_ser
     create_asset_obj_from_description
 from finance_majordomo.stocks.services.asset_services.asset_view_services import \
     PortfolioAssetsViewContextService, execute_portfolio_asset_view_context_service
-from finance_majordomo.stocks.services.asset_services.user_assets_services import get_current_portfolio
+
 
 
 class Stocks(LoginRequiredMixin, ListView):
@@ -53,7 +53,7 @@ class PortfolioAssets(LoginRequiredMixin, ListView):
         context['page_title'] = self.request.user.username + " " + _(
             "stock list")
         context['fields_to_display'] = self.request.user.usersettings
-        context['current_portfolio'] = get_current_portfolio(self.request.user)
+        context['current_portfolio'] = self.request.user.get_current_portfolio()
         context['asset_list'] = asset_list
         context['total_results'] = total_results
 

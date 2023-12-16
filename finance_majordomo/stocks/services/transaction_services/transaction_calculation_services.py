@@ -5,7 +5,7 @@ from typing import List
 
 from django.db.models import QuerySet, Sum
 
-from finance_majordomo.stocks.utils.currencies_utils import get_usd_rate
+from finance_majordomo.stocks.services.currency_services.currency_management_services import get_usd_rate
 from finance_majordomo.stocks.models.transaction_models import Transaction
 
 

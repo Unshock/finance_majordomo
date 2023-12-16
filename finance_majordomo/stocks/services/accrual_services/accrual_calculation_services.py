@@ -1,6 +1,6 @@
 from decimal import Decimal
 from finance_majordomo.stocks.models.asset import Asset
-from finance_majordomo.stocks.utils.currencies_utils import get_usd_rate
+from finance_majordomo.stocks.services.currency_services.currency_management_services import get_usd_rate
 from finance_majordomo.stocks.models.accrual_models import AccrualsOfPortfolio
 from finance_majordomo.stocks.services.transaction_services.\
     transaction_calculation_services import get_asset_quantity_for_portfolio

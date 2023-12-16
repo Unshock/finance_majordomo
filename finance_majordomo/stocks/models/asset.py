@@ -11,7 +11,6 @@ from common.utils.stocks import get_date_status
 from finance_majordomo.users.models import User, Portfolio
 
 
-
 class Asset(models.Model):
     asset_types = [
         ('stocks', 'stocks'),

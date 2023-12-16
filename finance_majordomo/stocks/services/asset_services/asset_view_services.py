@@ -5,12 +5,12 @@ from service_objects.fields import ModelField
 from service_objects.services import Service
 
 from common.utils.values_formatters import set_money_fmt, set_percentage_fmt
-from finance_majordomo.stocks.utils.currencies_utils import \
+from finance_majordomo.stocks.services.currency_services.currency_management_services import\
     update_currency_rates, update_usd
 from finance_majordomo.stocks.services.accrual_services.accrual_calculation_services import \
     get_accrual_result_of_portfolio
 from finance_majordomo.stocks.models.asset import Asset
-from finance_majordomo.stocks.services.asset_services.asset_services import \
+from finance_majordomo.stocks.services.asset_services.asset_model_management_services import \
     get_current_asset_price_per_asset
 from finance_majordomo.stocks.utils.assets_utils import update_historical_data
 from finance_majordomo.stocks.services.transaction_services.transaction_calculation_services import \
