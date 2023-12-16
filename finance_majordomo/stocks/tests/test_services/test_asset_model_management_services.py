@@ -17,6 +17,7 @@ FIXTURES_FOLDER = "fixtures"
 GET_CURRENCY_RATE_DATETIME = \
     "finance_majordomo.stocks.services.currency_services." \
     "currency_management_services.get_today_date"
+
 GET_ASSET_HISTORY_DATA = \
     "finance_majordomo.stocks.services.asset_services." \
     "asset_model_management_services.get_asset_history_data"

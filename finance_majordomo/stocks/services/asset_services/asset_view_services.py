@@ -5,18 +5,24 @@ from service_objects.fields import ModelField
 from service_objects.services import Service
 
 from common.utils.values_formatters import set_money_fmt, set_percentage_fmt
-from finance_majordomo.stocks.services.currency_services.currency_management_services import\
-    update_currency_rates, update_usd
-from finance_majordomo.stocks.services.accrual_services.accrual_calculation_services import \
-    get_accrual_result_of_portfolio
+from finance_majordomo.stocks.services.currency_services.\
+    currency_management_services import update_currency_rates, update_usd
+from finance_majordomo.stocks.services.accrual_services.\
+    accrual_calculation_services import get_accrual_result_of_portfolio
 from finance_majordomo.stocks.models.asset import Asset
-from finance_majordomo.stocks.services.asset_services.asset_model_management_services import \
-    get_current_asset_price_per_asset
+from finance_majordomo.stocks.services.asset_services.\
+    asset_model_management_services import get_current_asset_price_per_asset
 from finance_majordomo.stocks.utils.assets_utils import update_historical_data
-from finance_majordomo.stocks.services.transaction_services.transaction_calculation_services import \
-    get_asset_quantity_for_portfolio, get_average_purchase_price, \
-    get_purchase_price
+from finance_majordomo.stocks.services.transaction_services.\
+    transaction_calculation_services import get_asset_quantity_for_portfolio, \
+    get_average_purchase_price, get_purchase_price
 from finance_majordomo.users.models import User, Portfolio
+
+
+def get_assets_of_user_qs(user: User) -> QuerySet:
+    return GetAssetsOfUser.execute({
+        'user': user
+    })
 
 
 class GetAssetsOfUser(Service):
@@ -66,7 +72,7 @@ class PortfolioAssetItem:
                 currency='usd')
             self.current_price_per_asset_usd = \
                 self._get_current_price_per_asset(currency='usd')
-            self.current_price_usd = self._get_current_price_total()
+            self.current_price_usd = self._get_current_price_total_usd()
             self.accruals_received_usd = self._get_accrual_received(
                 currency='usd')
 
@@ -126,7 +132,7 @@ class PortfolioAssetItem:
     def _get_accrual_received(self, currency=None, formatter=None):
         accrual_received = get_accrual_result_of_portfolio(
             self.portfolio, asset=self.asset, currency=currency)
-        print('accral_rec', accrual_received)
+        #print('accral_rec', accrual_received)
         return formatter(accrual_received) if formatter else accrual_received
 
     def format_all_fields(self):
@@ -153,8 +159,8 @@ class PortfolioAssetItem:
 
 
 class AssetResult:
-    def __init__(
-            self, initial_price, final_price, accruals_received=Decimal('0')):
+    def __init__(self, initial_price, final_price,
+                 accruals_received=Decimal('0')):
         if self._validate_price(initial_price) \
                 and self._validate_price(final_price) \
                 and self._validate_price(accruals_received):
