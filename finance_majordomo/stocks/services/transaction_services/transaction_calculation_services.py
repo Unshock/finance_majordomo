@@ -13,7 +13,13 @@ from finance_majordomo.stocks.models.transaction_models import Transaction
 def get_asset_quantity_for_portfolio(portfolio_id: int,
                                      asset_id: int,
                                      date: datetime.date = None) -> Decimal:
-
+    """
+    :param portfolio_id: Portfolio model object id
+    :param asset_id: Asset model object id
+    :param date: datetime.date object. If set result is counted on the set date
+    :return: specified asset quantity for the date if date set or for today if
+        date is not set.
+    """
     users_specific_asset_transactions = Transaction.objects.filter(
         portfolio=portfolio_id, asset=asset_id).order_by('date')
 
@@ -116,6 +122,14 @@ def _get_purchase_price(purchase_list: List[TransactionItem],
 def get_purchase_price(portfolio_id: int, asset_id: int,
                        currency: str = None,
                        date: datetime.date = None) -> Decimal:
+    """
+    :param portfolio_id: Portfolio model object id
+    :param asset_id: Asset model object id
+    :param currency: can be 'usd'
+    :param date: datetime.date object. If set result is counted on the set date
+    :return: get *total* purchase price for the specified asset for the specified
+        date if date is set or for today in the specified currency
+    """
     portfolio_asset_transactions = Transaction.objects.filter(
         portfolio=portfolio_id,
         asset=asset_id).order_by('date')
@@ -134,7 +148,14 @@ def get_purchase_price(portfolio_id: int, asset_id: int,
 def get_average_purchase_price(portfolio_id: int, asset_id: int,
                                currency: str = None,
                                date: datetime.date = None) -> Decimal:
-
+    """
+    :param portfolio_id: Portfolio model object id
+    :param asset_id: Asset model object id
+    :param currency: can be 'usd'
+    :param date: datetime.date object. If set result is counted on the set date
+    :return: get *average* purchase price for the specified asset for the
+        specified date if date is set or for today in the specified currency
+    """
     total_purchase_price = get_purchase_price(
         portfolio_id, asset_id, currency, date)
 

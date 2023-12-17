@@ -5,14 +5,13 @@ from service_objects.fields import ModelField
 from service_objects.services import Service
 from django import forms
 
-from finance_majordomo.stocks.services.\
-    accrual_services.dividend_model_management_services import\
+from finance_majordomo.stocks.services. \
+    accrual_services.dividend_model_management_services import \
     execute_update_accruals_of_portfolio
 from finance_majordomo.stocks.models.asset import Asset
 from finance_majordomo.stocks.models.transaction_models import Transaction
 
 from finance_majordomo.users.models import User
-
 
 
 def execute_create_transaction_service(
@@ -25,8 +24,19 @@ def execute_create_transaction_service(
         accrued_interest: Decimal = None,
         user: User = None
 ):
+    """
+    :param transaction_type: type of transacton - BUY of SELL
+    :param date: transaction date in datetime.date format
+    :param price: transaction price
+    :param fee: transaction fee
+    :param quantity: quantity of transaction
+    :param asset: asset of transaction
+    :param accrued_interest: accrual interest if asset.group is bond
+    :param user: User model instance
 
-    CreateTransactionService.execute({
+    :return: new Transaction model object.
+    """
+    return CreateTransactionService.execute({
         'transaction_type': transaction_type,
         'date': date,
         'price': price,
@@ -34,7 +44,6 @@ def execute_create_transaction_service(
         'quantity': quantity,
         'asset': asset,
         'accrued_interest': accrued_interest,
-
         'user': user
     })
 
@@ -81,8 +90,6 @@ class CreateTransactionService(Service):
             quantity=quantity
         )
 
-        print(transaction_obj)
-
         # Если в ходе поиска добавляем первую транзакцию для актива, 
         # то добавляем актив в AssetsOfUser
         if asset not in user.assetsofuser_set.all():
@@ -94,7 +101,6 @@ class CreateTransactionService(Service):
             current_portfolio.save()
 
         if asset.group in ['stock_shares', 'stock_bonds']:
-
             execute_update_accruals_of_portfolio(
                 portfolio=current_portfolio,
                 transaction=transaction_obj,
@@ -106,4 +112,4 @@ class CreateTransactionService(Service):
     def post_process(self):
         # Send verification email (check out django-herald)
         print("POSTPROCESS")
-        #VerifyEmailNotification(self.booking).send()
+        # VerifyEmailNotification(self.booking).send()
