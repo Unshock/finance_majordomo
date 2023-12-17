@@ -1,6 +1,6 @@
 import datetime
 from decimal import Decimal
-from unittest.mock import patch, Mock
+from unittest.mock import patch, Mock, MagicMock
 from django import forms
 
 from django.urls import reverse, resolve
@@ -200,6 +200,26 @@ class TestTransactionsViews(BaseTest):
 
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
         self.assertRedirects(response, self.list_all_transactions)
+
+    def test_add_transaction_authenticated_POST_no_accrued_interest_for_bond(
+            self):
+
+        form_service_mocked = MagicMock(return_value=self.form_no_accrual_int)
+
+        with patch(EXECUTE_TRANSACTION_FORM_SERVICE, form_service_mocked):
+
+            response = self.client_authenticated.post(
+                self.add_transaction)
+
+            self.assertIn(
+                b'Accrued Interest is required for the bond group asset',
+                response.content)
+            self.assertEqual(response.status_code, HTTPStatus.OK)
+            self.assertTemplateUsed(response, 'base_create_and_update.html')
+            self.assertEqual(
+                response.context.get('page_title'), _("Add new transaction"))
+            self.assertEqual(
+                response.context.get('button_text'), _("Add"))
 
     def test_add_transaction_unauthenticated_POST(self):
 

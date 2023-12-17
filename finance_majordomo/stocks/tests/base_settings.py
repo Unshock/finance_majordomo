@@ -1,7 +1,9 @@
+from datetime import datetime
 from decimal import Decimal
 
 from django.test import TestCase, Client
 
+from finance_majordomo.stocks.forms.transaction_forms import TransactionForm
 from finance_majordomo.stocks.models import Asset
 from finance_majordomo.stocks.models.accrual_models import Dividend, \
     AccrualsOfPortfolio
@@ -64,4 +66,16 @@ class BaseTest(TestCase):
         cls.transaction2 = Transaction.objects.get(id=2)
         cls.transaction3 = Transaction.objects.get(id=3)
 
+        cls.form_no_accrual_int = TransactionForm({
+            'transaction_type': 'BUY',
+            'date': datetime(year=2022, month=4, day=4),
+            'price': Decimal('10'),
+            'fee': Decimal('10'),
+            'quantity': Decimal('10'),
+            'asset': cls.bond1.id,
+        },
+            user=cls.user_authenticated,
+            accrued_interest_err_message=
+            'Accrued Interest is required for the bond group asset'
+        )
 

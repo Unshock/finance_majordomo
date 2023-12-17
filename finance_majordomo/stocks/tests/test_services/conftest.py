@@ -12,6 +12,7 @@ from unittest import mock
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
+from finance_majordomo.stocks.forms.transaction_forms import TransactionForm
 from finance_majordomo.stocks.models.accrual_models import Dividend, \
     AccrualsOfPortfolio
 from finance_majordomo.stocks.models.transaction_models import Transaction
@@ -140,5 +141,3 @@ class ExtraTransactionsSetUp(TestCase):
             quantity=Decimal('1'),
             date=datetime(year=2023, month=4, day=25)
         )
-
-

@@ -3,12 +3,14 @@ import json
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
+from django.forms import BaseForm
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import ListView, CreateView, DeleteView
 
 from django.utils.translation import gettext_lazy as _
 
+from finance_majordomo.stocks.forms.transaction_forms import TransactionForm
 from finance_majordomo.stocks.models.transaction_models import Transaction
 from finance_majordomo.stocks.services.transaction_services.\
     transaction_form_creation_service import \
@@ -77,7 +79,7 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         return context
 
     def get(self, request, *args, **kwargs):
-        print('get')
+        #print('get')
         try:
 
             form = execute_transaction_form_service(
@@ -114,8 +116,11 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
             accrued_interest_err_message=self.accrued_interest_err_message,
             request=request
         )
-
+        #print(form, 111)
+        #print(dir(form))
+        #print(form.is_valid())
         if form.is_valid():
+            #print(form.errors, 223332)
             try:
                 execute_create_transaction_service(
                     transaction_type=form.cleaned_data.get('transaction_type'),
@@ -132,12 +137,14 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
                 return redirect(self.success_url)
 
             except Exception as e:
-                print(e)
+                #print(e)
                 messages.error(self.request, e)
                 return redirect('stocks:transactions')
-
+        #print(form.errors, 222)
+        #print(f"ERROENS{form.errors}111")
         if form.errors.get('__all__') and self.accrued_interest_err_message \
                 in form.errors.get('__all__'):
+
             form.add_accrued_interest_field()
 
         return render(
