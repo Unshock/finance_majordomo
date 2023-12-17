@@ -7,18 +7,6 @@ from finance_majordomo.stocks.models.asset import AssetsHistoricalData, Asset, \
     ProdCalendar
 
 
-def get_asset_board(asset_type):
-    boards_dict = {
-        'ofz_bond': 'TQOB',
-        'corporate_bond': 'TQCB',
-        'exchange_bond': 'TQCB',
-        'preferred_share': 'TQBR',
-        'common_share': 'TQBR',
-    }
-
-    return boards_dict.get(asset_type)
-
-
 def get_asset_market(asset_group):
     boards_dict = {
         'stock_shares': 'shares',
@@ -257,7 +245,7 @@ def update_today_data(asset_obj: Asset) -> object:
 
     group = asset_obj.group
 
-    board = get_asset_board(asset_obj.type)
+    board = asset_obj.primary_boardid
 
     print(group, 'group', 'board', board, asset_obj.group, asset_obj.type)
     last_price_data = get_current(share_obj.secid, board, group)
