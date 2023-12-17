@@ -6,128 +6,43 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from finance_majordomo.stocks.models.accrual_models import Dividend, \
     AccrualsOfPortfolio
+from finance_majordomo.stocks.services.accrual_services.accrual_calculation_services import \
+    get_accrual_result_of_portfolio
 from finance_majordomo.stocks.tests.base_settings import BaseTest
 from finance_majordomo.users.models import Portfolio
 
 
-class AccrualCalcServicesTest(BaseTest):
+class AccrualCalculationServicesTest(BaseTest):
 
-    def test_models_params(self):
+    def test_get_accrual_result_of_portfolio(self):
+        portfolio = self.user_authenticated.current_portfolio
+        result = get_accrual_result_of_portfolio(portfolio)
+        self.assertEqual(result, self.accrual2.amount * Decimal('0.87'))
 
-        accrual_1 = Dividend.objects.get(id=1)
+    def test_get_accrual_result_of_portfolio_no_tax(self):
+        portfolio = self.user_authenticated.current_portfolio
+        result = get_accrual_result_of_portfolio(
+            portfolio, taxes_excluded=False)
+        self.assertEqual(result, self.accrual2.amount)
 
-        self.assertEqual(accrual_1.asset.id, 30)
-        self.assertEqual(
-            accrual_1.date, date(2023, 4, 16)
+    def test_get_accrual_result_of_portfolio_asset_specified(self):
+        portfolio = self.user_authenticated.current_portfolio
+        result = get_accrual_result_of_portfolio(
+            portfolio, asset=self.share_POSI
         )
-        self.assertEqual(accrual_1.amount, Decimal("37.87"))
-        self.assertEqual(Dividend.objects.count(), 3)
-        self.assertEqual(
-            accrual_1._meta.get_field('date').verbose_name,
-            _("Dividend date"))
-        self.assertEqual(
-            accrual_1._meta.get_field('amount').verbose_name,
-            _("Dividend amount for one share"))
-        self.assertEqual(
-            accrual_1._meta.get_field('creation_date').verbose_name,
-            _("Creation date"))
+        self.assertEqual(result, Decimal('0') * Decimal('0.87'))
 
-    def test_amount_validation_fail_1(self):
-        amount_invalid = "not decimal"
-        with self.assertRaises(ValidationError):
-            try:
-                Dividend.objects.create(
-                    amount=amount_invalid,
-                    date='2020-03-02',
-                    asset_id=30
-                )
-            except Exception as e:
-                #print(e)
-                raise e
+    def test_get_accrual_result_of_portfolio_asset_specified_usd(self):
+        # uses get_currency_rate()
 
-    def test_amount_validation_fail_2(self):
-        amount_invalid = '100,10'
+        portfolio = self.user_authenticated.current_portfolio
+        result = get_accrual_result_of_portfolio(
+            portfolio, asset=self.bond1, currency='usd'
+        )
 
-        with self.assertRaises(ValidationError):
-            try:
-                Dividend.objects.create(
-                    amount=amount_invalid,
-                    date='2020-03-02',
-                    asset_id=30
-                )
-            except Exception as e:
-                #print(e)
-                raise e
-
-    # why InvalidOperation not ValidationError?
-    def test_amount_validation_fail_3(self):
-        amount_invalid = 100500600
-
-        with self.assertRaises(InvalidOperation):
-            Dividend.objects.create(
-                amount=amount_invalid,
-                date='2020-03-02',
-                asset_id=30
-            )
-
-
-    def test_date_validation_fail_1(self):
-        date_invalid = '100,10'
-
-        with self.assertRaises(ValidationError):
-            Dividend.objects.create(
-                amount=1,
-                date=date_invalid,
-                asset_id=30
-            )
-
-
-    def test_date_validation_fail_2(self):
-        date_invalid = '10-10-2020'
-
-        with self.assertRaises(ValidationError):
-            Dividend.objects.create(
-                amount=1,
-                date=date_invalid,
-                asset_id=30
-            )
-
-
-class AccrualsOfPortfolioModelsTest(BaseTest):
-
-    def test_models_params(self):
-
-        accrual_of_portfolio = AccrualsOfPortfolio.objects.get(id=1)
+        accrual_price = self.accrual2.amount
+        usd_rate = self.usd_rate4.price_usd
 
         self.assertEqual(
-            accrual_of_portfolio.portfolio.user.username, "user1")
-        self.assertEqual(
-            accrual_of_portfolio.dividend.date, date(2023, 4, 16))
-        self.assertEqual(
-            accrual_of_portfolio.is_received, False)
-        self.assertEqual(
-            accrual_of_portfolio._meta.get_field(
-                'is_received').verbose_name, _("Dividend status"))
-        self.assertEqual(AccrualsOfPortfolio.objects.count(), 3)
-
-    def test_is_received_validation_fail_1(self):
-        is_received_invalid = 'false'
-        with self.assertRaises(ValidationError):
-            AccrualsOfPortfolio.objects.create(
-                portfolio=Portfolio.objects.get(id=3),
-                dividend=Dividend.objects.get(id=3),
-                is_received=is_received_invalid
-            )
-
-    def test_unique_together(self):
-
-        with self.assertRaises(django.db.utils.IntegrityError):
-            AccrualsOfPortfolio.objects.create(
-                portfolio=Portfolio.objects.get(id=3),
-                dividend=Dividend.objects.get(id=3)
-            )
-
-            AccrualsOfPortfolio.objects.create(
-                portfolio=Portfolio.objects.get(id=3),
-                dividend=Dividend.objects.get(id=3)
-            )
+            result, accrual_price * Decimal('0.87') / usd_rate
+        )

@@ -18,6 +18,7 @@ from finance_majordomo.users.models import Portfolio
 
 FIXTURES_FOLDER = "fixtures"
 
+
 class AccrualModelManagementServicesTest(BaseTest):
 
     def test_execute_toggle_portfolio_accrual_service(self):
