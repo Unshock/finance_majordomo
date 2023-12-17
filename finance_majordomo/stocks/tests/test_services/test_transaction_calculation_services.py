@@ -20,7 +20,7 @@ class TestTransactionCalculationServices(BaseTest, ExtraTransactionsSetUp):
             asset_id=asset.id
         )
 
-        self.assertEqual(quantity, 4)
+        self.assertEqual(quantity, 1)
 
     def test_get_asset_quantity_for_portfolio_with_date(self):
         portfolio = self.user_authenticated.current_portfolio
@@ -43,7 +43,7 @@ class TestTransactionCalculationServices(BaseTest, ExtraTransactionsSetUp):
             asset_id=asset.id
         )
 
-        self.assertEqual(purchase_price, Decimal('6000'))
+        self.assertEqual(purchase_price, Decimal('2000'))
 
     def test_get_purchase_price_with_date_no_curr(self):
         portfolio = self.user_authenticated.current_portfolio
@@ -79,7 +79,7 @@ class TestTransactionCalculationServices(BaseTest, ExtraTransactionsSetUp):
             asset_id=asset.id
         )
 
-        self.assertEqual(purchase_price, Decimal('1500'))
+        self.assertEqual(purchase_price, Decimal('2000'))
 
     def test_get_average_purchase_price_with_date_no_curr(self):
         portfolio = self.user_authenticated.current_portfolio

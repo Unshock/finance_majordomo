@@ -122,6 +122,16 @@ class ExtraTransactionsSetUp(TestCase):
         )
 
         self.transaction_extra_3 = Transaction.objects.create(
+            asset_id=30,
+            transaction_type='SELL',
+            portfolio_id=2,
+            price=Decimal('5000.00'),
+            accrued_interest=None,
+            quantity=Decimal('3'),
+            date=datetime(year=2023, month=4, day=24)
+        )
+
+        self.transaction_extra_4 = Transaction.objects.create(
             asset_id=31,
             transaction_type='SELL',
             portfolio_id=2,
@@ -131,7 +141,4 @@ class ExtraTransactionsSetUp(TestCase):
             date=datetime(year=2023, month=4, day=25)
         )
 
-        self.transaction_extra_1.save()
-        self.transaction_extra_2.save()
-        self.transaction_extra_3.save()
 
