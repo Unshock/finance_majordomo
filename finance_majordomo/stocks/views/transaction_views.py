@@ -10,14 +10,18 @@ from django.views.generic import ListView, CreateView, DeleteView
 from django.utils.translation import gettext_lazy as _
 
 from finance_majordomo.stocks.models.transaction_models import Transaction
-from finance_majordomo.stocks.services.transaction_services.transaction_form_creation_service import \
+from finance_majordomo.stocks.services.transaction_services.\
+    transaction_form_creation_service import \
     execute_transaction_form_service
-from finance_majordomo.stocks.services.transaction_services.transaction_model_management_services import \
-    CreateTransactionService, execute_create_transaction_service
-from finance_majordomo.stocks.services.transaction_services.transaction_validation_services import validate_transaction, \
+from finance_majordomo.stocks.services.transaction_services.\
+    transaction_model_management_services import \
+    execute_create_transaction_service
+from finance_majordomo.stocks.services.transaction_services.\
+    transaction_validation_services import validate_transaction, \
     TransactionValidator
-from finance_majordomo.stocks.services.accrual_services.dividend_model_management_services import \
-    UpdateAccrualsOfPortfolio, execute_update_accruals_of_portfolio
+from finance_majordomo.stocks.services.accrual_services.\
+    dividend_model_management_services import \
+    execute_update_accruals_of_portfolio
 
 
 class TransactionList(LoginRequiredMixin, ListView):
@@ -73,8 +77,9 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         return context
 
     def get(self, request, *args, **kwargs):
-
+        print('get')
         try:
+
             form = execute_transaction_form_service(
                 asset_id=request.GET.get('asset_id'),
                 asset_secid=request.GET.get('asset_secid'),
@@ -111,9 +116,7 @@ class AddTransaction(LoginRequiredMixin, SuccessMessageMixin, CreateView):
         )
 
         if form.is_valid():
-
             try:
-
                 execute_create_transaction_service(
                     transaction_type=form.cleaned_data.get('transaction_type'),
                     date=form.cleaned_data.get('date'),

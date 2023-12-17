@@ -34,7 +34,6 @@ class TestTransactionModelManagementServices(BaseTest):
             transaction_type='BUY',
             date=datetime(year=2023, day=4, month=4),
             price=Decimal('1000'),
-            fee=Decimal('1001'),
             quantity=Decimal('1002'),
             asset=self.bond1,
             user=self.user_authenticated
@@ -48,7 +47,8 @@ class TestTransactionModelManagementServices(BaseTest):
         self.assertEqual(new_transaction.date, datetime(
             year=2023, day=4, month=4).date())
         self.assertEqual(new_transaction.price, Decimal('1000'))
-        self.assertEqual(new_transaction.fee, Decimal('1001'))
+        self.assertEqual(new_transaction.fee, Decimal('0'))
+        self.assertEqual(new_transaction.accrued_interest, Decimal('0'))
         self.assertEqual(new_transaction.quantity, Decimal('1002'))
         self.assertEqual(new_transaction.asset, self.bond1)
 

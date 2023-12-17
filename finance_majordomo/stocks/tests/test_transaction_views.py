@@ -1,6 +1,6 @@
 import datetime
 from decimal import Decimal
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 from django import forms
 
 from django.urls import reverse, resolve
@@ -187,40 +187,19 @@ class TestTransactionsViews(BaseTest):
             response.context.get('button_text'), _("Add"))
         self.assertTemplateUsed(response, 'base_create_and_update.html')
 
-    @patch(EXECUTE_CREATE_TRANSACTION_SERVICE,
-           lambda **kwargs: None)
-    @patch(EXECUTE_TRANSACTION_FORM_SERVICE,
-           lambda **kwargs: TransactionForm(data={'price': Decimal('1')}))  # valid Form
-    def test_add_transaction_authenticated_POST(self):
+    @patch(EXECUTE_CREATE_TRANSACTION_SERVICE)
+    @patch(EXECUTE_TRANSACTION_FORM_SERVICE)
+    def test_add_transaction_authenticated_POST(
+            self, form_service_mocked, create_service_mocked):
+
+        form_service_mocked.is_valid.return_value = True
+        create_service_mocked.return_value = None
 
         response = self.client_authenticated.post(
             self.add_transaction)
 
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
         self.assertRedirects(response, self.list_all_transactions)
-
-    @patch(EXECUTE_CREATE_TRANSACTION_SERVICE, lambda **kwargs: None)
-    @patch(EXECUTE_TRANSACTION_FORM_SERVICE,
-           lambda **kwargs: forms.Form(data={}))  # valid Form
-    def test_add_transaction_authenticated_POST(self):
-
-        response = self.client_authenticated.post(
-            self.add_transaction)
-
-        self.assertEqual(response.status_code, HTTPStatus.FOUND)
-        self.assertRedirects(response, self.list_all_transactions)
-        self.assertTemplateUsed(response, 'transactions/transaction_list.html')
-
-    @patch(EXECUTE_CREATE_TRANSACTION_SERVICE, lambda **kwargs: None)
-    @patch(EXECUTE_TRANSACTION_FORM_SERVICE,
-           lambda **kwargs: TransactionForm())  # invalid Form
-    def test_add_transaction_authenticated_POST(self):
-
-        response = self.client_authenticated.post(
-            self.add_transaction)
-
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertTemplateUsed(response, 'base_create_and_update.html')
 
     def test_add_transaction_unauthenticated_POST(self):
 

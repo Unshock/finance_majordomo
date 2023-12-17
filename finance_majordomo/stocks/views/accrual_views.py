@@ -5,8 +5,9 @@ from django.views import View
 from django.views.generic import ListView
 
 from finance_majordomo.stocks.models.accrual_models import Dividend
-from finance_majordomo.stocks.services.accrual_services.dividend_model_management_services import \
-    execute_toggle_portfolio_accrual_service 
+from finance_majordomo.stocks.services.accrual_services.\
+    dividend_model_management_services import \
+    execute_toggle_portfolio_accrual_service
 from finance_majordomo.stocks.services.accrual_services.dividend_view_services import \
     execute_portfolio_accrual_view_context_service
 from django.utils.translation import gettext_lazy as _
@@ -24,9 +25,10 @@ class Dividends(LoginRequiredMixin, ListView):
         context['page_title'] = _("Dividend list")
 
         portfolio = self.request.user.current_portfolio
-
+        print(execute_toggle_portfolio_accrual_service, '111')
         accruals_data = \
             execute_portfolio_accrual_view_context_service(portfolio, 90)
+        print(accruals_data)
 
         context['accrual_list'] = accruals_data.get('accrual_list')
         context['total_results'] = accruals_data.get('total_results')

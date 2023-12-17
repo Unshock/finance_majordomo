@@ -156,7 +156,6 @@ def execute_update_accruals_of_portfolio(
         becomes negative; otherwise, if the transaction adds an asset,
         the portfolio dividend appears but its status remains negative
     """
-
     action_type_list = ['add_transaction',
                         'del_transaction',
                         'update_transaction'

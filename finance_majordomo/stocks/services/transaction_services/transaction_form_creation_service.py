@@ -34,7 +34,7 @@ def execute_transaction_form_service(
     },
         request=request
     )
-
+    print(type(form))
     return form
 
 
