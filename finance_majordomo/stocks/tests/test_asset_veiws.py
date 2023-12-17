@@ -7,6 +7,11 @@ from ..models.asset import Asset
 from ...users.models import Portfolio, User
 
 
+EXECUTE_PORTFOLIO_ASSET_VIEW_CONTEXT_SERVICE = \
+    "finance_majordomo.stocks.views.asset_views." \
+    "execute_portfolio_asset_view_context_service"
+
+
 class TestStocksViews(BaseTest):
 
     def setUp(self):
@@ -50,8 +55,7 @@ class TestStocksViews(BaseTest):
 
         self.assertTemplateUsed(response, 'stocks/user_stock_list.html')
 
-    @patch("finance_majordomo.stocks.views.asset_views."
-           "execute_portfolio_asset_view_context_service",
+    @patch(EXECUTE_PORTFOLIO_ASSET_VIEW_CONTEXT_SERVICE,
            lambda *args: {'total_results': {'total': '10'},
                           'asset_list': ['AssetObj']})
     def test_portfolio_assets_list_GET(self):

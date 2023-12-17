@@ -43,9 +43,11 @@ class TogglePortfolioDividendService(Service):
             accrual_of_portfolio.is_received = False
             accrual_of_portfolio.save()
 
+
         else:
             accrual_of_portfolio.is_received = True
             accrual_of_portfolio.save()
+
 
 
 def execute_accrual_model_data_filling_service(

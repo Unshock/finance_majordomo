@@ -19,6 +19,7 @@ class Dividends(LoginRequiredMixin, ListView):
     context_object_name = 'dividend'
 
     def get_context_data(self, *, object_list=None, **kwargs):
+
         context = super().get_context_data(**kwargs)
         context['page_title'] = _("Dividend list")
 
@@ -29,7 +30,7 @@ class Dividends(LoginRequiredMixin, ListView):
 
         context['accrual_list'] = accruals_data.get('accrual_list')
         context['total_results'] = accruals_data.get('total_results')
-        print(context)
+
         return context
 
 
@@ -50,6 +51,6 @@ class TogglePortfolioDiv(SuccessMessageMixin, LoginRequiredMixin, View):
             execute_toggle_portfolio_accrual_service(accrual, portfolio)
 
         except Exception as e:
-            print(e)
+            print(e, ' in ', execute_toggle_portfolio_accrual_service)
 
         return redirect('stocks:dividends')
