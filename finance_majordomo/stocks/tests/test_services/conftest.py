@@ -97,3 +97,41 @@ class AssetServicesFixtureSetUp(TestCase):
                 os.path.dirname(__file__), FIXTURES_FOLDER, BOND_HISTORY_DATA),
                 'r')
         )
+
+
+class ExtraTransactionsSetUp(TestCase):
+    def setUp(self):
+        self.transaction_extra_1 = Transaction.objects.create(
+            asset_id=30,
+            transaction_type='SELL',
+            portfolio_id=2,
+            price=Decimal('900.00'),
+            accrued_interest=None,
+            quantity=Decimal('3'),
+            date=datetime(year=2023, month=4, day=20)
+        )
+
+        self.transaction_extra_2 = Transaction.objects.create(
+            asset_id=30,
+            transaction_type='BUY',
+            portfolio_id=2,
+            price=Decimal('2000.00'),
+            accrued_interest=None,
+            quantity=Decimal('2'),
+            date=datetime(year=2023, month=4, day=23)
+        )
+
+        self.transaction_extra_3 = Transaction.objects.create(
+            asset_id=31,
+            transaction_type='SELL',
+            portfolio_id=2,
+            price=Decimal('2000.00'),
+            accrued_interest=None,
+            quantity=Decimal('1'),
+            date=datetime(year=2023, month=4, day=25)
+        )
+
+        self.transaction_extra_1.save()
+        self.transaction_extra_2.save()
+        self.transaction_extra_3.save()
+

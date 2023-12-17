@@ -90,6 +90,7 @@ def _get_purchase_price(purchase_list: List[TransactionItem],
     currency_rate = Decimal('1')
 
     for elem in purchase_list:
+
         if elem.quantity >= total_sold:
             elem.quantity -= total_sold
             total_sold = 0
@@ -108,7 +109,7 @@ def _get_purchase_price(purchase_list: List[TransactionItem],
         if total_sold < 0:
             raise Exception('тотал меньше 0')
 
-    return Decimal(purchase_price)
+    return Decimal(purchase_price).quantize(Decimal("0.0001"))
 
 
 def get_purchase_price(portfolio_id: int, asset_id: int,
@@ -138,4 +139,6 @@ def get_average_purchase_price(portfolio_id: int, asset_id: int,
 
     quantity = get_asset_quantity_for_portfolio(portfolio_id, asset_id, date)
 
-    return total_purchase_price / quantity
+    result = total_purchase_price / quantity
+
+    return Decimal(result).quantize(Decimal("0.0001"))
