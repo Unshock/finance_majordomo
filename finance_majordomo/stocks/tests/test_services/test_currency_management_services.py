@@ -1,19 +1,13 @@
 from datetime import date as d
 import os
 from decimal import Decimal
-
 import requests_mock
-from unittest.mock import patch
 from unittest import mock
-import simplejson
-
 from finance_majordomo.stocks.models.currency import CurrencyRate
-from finance_majordomo.stocks.services.accrual_services\
-    .dividends_parser_services import get_share_dividends
-from finance_majordomo.stocks.services.currency_services.currency_management_services import \
-    update_currency_rates
+from finance_majordomo.stocks.services.currency_services.\
+    currency_management_services import update_currency_rates
 from finance_majordomo.stocks.tests.base_settings import BaseTest
-from finance_majordomo.stocks.tests.test_services.conftest import MockedDate
+
 
 FIXTURES_FOLDER = "fixtures"
 

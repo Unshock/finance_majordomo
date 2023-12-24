@@ -29,7 +29,7 @@ def get_accrual_result_of_portfolio(
 
     if asset:
         portfolio_accruals_received = portfolio_accruals_received.filter(
-            dividend__asset=asset
+            accrual__asset=asset
         )
 
     currency_rate = Decimal('1')
@@ -37,16 +37,16 @@ def get_accrual_result_of_portfolio(
 
     for accrual in portfolio_accruals_received:
 
-        asset_id = accrual.dividend.asset.id
-        date = accrual.dividend.date
-        amount = accrual.dividend.amount
+        asset_id = accrual.accrual.asset.id
+        date = accrual.accrual.date
+        amount = accrual.accrual.amount
 
         quantity = get_asset_quantity_for_portfolio(
             portfolio.id, asset_id, date=date)
 
         if currency and currency.lower() == 'usd':
             currency_rate = get_currency_rate(
-                date_dt=accrual.dividend.date, currency='usd')
+                date_dt=accrual.accrual.date, currency='usd')
             print(currency_rate, type(currency_rate))
         sum_accruals_received += quantity * amount / currency_rate
 

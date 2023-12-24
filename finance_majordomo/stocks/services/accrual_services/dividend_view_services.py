@@ -94,8 +94,8 @@ class PortfolioAccrualViewContextService(Service):
 
         portfolio_accruals = AccrualsOfPortfolio.objects.filter(
             portfolio=self.portfolio,
-            dividend__date__lte=self._get_today_date() + days_delta
-        ).order_by('-dividend__date')
+            accrual__date__lte=self._get_today_date() + days_delta
+        ).order_by('-accrual__date')
 
         return portfolio_accruals
 
@@ -106,18 +106,18 @@ class PortfolioAccrualViewContextService(Service):
 
         for accrual in portfolio_accruals:
 
-            accrual_date = accrual.dividend.date
+            accrual_date = accrual.accrual.date
             asset_quantity = get_asset_quantity_for_portfolio(
-                self.portfolio.id, accrual.dividend.asset.id, accrual_date
+                self.portfolio.id, accrual.accrual.asset.id, accrual_date
             )
 
             if asset_quantity <= 0:
                 continue
 
-            accrual_amount = accrual.dividend.amount
+            accrual_amount = accrual.accrual.amount
             accrual_total = accrual_amount * asset_quantity
-            accrual_id = accrual.dividend.id
-            asset_name = accrual.dividend.asset.latname
+            accrual_id = accrual.accrual.id
+            asset_name = accrual.accrual.asset.latname
             accrual_is_received = accrual.is_received
             accrual_is_upcoming = False if accrual_date <= \
                                            self._get_today_date() else True

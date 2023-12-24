@@ -3,7 +3,7 @@ from datetime import datetime
 from service_objects.fields import ModelField
 from service_objects.services import Service
 
-from finance_majordomo.stocks.models.accrual_models import Dividend, AccrualsOfPortfolio
+from finance_majordomo.stocks.models.accrual_models import Accrual, AccrualsOfPortfolio
 from finance_majordomo.stocks.models.asset import Asset
 from finance_majordomo.stocks.models.transaction_models import Transaction
 from finance_majordomo.stocks.services.transaction_services.transaction_calculation_services import \
@@ -11,7 +11,7 @@ from finance_majordomo.stocks.services.transaction_services.transaction_calculat
 from finance_majordomo.users.models import Portfolio
 
 
-def execute_toggle_portfolio_accrual_service(accrual: Dividend,
+def execute_toggle_portfolio_accrual_service(accrual: Accrual,
                                              portfolio: Portfolio):
     """
     :param accrual: Accrual model object
@@ -28,7 +28,7 @@ def execute_toggle_portfolio_accrual_service(accrual: Dividend,
 
 class TogglePortfolioDividendService(Service):
 
-    accrual = ModelField(Dividend)
+    accrual = ModelField(Accrual)
     portfolio = ModelField(Portfolio)
 
     def process(self):
@@ -36,7 +36,7 @@ class TogglePortfolioDividendService(Service):
         portfolio = self.cleaned_data['portfolio']
 
         accrual_of_portfolio = AccrualsOfPortfolio.objects.get(
-            portfolio=portfolio, dividend=accrual
+            portfolio=portfolio, accrual=accrual
         )
 
         if accrual_of_portfolio.is_received:
@@ -118,7 +118,7 @@ class AccrualModelDataFillingService(Service):
             amount = accrual_value[asset_type]['value']
 
             try:
-                existing_accrual = Dividend.objects.get(
+                existing_accrual = Accrual.objects.get(
                     asset=self.asset, date=date)
 
                 if existing_accrual.amount != amount:
@@ -127,7 +127,7 @@ class AccrualModelDataFillingService(Service):
                     # logging!
                 continue
 
-            except Dividend.DoesNotExist:
+            except Accrual.DoesNotExist:
                 self._create_accrual_model_item(date, amount)
 
         self.asset.latest_accrual_update = datetime.today()
@@ -135,7 +135,7 @@ class AccrualModelDataFillingService(Service):
         self.asset.save()
 
     def _create_accrual_model_item(self, date, amount):
-        dividend = Dividend.objects.create(
+        dividend = Accrual.objects.create(
             date=date,
             asset=self.asset,
             amount=amount
@@ -192,13 +192,13 @@ class UpdateAccrualsOfPortfolio(Service):
         asset = self.transaction.asset
         date = self.transaction.date
 
-        return Dividend.objects.filter(asset=asset, date__gte=date)
+        return Accrual.objects.filter(asset=asset, date__gte=date)
 
     def _create_accrual_of_portfolio(self, accrual):
 
         AccrualsOfPortfolio.objects.create(
             portfolio=self.portfolio,
-            dividend=accrual,
+            accrual=accrual,
             is_received=False
         )
 
@@ -222,7 +222,7 @@ class UpdateAccrualsOfPortfolio(Service):
             try:
                 dividend_of_portfolio = AccrualsOfPortfolio.objects.get(
                     portfolio=self.portfolio,
-                    dividend=accrual)
+                    accrual=accrual)
 
                 if accrual_date_quantity == 0:
                     dividend_of_portfolio.is_received = False

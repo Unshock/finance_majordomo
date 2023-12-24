@@ -7,7 +7,7 @@ from finance_majordomo.stocks.services.transaction_services.transaction_calculat
 # os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'finance_majordomo.settings')
 # django.setup()
 
-from finance_majordomo.stocks.models.accrual_models import Dividend, AccrualsOfPortfolio
+from finance_majordomo.stocks.models.accrual_models import Accrual, AccrualsOfPortfolio
 
 
 # def update_dividends_of_user(request, asset_obj, date=None, transaction=None):

@@ -103,9 +103,9 @@ class AssetModelManagementServicesTest(BaseTest, AssetServicesFixtureSetUp):
         self.assertEqual(sub_asset.face_value, 800)
 
         self.assertTrue(asset.latest_accrual_update)
-        self.assertEqual(len(asset.dividend_set.all()), 2)
+        self.assertEqual(len(asset.accrual_set.all()), 2)
         self.assertEqual(
-            asset.dividend_set.get(date='2024-10-16').amount, Decimal('35.4'))
+            asset.accrual_set.get(date='2024-10-16').amount, Decimal('35.4'))
 
         self.assertEqual(len(asset.assetshistoricaldata_set.all()), 6)
 
@@ -162,9 +162,9 @@ class AssetModelManagementServicesTest(BaseTest, AssetServicesFixtureSetUp):
         self.assertEqual(sub_asset.face_value, 1000)
 
         self.assertTrue(asset.latest_accrual_update)
-        self.assertEqual(len(asset.dividend_set.all()), 2)
+        self.assertEqual(len(asset.accrual_set.all()), 2)
         self.assertEqual(
-            asset.dividend_set.get(date='2024-10-16').amount, Decimal('35.4'))
+            asset.accrual_set.get(date='2024-10-16').amount, Decimal('35.4'))
 
         self.assertEqual(len(asset.assetshistoricaldata_set.all()), 6)
 
@@ -210,9 +210,9 @@ class AssetModelManagementServicesTest(BaseTest, AssetServicesFixtureSetUp):
         self.assertEqual(asset.primary_boardid, 'expected_board_id')
 
         self.assertTrue(asset.latest_accrual_update)
-        self.assertEqual(len(asset.dividend_set.all()), 1)
+        self.assertEqual(len(asset.accrual_set.all()), 1)
         self.assertEqual(
-            asset.dividend_set.get(date='2022-05-08').amount, Decimal('14.4'))
+            asset.accrual_set.get(date='2022-05-08').amount, Decimal('14.4'))
 
         self.assertEqual(len(asset.assetshistoricaldata_set.all()), 6)
 
@@ -255,9 +255,9 @@ class AssetModelManagementServicesTest(BaseTest, AssetServicesFixtureSetUp):
         self.assertEqual(asset.primary_boardid, 'expected_board_id')
 
         self.assertTrue(asset.latest_accrual_update)
-        self.assertEqual(len(asset.dividend_set.all()), 4)
+        self.assertEqual(len(asset.accrual_set.all()), 4)
         self.assertEqual(
-            asset.dividend_set.get(date='2022-11-14').amount,
+            asset.accrual_set.get(date='2022-11-14').amount,
             Decimal('5.16'))
 
         self.assertEqual(len(asset.assetshistoricaldata_set.all()), 6)

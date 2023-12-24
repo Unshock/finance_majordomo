@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
 
 from ..models import UserSettings
-from finance_majordomo.stocks.models.accrual_models import Dividend, AccrualsOfPortfolio
+from finance_majordomo.stocks.models.accrual_models import Accrual, AccrualsOfPortfolio
 from ...stocks.models.asset import Stock
 from finance_majordomo.stocks.models.transaction_models import Transaction
 
@@ -88,13 +88,13 @@ class SettingsUsers(TestCase):
             stock_data={},
         )
 
-        cls.dividend_id_1 = Dividend.objects.create(
+        cls.dividend_id_1 = Accrual.objects.create(
             stock_id=1,
             date="2000-01-01",
             amount="24.36",
         )
 
-        cls.dividend_id_2 = Dividend.objects.create(
+        cls.dividend_id_2 = Accrual.objects.create(
             stock_id=1,
             date="2000-01-02",
             amount="100000.00",
@@ -113,12 +113,12 @@ class SettingsUsers(TestCase):
 
         cls.dividend_of_user_id_1 = DividendsOfUser.objects.create(
             user=cls.user_authenticated,
-            dividend=cls.dividend_id_1,
+            accrual=cls.dividend_id_1,
         )
 
         cls.dividend_of_user_id_2 = DividendsOfUser.objects.create(
             user=cls.user_authenticated,
-            dividend=cls.dividend_id_2,
+            accrual=cls.dividend_id_2,
         )
 
         cls.dividend_of_user_id_2.is_received = True

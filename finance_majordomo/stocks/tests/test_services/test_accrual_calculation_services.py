@@ -1,15 +1,9 @@
-from datetime import date
 from decimal import Decimal, InvalidOperation
 
-import django.db.utils
-from django.core.exceptions import ValidationError
-from django.utils.translation import gettext_lazy as _
-from finance_majordomo.stocks.models.accrual_models import Dividend, \
-    AccrualsOfPortfolio
+
 from finance_majordomo.stocks.services.accrual_services.accrual_calculation_services import \
     get_accrual_result_of_portfolio
 from finance_majordomo.stocks.tests.base_settings import BaseTest
-from finance_majordomo.users.models import Portfolio
 
 
 class AccrualCalculationServicesTest(BaseTest):

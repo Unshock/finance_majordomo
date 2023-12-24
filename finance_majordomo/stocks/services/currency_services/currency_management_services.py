@@ -12,7 +12,10 @@ import requests
 
 
 def update_currency_rates(start_date=None):
-
+    """
+    :param start_date: datetime.date thas would be start date to load cbr rates.
+    :return: nothing, but updates currency rates in the db.
+    """
     # Постоянно шлет реквесты - переделать на update
 
     currency_code = {
@@ -38,7 +41,7 @@ def update_currency_rates(start_date=None):
 
     if isinstance(usd_rates_list, dict):
         print(f'something go wrong with {update_currency_rates}')
-        return
+        return None
 
     for day_data in usd_rates_list:
         date_dt = dt.strptime(day_data.get('@Date'), "%d.%m.%Y")

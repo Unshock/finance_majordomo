@@ -3,32 +3,31 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import redirect
 from django.views import View
 from django.views.generic import ListView
-
-from finance_majordomo.stocks.models.accrual_models import Dividend
-from finance_majordomo.stocks.services.accrual_services.\
-    dividend_model_management_services import \
-    execute_toggle_portfolio_accrual_service
-from finance_majordomo.stocks.services.accrual_services.dividend_view_services import \
-    execute_portfolio_accrual_view_context_service
 from django.utils.translation import gettext_lazy as _
 
+from finance_majordomo.stocks.models.accrual_models import Accrual
+from finance_majordomo.stocks.services.accrual_services.\
+    dividend_model_management_services \
+    import execute_toggle_portfolio_accrual_service
+from finance_majordomo.stocks.services.accrual_services.dividend_view_services \
+    import execute_portfolio_accrual_view_context_service
 
-class Dividends(LoginRequiredMixin, ListView):
+
+class Accruals(LoginRequiredMixin, ListView):
     login_url = 'login'
-    model = Dividend
+    model = Accrual
     template_name = 'dividends/dividend_list.html'
-    context_object_name = 'dividend'
+    context_object_name = 'accrual'
 
     def get_context_data(self, *, object_list=None, **kwargs):
 
         context = super().get_context_data(**kwargs)
-        context['page_title'] = _("Dividend list")
+        context['page_title'] = _("Accruals list")
 
         portfolio = self.request.user.current_portfolio
-        print(execute_toggle_portfolio_accrual_service, '111')
+
         accruals_data = \
             execute_portfolio_accrual_view_context_service(portfolio, 90)
-        print(accruals_data)
 
         context['accrual_list'] = accruals_data.get('accrual_list')
         context['total_results'] = accruals_data.get('total_results')
@@ -41,13 +40,13 @@ class UsersDividends(LoginRequiredMixin, ListView):
 
 
 class TogglePortfolioDiv(SuccessMessageMixin, LoginRequiredMixin, View):
-    model = Dividend
+    model = Accrual
     login_url = 'login'
 
     def get(self, request, *args, **kwargs):
 
         portfolio = request.user.current_portfolio
-        accrual = Dividend.objects.get(id=kwargs.get('pk_dividend'))
+        accrual = Accrual.objects.get(id=kwargs.get('pk_accrual'))
 
         try:
             execute_toggle_portfolio_accrual_service(accrual, portfolio)
@@ -55,4 +54,4 @@ class TogglePortfolioDiv(SuccessMessageMixin, LoginRequiredMixin, View):
         except Exception as e:
             print(e, ' in ', execute_toggle_portfolio_accrual_service)
 
-        return redirect('stocks:dividends')
+        return redirect('stocks:accruals')

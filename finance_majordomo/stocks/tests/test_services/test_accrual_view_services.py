@@ -1,23 +1,13 @@
 import os
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
-from django.db.models import Sum
-import django.db.utils
-import simplejson
-from django.core.exceptions import ValidationError
-from django.utils.translation import gettext_lazy as _
+
 from unittest.mock import patch
-from finance_majordomo.stocks.models.accrual_models import Dividend, \
-    AccrualsOfPortfolio
-from finance_majordomo.stocks.models.transaction_models import Transaction
-from finance_majordomo.stocks.services.accrual_services.dividend_model_management_services import \
-    execute_toggle_portfolio_accrual_service, \
-    execute_accrual_model_data_filling_service, \
-    execute_update_accruals_of_portfolio
-from finance_majordomo.stocks.services.accrual_services.dividend_view_services import \
-    execute_portfolio_accrual_view_context_service, AccrualItem
+
+from finance_majordomo.stocks.services.accrual_services.dividend_view_services \
+    import execute_portfolio_accrual_view_context_service, AccrualItem
 from finance_majordomo.stocks.tests.base_settings import BaseTest
-from finance_majordomo.users.models import Portfolio
+
 
 FIXTURES_FOLDER = "fixtures"
 

@@ -19,14 +19,14 @@ EXECUTE_PORTFOLIO_ACCRUAL_VIEW_CONTEXT_SERVICE = \
 class TestAccrualViews(BaseTest):
 
     def setUp(self):
-        self.accruals = reverse('stocks:dividends')
+        self.accruals = reverse('stocks:accruals')
         self.users_accruals = reverse('stocks:users_dividends')
         self.toggle_accrual =\
-            reverse('stocks:toggle_portfolio_div', kwargs={'pk_dividend': 3})
+            reverse('stocks:toggle_portfolio_div', kwargs={'pk_accrual': 3})
 
     def test_urls_to_views(self):
         self.assertEqual(resolve(self.accruals).func.view_class,
-                         accrual_views.Dividends)
+                         accrual_views.Accruals)
         self.assertEqual(resolve(self.users_accruals).func.view_class,
                          accrual_views.UsersDividends)
         self.assertEqual(resolve(self.toggle_accrual).func.view_class,
@@ -62,7 +62,7 @@ class TestAccrualViews(BaseTest):
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertEqual(response.context.get('accrual_list'), [AccrualItem])
         self.assertEqual(response.context.get('total_results'), {'total': '10'})
-        self.assertEqual(response.context.get('page_title'), "Dividend list")
+        self.assertEqual(response.context.get('page_title'), "Accruals list")
 
         self.assertTemplateUsed(response, 'dividends/dividend_list.html')
 
@@ -74,7 +74,7 @@ class TestAccrualViews(BaseTest):
 
         accrual_of_portfolio3 = AccrualsOfPortfolio.objects.get(
             portfolio=self.accrual_of_portfolio3.portfolio,
-            dividend=self.accrual_of_portfolio3.dividend
+            accrual=self.accrual_of_portfolio3.accrual
         )
 
         self.assertTrue(accrual_of_portfolio3.is_received)

@@ -6,7 +6,7 @@ import django.db.utils
 import simplejson
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
-from finance_majordomo.stocks.models.accrual_models import Dividend, \
+from finance_majordomo.stocks.models.accrual_models import Accrual, \
     AccrualsOfPortfolio
 from finance_majordomo.stocks.models.transaction_models import Transaction
 from finance_majordomo.stocks.services.accrual_services.dividend_model_management_services import \
@@ -26,19 +26,19 @@ class AccrualModelManagementServicesTest(BaseTest):
         accrual = self.accrual1
 
         accrual_of_portfolio = AccrualsOfPortfolio.objects.get(
-            portfolio=portfolio, dividend=accrual)
+            portfolio=portfolio, accrual=accrual)
         self.assertFalse(accrual_of_portfolio.is_received)
 
         execute_toggle_portfolio_accrual_service(accrual, portfolio)
 
         accrual_of_portfolio = AccrualsOfPortfolio.objects.get(
-            portfolio=portfolio, dividend=accrual)
+            portfolio=portfolio, accrual=accrual)
         self.assertTrue(accrual_of_portfolio.is_received)
 
         execute_toggle_portfolio_accrual_service(accrual, portfolio)
 
         accrual_of_portfolio = AccrualsOfPortfolio.objects.get(
-            portfolio=portfolio, dividend=accrual)
+            portfolio=portfolio, accrual=accrual)
         self.assertFalse(accrual_of_portfolio.is_received)
 
     def test_execute_accrual_model_data_filling_service(self):
@@ -51,9 +51,9 @@ class AccrualModelManagementServicesTest(BaseTest):
                     "POSI_dividend_data.json"),
                 'r'), use_decimal=True)
 
-        self.assertEqual(len(self.share_POSI.dividend_set.all()), 1)
+        self.assertEqual(len(self.share_POSI.accrual_set.all()), 1)
         self.assertEqual(
-            self.share_POSI.dividend_set.all()
+            self.share_POSI.accrual_set.all()
                 .aggregate(Sum('amount')).get('amount__sum'),
             Decimal('37.87')
         )
@@ -65,12 +65,12 @@ class AccrualModelManagementServicesTest(BaseTest):
             self.share_POSI.latest_accrual_update.date(),
             datetime.today().date()
         )
-        self.assertEqual(len(self.share_POSI.dividend_set.all()), 4)
+        self.assertEqual(len(self.share_POSI.accrual_set.all()), 4)
         self.assertEqual(
-            self.share_POSI.dividend_set.all()
+            self.share_POSI.accrual_set.all()
                 .aggregate(Sum('amount')).get('amount__sum'), Decimal('73.23'))
 
-        self.assertEqual(Dividend.objects.get(
+        self.assertEqual(Accrual.objects.get(
             date='2022-05-08', asset=self.share_POSI).amount, Decimal('14.4'))
 
     def test_execute_update_accruals_of_portfolio_invalid_action_type(self):
@@ -85,7 +85,7 @@ class AccrualModelManagementServicesTest(BaseTest):
         transaction = self.transaction3
         portfolio = self.user_authenticated.current_portfolio
 
-        Dividend.objects.create(
+        Accrual.objects.create(
             asset_id=32,
             date='2023-06-01',
             amount=Decimal('100')
@@ -123,7 +123,7 @@ class AccrualModelManagementServicesTest(BaseTest):
         self.accrual_of_portfolio2.is_received = False
         self.accrual_of_portfolio2.save()
 
-        Dividend.objects.create(
+        Accrual.objects.create(
             asset_id=32,
             date='2023-06-01',
             amount=Decimal('100')
@@ -165,7 +165,7 @@ class AccrualModelManagementServicesTest(BaseTest):
 
         portfolio = self.user_authenticated.current_portfolio
 
-        Dividend.objects.create(
+        Accrual.objects.create(
             asset_id=32,
             date='2023-06-01',
             amount=Decimal('100')

@@ -4,7 +4,7 @@
     "pk": 1,
     "fields": {
         "portfolio": 2,
-        "dividend": 1,
+        "accrual": 1,
         "is_received": false
     }
 },
@@ -13,7 +13,7 @@
     "pk": 2,
     "fields": {
         "portfolio": 2,
-        "dividend": 2,
+        "accrual": 2,
         "is_received": true
     }
 },
@@ -22,7 +22,7 @@
     "pk": 3,
     "fields": {
         "portfolio": 2,
-        "dividend": 3,
+        "accrual": 3,
         "is_received": false
     }
 }

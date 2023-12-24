@@ -267,7 +267,7 @@ class PortfolioAssetsViewContextService(Service):
         total_accruals_received_usd = Decimal('0')
 
         try:
-            update_currency_rates()
+            #update_currency_rates()
             update_usd()
 
         except Exception as e:

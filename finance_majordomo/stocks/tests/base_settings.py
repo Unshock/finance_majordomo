@@ -5,7 +5,7 @@ from django.test import TestCase, Client
 
 from finance_majordomo.stocks.forms.transaction_forms import TransactionForm
 from finance_majordomo.stocks.models import Asset
-from finance_majordomo.stocks.models.accrual_models import Dividend, \
+from finance_majordomo.stocks.models.accrual_models import Accrual, \
     AccrualsOfPortfolio
 from finance_majordomo.stocks.models.currency import CurrencyRate
 from finance_majordomo.stocks.models.transaction_models import Transaction
@@ -25,7 +25,7 @@ class BaseTest(TestCase):
         'transaction.json',
         'asset_of_portfolio.json',
         'portfolio.json',
-        'Dividend.json',
+        'accrual.json',
         'accruals_of_portfolio.json',
         'currency_rate.json',
     ]
@@ -47,9 +47,9 @@ class BaseTest(TestCase):
         cls.share_LSRG = Asset.objects.get(id=31)
         cls.bond1 = Asset.objects.get(id=32)
 
-        cls.accrual1 = Dividend.objects.get(id=1)
-        cls.accrual2 = Dividend.objects.get(id=2)
-        cls.accrual3 = Dividend.objects.get(id=3)
+        cls.accrual1 = Accrual.objects.get(id=1)
+        cls.accrual2 = Accrual.objects.get(id=2)
+        cls.accrual3 = Accrual.objects.get(id=3)
 
         cls.usd_rate1 = CurrencyRate.objects.get(id=1)
         cls.usd_rate2 = CurrencyRate.objects.get(id=2)

@@ -1,6 +1,6 @@
 [
 {
-    "model": "stocks.dividend",
+    "model": "stocks.accrual",
     "pk": 1,
     "fields": {
         "creation_date": "2023-11-24T18:02:15.195Z",
@@ -10,7 +10,7 @@
     }
 },
 {
-    "model": "stocks.dividend",
+    "model": "stocks.accrual",
     "pk": 2,
     "fields": {
         "creation_date": "2023-11-24T18:17:24.122Z",
@@ -20,7 +20,7 @@
     }
 },
 {
-    "model": "stocks.dividend",
+    "model": "stocks.accrual",
     "pk": 3,
     "fields": {
         "creation_date": "2023-11-24T18:17:24.123Z",
