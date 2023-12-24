@@ -1,0 +1,48 @@
+<ValCurs ID="R01239" DateRange1="20.12.2022" DateRange2="20.01.2023"
+         name="Foreign Currency Market Dynamic">
+    <Record Date="10.01.2023" Id="R01239">
+        <Nominal>1</Nominal>
+        <Value>75,0785</Value>
+        <VunitRate>75,0785</VunitRate>
+    </Record>
+    <Record Date="11.01.2023" Id="R01239">
+        <Nominal>1</Nominal>
+        <Value>74,5438</Value>
+        <VunitRate>74,5438</VunitRate>
+    </Record>
+    <Record Date="12.01.2023" Id="R01239">
+        <Nominal>1</Nominal>
+        <Value>74,1361</Value>
+        <VunitRate>74,1361</VunitRate>
+    </Record>
+    <Record Date="13.01.2023" Id="R01239">
+        <Nominal>1</Nominal>
+        <Value>72,7908</Value>
+        <VunitRate>72,7908</VunitRate>
+    </Record>
+    <Record Date="14.01.2023" Id="R01239">
+        <Nominal>1</Nominal>
+        <Value>73,1131</Value>
+        <VunitRate>73,1131</VunitRate>
+    </Record>
+    <Record Date="17.01.2023" Id="R01239">
+        <Nominal>1</Nominal>
+        <Value>73,8298</Value>
+        <VunitRate>73,8298</VunitRate>
+    </Record>
+    <Record Date="18.01.2023" Id="R01239">
+        <Nominal>1</Nominal>
+        <Value>74,2646</Value>
+        <VunitRate>74,2646</VunitRate>
+    </Record>
+    <Record Date="19.01.2023" Id="R01239">
+        <Nominal>1</Nominal>
+        <Value>74,5882</Value>
+        <VunitRate>74,5882</VunitRate>
+    </Record>
+    <Record Date="20.01.2023" Id="R01239">
+        <Nominal>1</Nominal>
+        <Value>74,4058</Value>
+        <VunitRate>74,4058</VunitRate>
+    </Record>
+</ValCurs>

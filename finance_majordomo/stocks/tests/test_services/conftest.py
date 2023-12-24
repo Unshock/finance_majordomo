@@ -141,3 +141,12 @@ class ExtraTransactionsSetUp(TestCase):
             quantity=Decimal('1'),
             date=datetime(year=2023, month=4, day=25)
         )
+
+
+class MockedDate:
+
+    def __init__(self, date_: date):
+        self._date = date_
+
+    def today(self):
+        return self._date

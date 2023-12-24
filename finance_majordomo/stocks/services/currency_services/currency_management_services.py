@@ -6,11 +6,12 @@ from common.utils.datetime_utils import get_today_date
 from finance_majordomo.stocks.models.asset import ProdCalendar
 from finance_majordomo.stocks.models.currency import CurrencyRate
 from datetime import datetime as dt
+from datetime import date
 from datetime import timedelta as td
 import requests
 
 
-def update_currency_rates(date=None):
+def update_currency_rates(start_date=None):
 
     # Постоянно шлет реквесты - переделать на update
 
@@ -19,12 +20,12 @@ def update_currency_rates(date=None):
         'euro': 'R01239'  # с евро пока не работаем
     }
 
-    if date:
-        date_req1 = date
+    if start_date:
+        date_req1 = start_date
     else:
         date_req1 = '01/01/2023'  # тянет с этой даты
 
-    date_req2 = dt.strftime(dt.today(), '%d/%m/%Y')
+    date_req2 = date.strftime(date.today(), '%d/%m/%Y')
 
     url = f'https://www.cbr.ru/scripts/XML_dynamic.asp?' \
           f'date_req1={date_req1}&' \
@@ -36,6 +37,7 @@ def update_currency_rates(date=None):
     usd_rates_list = xmltodict.parse(data.text)['ValCurs']['Record']
 
     if isinstance(usd_rates_list, dict):
+        print(f'something go wrong with {update_currency_rates}')
         return
 
     for day_data in usd_rates_list:
@@ -54,7 +56,7 @@ def update_usd():
     last_date = CurrencyRate.objects.last()
     print(f"last_date in usd table: {last_date}")
     last_date_str = dt.strftime(last_date.tradedate, '%d/%m/%Y')
-    update_currency_rates(date=last_date_str)
+    update_currency_rates(start_date=last_date_str)
 
 
 def get_currency_rate(date_dt=None, *, currency=None):
