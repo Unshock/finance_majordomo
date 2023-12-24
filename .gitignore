@@ -17,3 +17,6 @@ my_git_ssh_xd.txt
 .python-version
 *.sqlite3
 *.bak
+/finance_majordomo/stocks/made tests/
+/finance_majordomo/stocks/tests_transactions/
+/common/utils/some_code.py
