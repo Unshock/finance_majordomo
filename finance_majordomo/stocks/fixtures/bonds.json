@@ -10,7 +10,6 @@
         "couponfrequency": 2,
         "couponvalue": "35.4000",
         "days_to_redemption": 327,
-        "latest_coupon_update": null,
         "face_value": "1000.0000"
     }
 }

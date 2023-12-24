@@ -90,12 +90,6 @@ class CreateTransactionService(Service):
             quantity=quantity
         )
 
-        # Если в ходе поиска добавляем первую транзакцию для актива, 
-        # то добавляем актив в AssetsOfUser
-        if asset not in user.assetsofuser_set.all():
-            asset.users.add(user)
-            asset.save()
-
         if asset not in current_portfolio.assetofportfolio_set.all():
             current_portfolio.asset.add(asset)
             current_portfolio.save()

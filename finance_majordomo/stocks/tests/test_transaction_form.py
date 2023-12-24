@@ -5,47 +5,7 @@ from finance_majordomo.stocks.forms.transaction_forms import TransactionForm
 from django.utils.translation import gettext_lazy as _
 
 
-class TransactionFormTest(BaseTest):
-
-    # def test_transaction_form_ticker_choice_GET_no_params(self):
-    #     with requests_mock.Mocker() as request:
-    #         request.method = "GET"
-    #         request.user = self.client_authenticated
-    # 
-    #         form = TransactionForm(request=request)
-    # 
-    #         choices = form.fields['asset'].choices
-    # 
-    #         users_stocks = \
-    #             self.user_authenticated.assetsofuser_set.values_list('asset')
-    # 
-    #         self.assertEqual(form.fields['asset'].initial, None)
-    #         self.assertEqual(len(choices) - 1, len(users_stocks))
-    #         for asset_id in users_stocks:
-    #             asset = Stock.objects.get(id=asset_id[0])
-    #             self.assertIn((asset.id, str(asset)), choices)
-    # 
-    # def test_transaction_form_ticker_choice_GET_asset_SECID_param(self):
-    #     with requests_mock.Mocker() as request:
-    #         request.method = "GET"
-    #         request.user = self.user_authenticated
-    # 
-    #         # user has no such asset yet:
-    #         asset_query = Stock.objects.filter(id=2)
-    # 
-    #         form = TransactionForm(request=request, asset=asset_query)
-    # 
-    #         choices = form.fields['ticker'].choices
-    # 
-    #         users_stocks = \
-    #             self.user_authenticated.stocksofuser_set.values_list(
-    #                 'stock')
-    # 
-    #         self.assertEqual(len(choices) - 1, len(users_stocks) + 1)
-    #         self.assertIn((asset_query[0].id, str(asset_query[0])), choices)
-    #         for asset_id in users_stocks:
-    #             asset = Stock.objects.get(id=asset_id[0])
-    #             self.assertIn((asset.id, str(asset)), choices)
+class TestTransactionForm(BaseTest):
 
     def test_valid_transaction_form_buy_GET(self):
 

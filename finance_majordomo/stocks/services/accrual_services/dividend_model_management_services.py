@@ -131,7 +131,6 @@ class AccrualModelDataFillingService(Service):
                 self._create_accrual_model_item(date, amount)
 
         self.asset.latest_accrual_update = datetime.today()
-        self.asset.latest_dividend_update = datetime.today()
         self.asset.save()
 
     def _create_accrual_model_item(self, date, amount):

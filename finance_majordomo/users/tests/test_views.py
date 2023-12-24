@@ -6,8 +6,6 @@ from django.utils.translation import gettext_lazy as _
 #from .setting import SettingsUsers
 from .. import views
 from ..models import User, UserSettings
-from ..utils.fields_to_display import FIELDS_TO_DISPLAY
-from ...stocks.models.asset import StocksOfUser
 from ...stocks.tests.base_settings import BaseTest
 
 
@@ -100,20 +98,6 @@ class TestUsersViews(BaseTest):
         self.assertTrue(created_user.password)
         self.assertEqual(created_user.id, 5)
         self.assertRedirects(response, self.login_url)
-
-    # def test_add_stock_to_user(self):
-    # 
-    #     self.assertEqual(StocksOfUser.objects.filter(user_id=1).count(), 0)
-    #     self.assertEqual(StocksOfUser.objects.all().count(), 0)
-    # 
-    #     response = self.client_authenticated.get(
-    #         self.add_stock)
-    # 
-    #     self.assertEqual(response.status_code, HTTPStatus.FOUND)
-    #     self.assertEqual(StocksOfUser.objects.filter(user_id=1).count(), 1)
-    #     self.assertEqual(StocksOfUser.objects.all().count(), 1)
-    #     self.assertEqual(
-    #         StocksOfUser.objects.get(user_id=1).stock.isin, 'isin_id_1')
 
     def test_set_fields_to_display_GET(self):
 

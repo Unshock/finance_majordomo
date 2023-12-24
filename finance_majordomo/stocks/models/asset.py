@@ -1,4 +1,3 @@
-from __future__ import annotations
 from datetime import datetime
 
 from django.db import models
@@ -12,6 +11,7 @@ from finance_majordomo.users.models import User, Portfolio
 
 
 class Asset(models.Model):
+
     asset_types = [
         ('stocks', 'stocks'),
         ('bonds', 'bonds'),
@@ -114,13 +114,6 @@ class Asset(models.Model):
         related_name='asset',
     )
 
-    users = models.ManyToManyField(
-        User,
-        through='AssetsOfUser',
-        through_fields=('asset', 'user'),
-        related_name='asset1'
-    )
-
     latest_accrual_update = models.DateField(
         verbose_name='Дата последнего обновления информации о начислениях',
         blank=True,
@@ -141,11 +134,6 @@ class Asset(models.Model):
 
 
 class Stock(Asset):
-    latest_dividend_update = models.DateField(
-        verbose_name='Дата последнего обновления информации о дивидендах',
-        blank=True,
-        null=True
-    )
 
     def __str__(self):
         return self.latname
@@ -159,38 +147,24 @@ class Stock(Asset):
         ordering = ['creation_date', 'secid', 'name']
 
 
-class StocksOfUser(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE
-    )
-
-    stock = models.ForeignKey(
-        Stock,
-        on_delete=models.CASCADE
-    )
-
-    class Meta:
-        verbose_name = "Акции пользователя"
-        verbose_name_plural = "Акции пользователей"
-        ordering = ['stock']
-
-
 class Bond(Asset):
 
     startdatemoex = models.DateField(
         verbose_name="Дата начала торгов на MOEX",
         blank=True
     )
+
     buybackdate = models.DateField(
         verbose_name="Дата байбека",
         blank=True,
         null=True
     )
+
     matdate = models.DateField(
         verbose_name="Дата погашения",
         blank=True
     )
+
     couponpercent = models.DecimalField(
         max_digits=10,
         decimal_places=4,
@@ -198,10 +172,12 @@ class Bond(Asset):
         blank=True,
         null=True
     )
+
     couponfrequency = models.IntegerField(
         verbose_name="Частота выплаты купона в год",
         blank=True
     )
+
     couponvalue = models.DecimalField(
         max_digits=10,
         decimal_places=4,
@@ -209,13 +185,9 @@ class Bond(Asset):
         blank=True,
         null=True
     )
+
     days_to_redemption = models.IntegerField(
         verbose_name="Дней до погашения",
-        blank=True,
-        null=True
-    )
-    latest_coupon_update = models.DateField(
-        verbose_name='Дата последнего обновления информации о купонах',
         blank=True,
         null=True
     )
@@ -240,23 +212,6 @@ class Bond(Asset):
         ordering = ['creation_date', 'secid', 'name']
 
 
-class BondOfUser(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE
-    )
-
-    bond = models.ForeignKey(
-        Bond,
-        on_delete=models.CASCADE
-    )
-
-    class Meta:
-        verbose_name = "Облигации пользователя"
-        verbose_name_plural = "Облигации пользователей"
-        ordering = ['bond']
-
-
 class ProdCalendar(models.Model):
     date_status_choice = [
         ('0', 'Working'),
@@ -275,7 +230,7 @@ class ProdCalendar(models.Model):
     )
 
     @staticmethod
-    def get_date(date: datetime.date) -> ProdCalendar:
+    def get_date(date: datetime.date) -> 'ProdCalendar':
         try:
             prod_date = ProdCalendar.objects.get(date=date)
 
@@ -313,10 +268,10 @@ class AssetsHistoricalData(models.Model):
     waval = models.DecimalField(max_digits=13, decimal_places=5, null=True)
     trendclspr = models.DecimalField(max_digits=7, decimal_places=3, null=True)
 
-    couponpercent = models.DecimalField(max_digits=13, decimal_places=5,
-                                        null=True)
-    couponvalue = models.DecimalField(max_digits=13, decimal_places=5,
-                                      null=True)
+    couponpercent = models.DecimalField(
+        max_digits=13, decimal_places=5, null=True)
+    couponvalue = models.DecimalField(
+        max_digits=13, decimal_places=5, null=True)
     yieldclose = models.DecimalField(max_digits=13, decimal_places=5, null=True)
 
     is_closed = models.BooleanField(blank=False)
@@ -390,31 +345,7 @@ class AssetOfPortfolio(models.Model):
         on_delete=models.CASCADE
     )
 
-    # def get_purchase_price(self, currency=None, date=None):
-    #     from ..transactions.services.transaction_calculation_services import \
-    #         get_purchase_price
-    #     return get_purchase_price(
-    #         self.portfolio.id, self.asset.id, currency=currency, date=date
-    #     )
-
     class Meta:
         verbose_name = "Объекты портфеля"
         verbose_name_plural = "Объекты портфеля"
         ordering = ['portfolio']
-
-
-class AssetsOfUser(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE
-    )
-
-    asset = models.ForeignKey(
-        Asset,
-        on_delete=models.CASCADE
-    )
-
-    class Meta:
-        verbose_name = "Активы пользователя"
-        verbose_name_plural = "Активы пользователей"
-        ordering = ['user']

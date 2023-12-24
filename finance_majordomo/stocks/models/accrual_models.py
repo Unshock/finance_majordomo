@@ -1,8 +1,8 @@
 from django.db import models
-from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from finance_majordomo.stocks.models.asset import Stock, Asset
-from finance_majordomo.users.models import User, Portfolio
+
+from finance_majordomo.stocks.models.asset import Asset
+from finance_majordomo.users.models import Portfolio
 
 
 class Accrual(models.Model):
