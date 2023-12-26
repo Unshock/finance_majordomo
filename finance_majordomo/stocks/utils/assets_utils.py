@@ -22,7 +22,7 @@ def get_asset_history_data(asset, start_date=None):
         start_date=start_date,
         market=get_asset_market(asset.group),
         board=asset.primary_boardid)
-
+    print(asset_history_data[-10:])
     return asset_history_data[get_first_trade_date_index(asset_history_data):]
 
 
@@ -56,9 +56,10 @@ def get_first_trade_date_index(asset_history_data: list[dict]) -> int:
 
 
 def add_share_history_data_to_model2(asset, asset_history_data):
-
-    for day_data, day_value in asset_history_data.items():
-
+    print(f'run {add_share_history_data_to_model2}')
+    print(asset_history_data)
+    for day_value in asset_history_data:
+        print(day_value)
         AssetsHistoricalData.objects.create(
             asset=Asset.objects.get(id=asset.id),
 
@@ -108,8 +109,8 @@ def add_share_history_data_to_model2(asset, asset_history_data):
 
 
 def add_bond_history_data_to_model2(asset, asset_history_data):
-
-    for day_data, day_value in asset_history_data.items():
+    print(f'run {add_bond_history_data_to_model2}')
+    for day_value in asset_history_data:
         AssetsHistoricalData.objects.create(
             asset=Asset.objects.get(id=asset.id),
 

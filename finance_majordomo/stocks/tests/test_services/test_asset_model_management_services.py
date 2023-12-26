@@ -59,10 +59,10 @@ class AssetModelManagementServicesTest(BaseTest, AssetServicesFixtureSetUp):
     ):
         mocked_get_asset_description.return_value =\
             self.description_RU000A0JTW83
-        mocked_get_asset_history_data.return_value = self.bond_history_data
+        mocked_get_asset_history_data.return_value = \
+            [v for v in self.bond_history_data.values()]
         mocked_get_bond_coupon_history.return_value = self.bond_accrual_data
         mocked_get_share_dividends.return_value = None
-
         asset = get_or_create_asset_obj('Ticker', 'expected_board_id')
         sub_asset = asset.get_related_object()
 
@@ -119,7 +119,8 @@ class AssetModelManagementServicesTest(BaseTest, AssetServicesFixtureSetUp):
     ):
         mocked_get_asset_description.return_value = \
             self.description_SU26222RMFS8
-        mocked_get_asset_history_data.return_value = self.bond_history_data
+        mocked_get_asset_history_data.return_value = \
+            [v for v in self.bond_history_data.values()]
         mocked_get_bond_coupon_history.return_value = self.bond_accrual_data
         mocked_get_share_dividends.return_value = None
 
@@ -177,7 +178,8 @@ class AssetModelManagementServicesTest(BaseTest, AssetServicesFixtureSetUp):
             mocked_get_bond_coupon_history, mocked_get_share_dividends
     ):
         mocked_get_asset_description.return_value = self.description_ZSGPP
-        mocked_get_asset_history_data.return_value = self.share_history_data
+        mocked_get_asset_history_data.return_value = \
+            [v for v in self.share_history_data.values()]
         mocked_get_bond_coupon_history.return_value = None
         mocked_get_share_dividends.return_value = self.share_accrual_data
 
@@ -213,7 +215,6 @@ class AssetModelManagementServicesTest(BaseTest, AssetServicesFixtureSetUp):
         self.assertEqual(len(asset.accrual_set.all()), 1)
         self.assertEqual(
             asset.accrual_set.get(date='2022-05-08').amount, Decimal('14.4'))
-
         self.assertEqual(len(asset.assetshistoricaldata_set.all()), 6)
 
     @mock.patch(GET_SHARE_DIVIDENDS)
@@ -225,7 +226,8 @@ class AssetModelManagementServicesTest(BaseTest, AssetServicesFixtureSetUp):
             mocked_get_bond_coupon_history, mocked_get_share_dividends
     ):
         mocked_get_asset_description.return_value = self.description_SBER
-        mocked_get_asset_history_data.return_value = self.share_history_data
+        mocked_get_asset_history_data.return_value = \
+            [v for v in self.share_history_data.values()]
         mocked_get_bond_coupon_history.return_value = None
         mocked_get_share_dividends.return_value = self.share_accrual_data
 

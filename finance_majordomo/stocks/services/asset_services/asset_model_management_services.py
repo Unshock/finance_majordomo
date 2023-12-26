@@ -33,7 +33,7 @@ def get_or_create_asset_obj(
         asset_obj = Asset.objects.get(secid=asset_sec_id)
 
     except Asset.DoesNotExist:
-        print(f'Start creating asset - {asset_sec_id}')
+        #print(f'Start creating asset - {asset_sec_id}')
         asset_description = get_asset_description(asset_sec_id)
         asset_description['primary_boardid'] = primary_board_id
 
@@ -239,7 +239,8 @@ class CreateAssetService(Service):
         try:
             add_bond_history_data_to_model2(asset_obj, historical_data)
 
-        except Exception('HISTORY PROBLEM'):
+        except Exception as e:
+            print(e)
             pass
 
     @staticmethod
@@ -254,6 +255,7 @@ class CreateAssetService(Service):
         elif asset_obj.group == 'stock_bonds':
 
             accrual_data_dict = get_bond_coupon_history(asset_obj.secid)
+
             execute_accrual_model_data_filling_service(
                 asset=asset_obj, accrual_data_dict=accrual_data_dict
             )
@@ -366,9 +368,11 @@ def get_current_asset_price_per_asset(
         asset: Asset, currency: str = None) -> Decimal:
 
     currency_rate = get_currency_rate(currency=currency)  # last date rate usd - rework
+    a = AssetsHistoricalData.objects.filter(
+        asset=asset).order_by('-tradedate').first()
 
     last_date_price = AssetsHistoricalData.objects.filter(
-        asset=asset).order_by('-tradedate')[0].legalcloseprice
+        asset=asset).order_by('-tradedate').first().legalcloseprice
 
     current_price = last_date_price / currency_rate
 

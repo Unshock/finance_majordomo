@@ -33,7 +33,7 @@ def validate_ticker(ticker: str):
     with requests.Session() as session:
         iss = apimoex.ISSClient(session, request_url, arguments)
         data = iss.get()
-        # print(data)
+        #print(data)
         try:
             ticker_data = next(
                 x for x in data['securities'] if x["SECID"] == ticker.upper())
@@ -42,7 +42,7 @@ def validate_ticker(ticker: str):
 
         except StopIteration:
             ticker_data = None
-        # print(ticker_data)
+        #print(ticker_data)
         return ticker_data
 
 
@@ -61,7 +61,7 @@ def get_asset_board_history(ticker: str,
     """
 
     with requests.Session() as session:
-        # print(f"Start request of data for ticker: {ticker.upper()}"
+        #print(f"Start request of data for ticker: {ticker.upper()}"
         #      f" from date: {start_date}")
 
         data = apimoex.get_board_history(
@@ -79,9 +79,9 @@ def get_asset_board_history(ticker: str,
                             f'{ticker}, {start_date}, {board}, {market}')
 
 
-# print(get_stock_board_history('gazp')[-1])
-# print(get_stock_board_history('posi')[-1])
-# print(get_stock_board_history('lsrg')[-1])
+#print(get_stock_board_history('gazp')[-1])
+#print(get_stock_board_history('posi')[-1])
+#print(get_stock_board_history('lsrg')[-1])
 #print(get_asset_board_history('lqdt', board='TQTF')[-1])
 #print(get_asset_board_history('RU000A101QM3', board="TQCB", market='bonds')[-1])
 
@@ -104,7 +104,7 @@ def get_stock_current_price(ticker: str):
     current_time = datetime.datetime.now(offset)
     request_time = current_time - datetime.timedelta(minutes=TIME_GAP_MINUTES)
 
-    print(current_time, request_time)
+    print(get_stock_current_price, current_time, request_time)
 
     with requests.Session() as session:
         print(f'ZAPROS na poluchenie last_price of {ticker.upper()} poshel')
@@ -140,7 +140,7 @@ def get_bond_current_price(secid: str, board):
     current_time = datetime.datetime.now(offset)
     request_time = current_time - datetime.timedelta(minutes=TIME_GAP_MINUTES)
 
-    print(current_time, request_time)
+    print(get_bond_current_price, current_time, request_time)
 
     #bond = Bond.objects.get(secid=secid)
     #face_value = bond.face_value
@@ -176,7 +176,7 @@ def get_bond_current_price(secid: str, board):
 #get_stock_current_price('gazp')
 
 def get_asset_description(secid: str):
-    print(1)
+
     with requests.Session() as session:
         data = apimoex.find_security_description(session, secid.upper())
 
@@ -278,7 +278,7 @@ def make_json_trade_info_dict(data: list):
 def make_json_last_price_dict(last_price, actual_time):
     today = datetime.datetime.strftime(datetime.datetime.today(), '%Y-%m-%d')
 
-    # print(actual_time)
+    #print(actual_time)
 
     trade_info = {
         today: {

@@ -21,38 +21,50 @@
     <body class="d-flex flex-column min-vh-100">
     {% block navbar %}
         <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3 ">
-            <a class="navbar-brand" href="{% url 'stocks:home' %}">{% translate "Financial majordomo" %}</a>
-            <button class="navbar-toggler" data-toggle="collapse" data-target="navbarToggleExternalContent">
+            <a class="navbar-brand"
+               href="{% url 'stocks:home' %}">{% translate "Financial majordomo" %}</a>
+            <button class="navbar-toggler" data-toggle="collapse"
+                    data-target="navbarToggleExternalContent">
                 <span class="navbar-toggler-icon"></span>
             </button>
             
             <div class="collapse navbar-collapse" id="navbarToggleExternalContent">
                 <ul class="navbar-nav mr-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'users' %}">{% translate "Users" %}</a>
-                    </li>
-
-
 
             
                     {% if request.user.is_authenticated %}
+                        
+                        {% if request.user.is_staff %}
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   href="{% url 'users' %}">{% translate "Users" %}</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   href="{% url 'stocks:stocks' %}">{% translate "Stocks" %}</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   href="{% url 'stocks:user_transactions' %}">{% translate "My Transactions" %}</a>
+                            </li>
+                        {% endif %}
+                        
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'stocks:stocks' %}">{% translate "Stocks" %}</a>
+                            <a class="nav-link"
+                               href="{% url 'stocks:users_stocks' %}">{% translate "Portfolio" %}</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'stocks:users_stocks' %}">{% translate "My Stocks" %}</a>
+                            <a class="nav-link"
+                               href="{% url 'stocks:transactions' %}">{% translate "Transactions" %}</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               href="{% url 'stocks:accruals' %}">{% translate "Accruals" %}</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'stocks:transactions' %}">{% translate "Transactions" %}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'stocks:user_transactions' %}">{% translate "My Transactions" %}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'stocks:accruals' %}">{% translate "Dividends" %}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'stocks:search' %}">{% translate "Search" %}</a>
+                            <a class="nav-link"
+                               href="{% url 'stocks:search' %}">{% translate "Search" %}</a>
                         </li>
                     {% endif %}
 

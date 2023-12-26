@@ -5,17 +5,15 @@ from django.core.validators import MinLengthValidator
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from finance_majordomo.stocks.models.asset import Stock, Asset
-from finance_majordomo.users.models import User, Portfolio
+from finance_majordomo.stocks.models.asset import Asset
+from finance_majordomo.users.models import Portfolio
 
 
-# Create your models here.
 class Transaction(models.Model):
 
     transaction_type_choices = [
         ('BUY', 'Buy'),
-        ('SELL', 'Sell'),
-        #('SELL', 'Sell'),
+        ('SELL', 'Sell')
     ]
 
     creation_date = models.DateTimeField(

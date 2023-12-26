@@ -96,13 +96,11 @@ def _get_purchase_price(purchase_list: List[TransactionItem],
     currency_rate = Decimal('1')
 
     for elem in purchase_list:
-        print(elem.quantity, total_sold, elem.quantity>total_sold)
         if elem.quantity >= total_sold:
             elem.quantity -= total_sold
             total_sold = 0
 
         else:
-            print('555')
             sold = elem.quantity
             elem.quantity = 0
             total_sold -= sold

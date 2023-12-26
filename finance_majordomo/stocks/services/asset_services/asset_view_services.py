@@ -190,9 +190,9 @@ class AssetResult:
                 self.initial_price > 0:
             result = (
                     (
-                            Decimal(self.final_price)
-                            + Decimal(self.accruals_received)
-                            - Decimal(self.initial_price)
+                     Decimal(self.final_price)
+                     + Decimal(self.accruals_received)
+                     - Decimal(self.initial_price)
                     ) / Decimal(self.initial_price)
             )
         else:
@@ -206,6 +206,7 @@ class AssetResult:
         return formatter(result) if formatter else result
 
     def get_financial_result_with_accruals(self, formatter=None):
+
         result = Decimal(self.final_price) \
                  + Decimal(self.accruals_received) \
                  - Decimal(self.initial_price)
@@ -303,7 +304,7 @@ class PortfolioAssetsViewContextService(Service):
         total_results_usd = AssetResult(
             total_purchase_price_usd,
             total_current_price_usd,
-            total_accruals_received
+            total_accruals_received_usd
         )
 
         self.portfolio_assets_data['total_results'] = {

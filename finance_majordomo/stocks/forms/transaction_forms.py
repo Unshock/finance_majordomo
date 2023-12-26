@@ -117,7 +117,7 @@ class TransactionForm(forms.Form):
 
         cleaned_data = super().clean()
 
-        print('cleaned_data', self.cleaned_data)
+        #print('cleaned_data', self.cleaned_data)
 
         asset_obj = cleaned_data.get('asset')
         transaction_type = cleaned_data.get('transaction_type')

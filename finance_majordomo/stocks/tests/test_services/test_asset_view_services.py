@@ -80,7 +80,7 @@ class AssetViewServicesTest(BaseTest):
         self.assertEqual(
             total_res['total_current_price_usd'], '155.02')
         self.assertEqual(
-            total_res['total_financial_result_with_divs_usd'], '81.75')
+            total_res['total_financial_result_with_divs_usd'], '51.33')
 
         self.assertEqual(len(asset_list), 3)
 

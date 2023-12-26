@@ -102,7 +102,8 @@ class AccrualModelDataFillingService(Service):
             'preferred_share': 'preferred_share',
             'common_share': 'common_share',
             'ofz_bond': 'bond',
-            'corporate_bond': 'bond'
+            'corporate_bond': 'bond',
+            'exchange_bond': 'bond'
         }
 
         return types_dict.get(self.asset.type)

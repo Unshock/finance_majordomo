@@ -22,7 +22,8 @@ def execute_transaction_form_service(
         user: User = None,
         request: requests.Request = None):
 
-    print('bbb)', asset_group, asset_id, asset_secid)
+    print(f'run {execute_transaction_form_service}',
+          asset_group, asset_id, asset_secid)
     form = CreateTransactionFormService.execute({
         'asset_id': asset_id,
         'asset_secid': asset_secid,

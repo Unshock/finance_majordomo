@@ -41,6 +41,8 @@ def update_currency_rates(start_date=None):
 
     if isinstance(usd_rates_list, dict):
         print(f'something go wrong with {update_currency_rates}')
+        print(f'usd rates from moex {usd_rates_list}')
+        print('возникает когда нужно обновить только последний день')
         return None
 
     for day_data in usd_rates_list:

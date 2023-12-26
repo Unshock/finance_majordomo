@@ -21,7 +21,7 @@ class StockForm(ModelForm):
 
     def clean_ticker(self):
         ticker = self.cleaned_data['ticker'].upper()
-        print(ticker, Stock.objects.filter(secid=ticker))
+        #print(ticker, Stock.objects.filter(secid=ticker))
         if Stock.objects.filter(secid=ticker).count() == 1:
             raise ValidationError(_(f"Тикер {ticker} уже добавлен"))
 

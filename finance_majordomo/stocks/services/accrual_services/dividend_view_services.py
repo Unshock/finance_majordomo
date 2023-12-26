@@ -72,7 +72,7 @@ class PortfolioAccrualViewContextService(Service):
 
         portfolio_accruals = self._get_portfolio_accruals()
         if not portfolio_accruals:
-            print(self.portfolio_accrual_data)
+            #print(self.portfolio_accrual_data)
             return self.portfolio_accrual_data
 
         self._fill_context_with_accrual_context_data(portfolio_accruals)
