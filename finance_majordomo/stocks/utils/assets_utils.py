@@ -57,9 +57,9 @@ def get_first_trade_date_index(asset_history_data: list[dict]) -> int:
 
 def add_share_history_data_to_model2(asset, asset_history_data):
     print(f'run {add_share_history_data_to_model2}')
-    print(asset_history_data)
+    #print(asset_history_data)
     for day_value in asset_history_data:
-        print(day_value)
+        #print(day_value)
         AssetsHistoricalData.objects.create(
             asset=Asset.objects.get(id=asset.id),
 
@@ -137,18 +137,14 @@ def add_bond_history_data_to_model2(asset, asset_history_data):
 def update_historical_data(asset_obj: object, date=None):
     related_obj = asset_obj.get_related_object()
 
-    print(asset_obj, related_obj)
-
     today_status = ProdCalendar.get_date(
         datetime.strftime(datetime.today(), '%Y-%m-%d')).date_status
 
     today_date = datetime.today().date()
 
-    print(asset_obj, related_obj, type(related_obj))
-
     # ne tolko share no i bond
     latest_day = AssetsHistoricalData.objects.filter(
-        asset=asset_obj).order_by('-tradedate')[0]
+        asset=asset_obj).order_by('-tradedate').first()
 
     print('latest_day', latest_day)
 

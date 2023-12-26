@@ -23,7 +23,7 @@ urlpatterns = [
     path('dividends/toggle_dividend/<int:pk_accrual>', accrual_views.
          TogglePortfolioDiv.as_view(), name="toggle_portfolio_div"),
 
-    path('transactions', transaction_views.TransactionList.as_view(),
+    path('transactions/', transaction_views.TransactionList.as_view(),
          name="transactions"),
     path('transactions/my/', transaction_views.UsersTransactionList.as_view(),
          name="user_transactions"),

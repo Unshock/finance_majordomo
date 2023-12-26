@@ -48,8 +48,6 @@ class PortfolioAssets(LoginRequiredMixin, ListView):
         asset_list = portfolio_assets_data.get('asset_list')
         total_results = portfolio_assets_data.get('total_results')
 
-        print(asset_list)
-
         context['page_title'] = self.request.user.username + " " + _(
             "stock list")
         context['fields_to_display'] = self.request.user.usersettings
